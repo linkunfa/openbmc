@@ -18,6 +18,7 @@ RPROVIDES_${PN}-system += "virtual-obmc-system-mgmt"
 
 SUMMARY_${PN}-chassis = "EVB NPCM845 Chassis"
 RDEPENDS_${PN}-chassis = " \
+        x86-power-control \
         "
 
 SUMMARY_${PN}-fans = "EVB NPCM845 Fans"
