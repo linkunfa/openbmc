@@ -50,4 +50,5 @@ RDEPENDS_${PN}-system = " \
         dhrystone \
         ent \
         rw-perf \
+        loadmcu \
         "
