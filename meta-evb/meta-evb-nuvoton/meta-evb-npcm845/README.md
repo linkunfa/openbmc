@@ -38,6 +38,8 @@ Please submit any patches against the meta-evb-npcm845 layer to the maintainer o
   * [JTag Master](#jtag-master)
   * [SMB](#smb)
   * [ESPI](#espi)
+- [Features of NPCM845 EVB](#features-of-npcm845-evb)
+  * [MCU Firmware Update](#mcu-firmware-update)
 
 # Getting Started
 
@@ -438,4 +440,44 @@ The EVB has the J_eSPI header to support ESPI transactions.
   * The value of **ESPIHINDP** register is expected to be **0x0001111f**.
   * Bit **8** of **MFSEL4** register is set to **1**.  
 - Issue ESPI request packets from the host.
+
+## Features of NPCM845 EVB
+### MCU Firmware Update
+
+There is a MCU (ATtiny1634) connected to NPCM845 SMB4. The fimrware can be programmed via the following pins.
+```
+GPIO29: MCU SCLK
+GPIO28: MCU MOSI
+GPIO76: MCU MISO
+GPIO77: MCU RESET#
+```
+
+- kernel dts
+```
+    mcu_flash {
+        compatible = "nuvoton,npcm845-mcu-flash";
+        status = "okay";
+        #address-cells = <1>;
+        #size-cells = <1>;
+        dev-num = <0>;    /* /dev/mcu0 */
+        mfsel-offset = <0x260>; /* MFSEL1 */
+        smb-offset = <1>; /* SMBSEL offset of MFSEL */
+        mcu-gpios = <&gpio0 29 GPIO_ACTIVE_HIGH>,     /* GPIO29: SCLK */
+            <&gpio0 28 GPIO_ACTIVE_HIGH>,     /* GPIO28: MOSI */
+            <&gpio2 12 GPIO_ACTIVE_HIGH>,      /* GPIO76: MISO */
+            <&gpio2 13 GPIO_ACTIVE_LOW>;      /* GPIO77: RESET# */
+    };
+```
+- Enable kernel config
+```
+CONFIG_NPCM7XX_MCU_FLASH=y
+```
+- Build programming tool [loadmcu](https://github.com/Nuvoton-Israel/loadmcu)
+```
+bitbake loadmcu
+```
+- Programming
+```
+loadmcu -d /dev/mcu0 -s mcu_fw.bin
+```
 
