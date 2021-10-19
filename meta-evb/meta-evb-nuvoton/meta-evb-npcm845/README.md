@@ -458,23 +458,25 @@ The EVB has two SIOX modules connecting to CPLD. You could controll LED_CPLD_7 a
 - Edit nuvoton-common-npcm8xx.dtsi.
 ```
 sgpio1: sgpio@101000 {
-	clocks = <&clk NPCM8XX_CLK_APB3>;
-	compatible = "nuvoton,npcm845-sgpio";
-	gpio-controller;
-	pinctrl-names = "default";
-	pinctrl-0 = <&iox1_pins>;
-	reg = <0x101000 0x200>;
-	status = "disabled";
+  clocks = <&clk NPCM8XX_CLK_APB3>;
+  compatible = "nuvoton,npcm845-sgpio";
+  interrupts = <GIC_SPI 19 IRQ_TYPE_LEVEL_HIGH>;
+  gpio-controller;
+  pinctrl-names = "default";
+  pinctrl-0 = <&iox1_pins>;
+  reg = <0x101000 0x200>;
+  status = "disabled";
 };
 
 sgpio2: sgpio@102000 {
-	clocks = <&clk NPCM8XX_CLK_APB3>;
-	compatible = "nuvoton,npcm845-sgpio";
-	gpio-controller;
-	pinctrl-names = "default";
-	pinctrl-0 = <&iox2_pins>;
-	reg = <0x102000 0x200>;
-	status = "disabled";
+  clocks = <&clk NPCM8XX_CLK_APB3>;
+  compatible = "nuvoton,npcm845-sgpio";
+  interrupts = <GIC_SPI 20 IRQ_TYPE_LEVEL_HIGH>;
+  gpio-controller;
+  pinctrl-names = "default";
+  pinctrl-0 = <&iox2_pins>;
+  reg = <0x102000 0x200>;
+  status = "disabled";
 };
 ```
 - Edit nuvoton-npcm845-evb.dts to support 64 input and 64 output of the second module, and the ninth output pin is for green LED
@@ -494,23 +496,150 @@ CONFIG_GPIO_NUVOTON_SGPIO=y
 ```
 - Boot EVB to Openbmc, you can check gpiochip8 infomation
 ```
-cat /sys/kernel/debug/gpio
-gpioinfo 8
+root@evb-npcm845:~# gpioinfo 8
+gpiochip8 - 128 lines:
+        line   0:  "POWER_OUT"       unused  output  active-high
+        line   1:  "RESET_OUT"       unused  output  active-high
+        line   2:      unnamed       unused  output  active-high
+        line   3:      unnamed       unused  output  active-high
+        line   4:      unnamed       unused  output  active-high
+        line   5:      unnamed       unused  output  active-high
+        line   6:      unnamed       unused  output  active-high
+        line   7:      unnamed       unused  output  active-high
+        line   8:      "g_led"       unused  output  active-high
+        line   9:      unnamed       unused  output  active-high
+        line  10:      unnamed       unused  output  active-high
+        line  11:      unnamed       unused  output  active-high
+        line  12:      unnamed       unused  output  active-high
+        line  13:      unnamed       unused  output  active-high
+        line  14:      unnamed       unused  output  active-high
+        line  15:      unnamed       unused  output  active-high
+        line  16:      unnamed       unused  output  active-high
+        line  17:      unnamed       unused  output  active-high
+        line  18:      unnamed       unused  output  active-high
+        line  19:      unnamed       unused  output  active-high
+        line  20:      unnamed       unused  output  active-high
+        line  21:      unnamed       unused  output  active-high
+        line  22:      unnamed       unused  output  active-high
+        line  23:      unnamed       unused  output  active-high
+        line  24:      unnamed       unused  output  active-high
+        line  25:      unnamed       unused  output  active-high
+        line  26:      unnamed       unused  output  active-high
+        line  27:      unnamed       unused  output  active-high
+        line  28:      unnamed       unused  output  active-high
+        line  29:      unnamed       unused  output  active-high
+        line  30:      unnamed       unused  output  active-high
+        line  31:      unnamed       unused  output  active-high
+        line  32:      unnamed       unused  output  active-high
+        line  33:      unnamed       unused  output  active-high
+        line  34:      unnamed       unused  output  active-high
+        line  35:      unnamed       unused  output  active-high
+        line  36:      unnamed       unused  output  active-high
+        line  37:      unnamed       unused  output  active-high
+        line  38:      unnamed       unused  output  active-high
+        line  39:      unnamed       unused  output  active-high
+        line  40:      unnamed       unused  output  active-high
+        line  41:      unnamed       unused  output  active-high
+        line  42:      unnamed       unused  output  active-high
+        line  43:      unnamed       unused  output  active-high
+        line  44:      unnamed       unused  output  active-high
+        line  45:      unnamed       unused  output  active-high
+        line  46:      unnamed       unused  output  active-high
+        line  47:      unnamed       unused  output  active-high
+        line  48:      unnamed       unused  output  active-high
+        line  49:      unnamed       unused  output  active-high
+        line  50:      unnamed       unused  output  active-high
+        line  51:      unnamed       unused  output  active-high
+        line  52:      unnamed       unused  output  active-high
+        line  53:      unnamed       unused  output  active-high
+        line  54:      unnamed       unused  output  active-high
+        line  55:      unnamed       unused  output  active-high
+        line  56:      unnamed       unused  output  active-high
+        line  57:      unnamed       unused  output  active-high
+        line  58:      unnamed       unused  output  active-high
+        line  59:      unnamed       unused  output  active-high
+        line  60:      unnamed       unused  output  active-high
+        line  61:      unnamed       unused  output  active-high
+        line  62:      unnamed       unused  output  active-high
+        line  63:      unnamed       unused  output  active-high
+        line  64:      unnamed       unused   input  active-high
+        line  65:      unnamed       unused   input  active-high
+        line  66:   "PS_PWROK" "power-control" input active-high [used]
+        line  67: "POST_COMPLETE" "power-control" input active-high [used]
+        line  68: "POWER_BUTTON" "power-control" input active-high [used]
+        line  69: "RESET_BUTTON" "power-control" input active-high [used]
+        line  70:      unnamed       unused   input  active-high
+        line  71:      unnamed       unused   input  active-high
+        line  72:      unnamed       unused   input  active-high
+        line  73:      unnamed       unused   input  active-high
+        line  74:      unnamed       unused   input  active-high
+        line  75:      unnamed       unused   input  active-high
+        line  76:      unnamed       unused   input  active-high
+        line  77:      unnamed       unused   input  active-high
+        line  78:      unnamed       unused   input  active-high
+        line  79:      unnamed       unused   input  active-high
+        line  80:      unnamed       unused   input  active-high
+        line  81:      unnamed       unused   input  active-high
+        line  82:      unnamed       unused   input  active-high
+        line  83:      unnamed       unused   input  active-high
+        line  84:      unnamed       unused   input  active-high
+        line  85:      unnamed       unused   input  active-high
+        line  86:      unnamed       unused   input  active-high
+        line  87:      unnamed       unused   input  active-high
+        line  88:      unnamed       unused   input  active-high
+        line  89:      unnamed       unused   input  active-high
+        line  90:      unnamed       unused   input  active-high
+        line  91:      unnamed       unused   input  active-high
+        line  92:      unnamed       unused   input  active-high
+        line  93:      unnamed       unused   input  active-high
+        line  94:      unnamed       unused   input  active-high
+        line  95:      unnamed       unused   input  active-high
+        line  96:      unnamed       unused   input  active-high
+        line  97:      unnamed       unused   input  active-high
+        line  98:      unnamed       unused   input  active-high
+        line  99:      unnamed       unused   input  active-high
+        line 100:      unnamed       unused   input  active-high
+        line 101:      unnamed       unused   input  active-high
+        line 102:      unnamed       unused   input  active-high
+        line 103:      unnamed       unused   input  active-high
+        line 104:      unnamed       unused   input  active-high
+        line 105:      unnamed       unused   input  active-high
+        line 106:      unnamed       unused   input  active-high
+        line 107:      unnamed       unused   input  active-high
+        line 108:      unnamed       unused   input  active-high
+        line 109:      unnamed       unused   input  active-high
+        line 110:      unnamed       unused   input  active-high
+        line 111:      unnamed       unused   input  active-high
+        line 112:      unnamed       unused   input  active-high
+        line 113:      unnamed       unused   input  active-high
+        line 114:      unnamed       unused   input  active-high
+        line 115:      unnamed       unused   input  active-high
+        line 116:      unnamed       unused   input  active-high
+        line 117:      unnamed       unused   input  active-high
+        line 118:      unnamed       unused   input  active-high
+        line 119:      unnamed       unused   input  active-high
+        line 120:      unnamed       unused   input  active-high
+        line 121:      unnamed       unused   input  active-high
+        line 122:      unnamed       unused   input  active-high
+        line 123:      unnamed       unused   input  active-high
+        line 124:      unnamed       unused   input  active-high
+        line 125:      unnamed       unused   input  active-high
+        line 126:      unnamed       unused   input  active-high
+        line 127:      unnamed       unused   input  active-high
+
 ```
 - Now, you can turn on/off LED_CPLD_7
 ```
-cd /sys/class/gpio
-echo 392 > ./export
-echo 1 > gpio392/value
-echo 0 > gpio392/value
+root@evb-npcm845:~# gpioset 8 8=0
+root@evb-npcm845:~# gpioset 8 8=1
 ```
-- Test loopback with output pin 384 and input pin 448
+- GPIO interrupt loopback test
 ```
-cd /sys/class/gpio
-echo 384 > ./export
-echo 448 > .export
-echo 1 > gpio385/value
-cat gpio448/value
+root@evb-npcm845:~# gpiomon 8 64 &
+root@evb-npcm845:~# gpioset 8 0=1
+event:  RISING EDGE offset: 64 timestamp: [   83882.867414528]
+root@evb-npcm845:~# gpioset 8 0=0
+event: FALLING EDGE offset: 64 timestamp: [   83884.267443984]
 ```
 
 ## Features of NPCM845 EVB
