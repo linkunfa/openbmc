@@ -39,11 +39,10 @@ Please submit any patches against the meta-evb-npcm845 layer to the maintainer o
   * [SMB](#smb)
   * [ESPI](#espi)
   * [SIOX](#siox)
+  * [VGA](#vga)
+  * [USB](#usb)
 - [Features of NPCM845 EVB](#features-of-npcm845-evb)
   * [MCU Firmware Update](#mcu-firmware-update)
-  * [iKVM](#ikvm)
-  * [Virtual Media](#virtual-media)
-  * [Fan PID Control](#fan-pid-control)
 
 # Getting Started
 
@@ -273,7 +272,7 @@ The EVB has 3 RJ45 headers and 1 NCSI header
 
 The EVB has I3C0~I3C5 interfaces on the J_I3C header.
 
-### SPD5118 device
+**SPD5118 device**
 - Connect a Renesas SPD5118 moudule to EVB I3C1 interface
   * connect J_I3C.3 to device SCL
   * connect J_I3C.4 to device SDA
@@ -306,7 +305,7 @@ CONFIG_EEPROM_SPD5118=y
 
 The EVB has JTAG Master 1 interface on the J_JTAGM header.
 
-### Onboard CPLD
+**Onboard CPLD**
 - Route JTAG Master 1 interface to onboard CPLD.
 ```
 echo 70 > /sys/class/gpio/export
@@ -321,13 +320,14 @@ loadsvf -d /dev/jtag0 -s arbelevb_cpld.svf
 
 - The CPLD SVF can be downloaded from here:
 [arbelevb_cpld.svf](https://github.com/Nuvoton-Israel/openbmc/tree/npcm-v2.10/meta-evb/meta-evb-nuvoton/meta-evb-npcm845/recipes-evb-npcm845/loadsvf/files/arbelevb_cpld.svf )
+
 ## SMB
 
 The EVB has 27 SMB interfaces on J3 and J4 headers.
 
 There is a TMP100 sensor (0x48) connected to SMB module 6.
 
-### TMP100 sensor
+**TMP100 sensor**
 - The following example in EVB debug console is to detect TMP100.
 ```
 i2cdetect -y -q 6
@@ -359,7 +359,7 @@ CONFIG_SENSORS_LM75=y
 ```
 /sys/class/hwmon/hwmon0/
 ```
-### SMB acts as a slave emulated EEPROM
+**SMB acts as a slave emulated EEPROM**
 
 The SMB module's slave functionality could be tested by the following
 procedure.
@@ -411,7 +411,7 @@ i2ctransfer -f -y 0 w2@0x64 0 0 r2
 
 The EVB has the J_eSPI header to support ESPI transactions.
 
-### Wiring
+**Wiring**
 - Connected to the host ESPI interface.
   * eSPI_ALERT_N (optional): ESPI alert pin.  
   * eSPI_RST_N: ESPI reset pin.  
@@ -425,7 +425,7 @@ The EVB has the J_eSPI header to support ESPI transactions.
 > _If _eSPI_ALERT_N is connected, please configure the alert mode accordingly on the host side._  
 > _To connect the external power 1.8V or 1.0V, please short the pin 2 only on the JP_ESPI_PWR header on EVB._  
 
-### ESPI channel support declaration in u-boot configuration
+**ESPI channel support declaration in u-boot configuration**
 - Enable u-boot configuration
 > _Edit nuvoton-npcm850-evb.dts in u-boot_  
 ```
@@ -436,7 +436,7 @@ The EVB has the J_eSPI header to support ESPI transactions.
 > _The configuration above claims that all channels would be supported._  
 - Rebuild and flash the u-boot binary.  
 
-### Validate ESPI
+**Validate ESPI**
 - Boot EVB into u-boot first and then the host device.  
 - Check if values of the following registers are configured properly.  
   * Bits **24~27** of **ESPICFG** register are set to **1** to support all four
@@ -449,10 +449,7 @@ The EVB has the J_eSPI header to support ESPI transactions.
 
 The EVB has two SIOX modules connecting to CPLD. You could controll LED_CPLD_7 and do loopback test.
 
-### Source URL
-- [https://github.com/Nuvoton-Israel/linux/blob/NPCM-5.10-OpenBMC/drivers/gpio/gpio-npcm-sgpio.c](https://github.com/Nuvoton-Israel/linux/blob/NPCM-5.10-OpenBMC/drivers/gpio/gpio-npcm-sgpio.c)
-	
-###  How to Use
+**How to Use**
 - Please follow JTAG Master section to program CPLD
  
 - Edit nuvoton-common-npcm8xx.dtsi.
@@ -642,6 +639,83 @@ root@evb-npcm845:~# gpioset 8 0=0
 event: FALLING EDGE offset: 64 timestamp: [   83884.267443984]
 ```
 
+## VGA
+
+The EVB has a VGA output port.
+
+**How to use**
+1. Install Arbel EVB on a host PC via PCIE socket
+2. Power on Arbel EVB
+3. Waiting for arbel left bootblock
+4. Power on PC host
+5. Once PC run into OS, you should get OS screen from evb's vga port.
+6. If you didn't see the OS screen, please contact the developer.
+
+**iKVM test**
+1. Connects J_USB1_DEV and host PC with a USB cable
+2. Make sure your workstation and Arbel EVB are in the same network.
+3. Launch a browser in your workstation and you will see the entry page.
+    ```
+    /* BMCWeb Server */
+    https://<arbel ip>
+    ```
+4. Login to OpenBMC home page
+    ```
+    Username: root
+    Password: 0penBmc
+    ```
+5. Navigate to OpenBMC WebUI viewer
+    ```
+    https://<arbel ip>/#/control/kvm
+    ```
+
+**The preferred settings of RealVNC Viewer**
+```
+Picture quality: Custom
+ColorLevel: rgb565
+PreferredEncoding: Hextile
+```
+
+## USB
+
+The evb has 2 x USB device ports and 1 x USB host port.
+- J_USB1_DEV: USB Port 1 - Device, Mini-USB Type B
+- J_USB2_HOST: USB Port 2 - Host, USB Type A
+- J_USB3_HOST_DEV: USB Port 3 - Host/Device, Micro-USB Type AB
+
+**UDC Connectivity**
+- The UDC0~7 are used for usb port 1,
+- The UDC8 is used for usb port 3 if usb device mode
+- The UDC9 is used for usb port 2 if usb device mode
+
+**USB device test**
+1. Connects J_USB1_DEV and host PC with a USB cable
+
+2. Clone a physical USB drive to an image file
+    * For Linux - use tool like **dd**
+      ```
+      dd if=/dev/sda of=usb.img bs=1M count=100
+      ```
+      > _**bs** here is block size and **count** is block count._
+      >
+      > _For example, if the size of your USB drive is 1GB, then you could set "bs=1M" and "count=1024"_
+
+    * For Windows - use tool like **Win32DiskImager.exe**
+
+      > _NOTICE : A simple *.iso file cannot work for this._
+
+2. Enable Virtual Media
+
+    2.1 VM-WEB
+    1. Login and switch to webpage of VM on your browser
+        ```
+        https://XXX.XXX.XXX.XXX/#/control/virtual-media
+        ```
+    2. Operations of Virtual Media
+        * After `Choose File`, click `Start` to start VM network service
+        * After clicking `Start`, you will see a new USB device on HOST OS
+        * If you want to stop this service, just click `Stop` to stop VM network service.
+
 ## Features of NPCM845 EVB
 ### MCU Firmware Update
 
@@ -681,405 +755,3 @@ bitbake loadmcu
 ```
 loadmcu -d /dev/mcu0 -s mcu_fw.bin
 ```
-
-### iKVM
-<img align="right" width="30%" src="https://raw.githubusercontent.com/NTC-CCBG/snapshots/master/openbmc/ipkvm-2.10.png">
-
-This is a Virtual Network Computing (VNC) server program using [LibVNCServer](https://github.com/LibVNC/libvncserver).
-1. Support Video Capture and Differentiation(VCD), compare frames by hardware.
-2. Support Encoding Compression Engine(ECE), 16-bit hextile compression hardware encoding.
-3. Support USB HID, support Keyboard and Mouse.
-
-**Source URL**
-
-* [https://github.com/Nuvoton-Israel/obmc-ikvm](https://github.com/Nuvoton-Israel/obmc-ikvm)
-
-**How to use**
-
-1. Install Arbel EVB on a host PC via PCIE socket
-2. Connect USB1_DEV and host PC with a USB cable
-3. Power on host PC and Arbel EVB
-4. Make sure your workstation and Arbel EVB are in the same network.
-5. Launch a browser in your workstation and you will see the entry page.
-    ```
-    /* BMCWeb Server */
-    https://<arbel ip>
-    ```
-4. Login to OpenBMC home page
-    ```
-    Username: root
-    Password: 0penBmc
-    ```
-5. Navigate to OpenBMC WebUI viewer
-    ```
-    https://<arbel ip>/#/control/kvm
-    ```
-**Performance**
-
-* Host OS: Windows Server 2012 R2
-
-|Playing video: [AQUAMAN](https://www.youtube.com/watch?v=2wcj6SrX4zw)|[Real VNC viewer](https://www.realvnc.com/en/connect/download/viewer/) | noVNC viewer
-:-------------|:--------|:-----------|
-Host Resolution    | FPS    | FPS |
-1024x768  |  25    | 8 |
-1280x1024   |  20  | 4 |
-1600x1200   |  14   | 3 |
-
-|Scrolling bar: [Demo video](https://drive.google.com/file/d/1H71_H6yjO8NU4Qu_ZL4F59FQ0PQmEo2n/view)|[Real VNC viewer](https://www.realvnc.com/en/connect/download/viewer/) | noVNC viewer
-:-------------|:--------|:-----------|
-Host Resolution    | FPS    | FPS |
-1024x768  |  31    | 15 |
-1280x1024   |  24  | 12 |
-1600x1200   |  20   | 7 |
-
-**The preferred settings of RealVNC Viewer**
-```
-Picture quality: Custom
-ColorLevel: rgb565
-PreferredEncoding: Hextile
-```
-
-**Maintainer**
-
-* Joseph Liu
-
-### Virtual Media
-<img align="right" width="20%" src="https://raw.githubusercontent.com/NTC-CCBG/snapshots/master/openbmc/vm_app_win.png">
-<img align="right" width="30%" src="https://raw.githubusercontent.com/NTC-CCBG/snapshots/master/openbmc/virtual-media-2.10.png">
-
-Virtual Media (VM) is to emulate an USB drive on remote host PC via Network Block Device(NBD) and Mass Storage(MSTG).
-
-**Source URL**
-
-* [https://github.com/Nuvoton-Israel/openbmc/tree/runbmc/meta-phosphor/nuvoton-layer/recipes-connectivity/jsnbd](https://github.com/Nuvoton-Israel/openbmc/tree/runbmc/meta-phosphor/nuvoton-layer/recipes-connectivity/jsnbd)
-* [https://github.com/Nuvoton-Israel/openbmc-util/tree/master/virtual_media_openbmc2.6](https://github.com/Nuvoton-Israel/openbmc-util/tree/master/virtual_media_openbmc2.6)
-
-**How to use**
-
-1. Clone a physical USB drive to an image file
-    * For Linux - use tool like **dd**
-      ```
-      dd if=/dev/sda of=usb.img bs=1M count=100
-      ```
-      > _**bs** here is block size and **count** is block count._
-      >
-      > _For example, if the size of your USB drive is 1GB, then you could set "bs=1M" and "count=1024"_
-
-    * For Windows - use tool like **Win32DiskImager.exe**
-
-      > _NOTICE : A simple *.iso file cannot work for this._
-
-2. Enable Virtual Media
-
-    2.1 VM-WEB
-    1. Login and switch to webpage of VM on your browser
-        ```
-        https://XXX.XXX.XXX.XXX/#/control/virtual-media
-        ```
-
-    2. Operations of Virtual Media
-        * After `Choose File`, click `Start` to start VM network service
-        * After clicking `Start`, you will see a new USB device on HOST OS
-        * If you want to stop this service, just click `Stop` to stop VM network service.
-
-    2.2 VM standalone application
-    * Download [application source code](https://github.com/Nuvoton-Israel/openbmc-util/tree/master/virtual_media_openbmc2.6)
-    * Follow the [readme](https://github.com/Nuvoton-Israel/openbmc-util/blob/master/virtual_media_openbmc2.6/NBDServerWSWindows/README) instructions install QT and Openssl
-    * Start QT creator, open project **VirtualMedia.pro**, then build all
-    * Launch windows/linux application
-        > _NOTICE : use `sudo` to launch app in linux and install `nmap` first_
-    *  Operations
-        + After `Chose an Image File` or `Select an USB Drive`, click `Search` to check which BMCs are on line
-        + Select any on line BMC and key in `Account/Password`, choose the `Export Type` to Image, and click `Start VM` to start VM network service (still not hook USB disk to host platform)
-        + After `Start VM`, click `Mount USB` to hook the emulated USB disk to host platform, or click `Stop VM` to stop VM network service.
-        + After `Mount USB`, click `UnMount USB` to emulate unplugging the USB disk from host platform
-        + After `UnMount USB`, click `Stop VM` to stop VM network service, or click `Mount USB` to hook USB disk to host platform.
-
-3. Performance
-
-|Client |MountType |Encryption |Speed KB/s
-:---------------------|:----------------------------------------------|:---|:---------|
-Client WebUI(HTML5)  | CentOS-8.2.2004-x86_64-dvd1.iso (8GB Size)    |Yes| ~7800KB/s |
-
-**Maintainer**
-* Medad CChien
-
-### Fan PID Control
-<img align="right" width="30%" src="https://raw.githubusercontent.com/NTC-CCBG/snapshots/master/openbmc/fan_stepwise_pwm.png">
-<img align="right" width="30%" src="https://raw.githubusercontent.com/NTC-CCBG/snapshots/master/openbmc/fan-2.10.png">
-
-NPCM845 has three PWM modules and each module has four PWM outputs. On EVB, the first module is for controlling four fans for dynamic adjustment according temperature variation and the second module is for controlling the brightness of four LEDs.
-
-**Source URL**
-
-* [https://github.com/openbmc/phosphor-pid-control](https://github.com/openbmc/phosphor-pid-control)
-* [https://github.com/openbmc/phosphor-hwmon](https://github.com/openbmc/phosphor-hwmon)
-* [https://github.com/Nuvoton-Israel/openbmc/tree/npcm-v2.10/meta-evb/meta-evb-nuvoton/meta-evb-npcm845/recipes-phosphor/fans/phosphor-pid-control](https://github.com/Nuvoton-Israel/openbmc/tree/npcm-v2.10/meta-evb/meta-evb-nuvoton/meta-evb-npcm845/recipes-phosphor/fans/phosphor-pid-control)
-
-**How to use**
-
-In order to automatically apply accurate and responsive correction to a fan control function, we use the `swampd` to handle output PWM signal. For enable this daemon, basically we need configuring the swampd configuration file and deploy a system service for start this daemon as below steps.
-
->_NOTICE: In current solution, we only use stepwise mechanism to control fans. But the swampd also can controls fan with PID by tuning parameters according to customer platform._
-
-* The swampd(PID control daemon) is a Margin-based daemon running within the OpenBMC environment. It uses a well-defined [configuration file](https://github.com/Nuvoton-Israel/openbmc/blob/npcm-v2.10/meta-evb/meta-evb-nuvoton/meta-evb-npcm845/recipes-phosphor/fans/phosphor-pid-control/config-evb-npcm845.json) to control the temperature of the tray components to keep them within operating conditions.
-
-    Here is a configuraion example shows how to using one PWM control more than one fans on system.
-    ```
-    "sensors" : [
-        {
-            "name": "Fan1",
-            "type": "fan",
-            "readPath": "/xyz/openbmc_project/sensors/fan_tach/Fan1",
-            "writePath": "/sys/devices/platform/ahb/ahb:apb/f0103000.pwm-fan-controller/hwmon/**/pwm1",
-            "min": 0,
-            "max": 255
-        },
-        {
-            "name": "Fan2",
-            "type": "fan",
-            "readPath": "/xyz/openbmc_project/sensors/fan_tach/Fan2",
-            "writePath": "/sys/devices/platform/ahb/ahb:apb/f0103000.pwm-fan-controller/hwmon/**/pwm2",
-            "min": 0,
-            "max": 255
-        },
-        {
-            "name": "Fan3",
-            "type": "fan",
-            "readPath": "/xyz/openbmc_project/sensors/fan_tach/Fan3",
-            "writePath": "/sys/devices/platform/ahb/ahb:apb/f0103000.pwm-fan-controller/hwmon/**/pwm3",
-            "min": 0,
-            "max": 255
-        },
-        {
-            "name": "Fan4",
-            "type": "fan",
-            "readPath": "/xyz/openbmc_project/sensors/fan_tach/Fan4",
-            "writePath": "/sys/devices/platform/ahb/ahb:apb/f0103000.pwm-fan-controller/hwmon/**/pwm4",
-            "min": 0,
-            "max": 255
-        },
-        {
-            "name": "BMC_CPU_Temp0",
-            "type": "temp",
-            "readPath": "/xyz/openbmc_project/sensors/temperature/BMC_CPU_Temp0",
-            "writePath": "",
-            "min": 0,
-            "max": 0,
-            "ignoreDbusMinMax": true,
-            "timeout": 0
-        },
-        {
-            "name": "EVB_Temp",
-            "type": "temp",
-            "readPath": "/xyz/openbmc_project/sensors/temperature/EVB_Temp",
-            "writePath": "",
-            "min": 0,
-            "max": 0,
-            "ignoreDbusMinMax": true,
-            "timeout": 0
-        }
-    ],
-    "zones" : [
-        {
-            "id": 0,
-            "minThermalOutput": 0.0,
-            "failsafePercent": 100.0,
-            "pids": [
-                {
-                    "name": "Fan1",
-                    "type": "fan",
-                    "inputs": ["Fan1"],
-                    "setpoint": 40.0,
-                    "pid": {
-                        "samplePeriod": 1.0,
-                        "proportionalCoeff": 0.0,
-                        "integralCoeff": 0.0,
-                        "feedFwdOffsetCoeff": 0.0,
-                        "feedFwdGainCoeff": 1.0,
-                        "integralLimit_min": 0.0,
-                        "integralLimit_max": 0.0,
-                        "outLim_min": 10.0,
-                        "outLim_max": 100.0,
-                        "slewNeg": 0.0,
-                        "slewPos": 0.0
-                    }
-                },
-                {
-                    "name": "BMC_CPU_Temp0",
-                    "type": "stepwise",
-                    "inputs": ["BMC_CPU_Temp0"],
-                    "setpoint": 30.0,
-                    "pid": {
-                        "samplePeriod": 1.0,
-                        "positiveHysteresis": 0.0,
-                        "negativeHysteresis": 0.0,
-                        "isCeiling": false,
-                        "reading": {
-                            "0": 25,
-                            "1": 28,
-                            "2": 31,
-                            "3": 34,
-                            "4": 37,
-                            "5": 40,
-                            "6": 43,
-                            "7": 46,
-                            "8": 49,
-                            "9": 52,
-                            "10": 55,
-                            "11": 58,
-                            "12": 61,
-                            "13": 64,
-                            "14": 67,
-                            "15": 70
-                        },
-                        "output": {
-                            "0": 10,
-                            "1": 10,
-                            "2": 20,
-                            "3": 20,
-                            "4": 20,
-                            "5": 30,
-                            "6": 30,
-                            "7": 30,
-                            "8": 40,
-                            "9": 50,
-                            "10": 60,
-                            "11": 70,
-                            "12": 80,
-                            "13": 90,
-                            "14": 100,
-                            "15": 100
-                        }
-                    }
-                }
-            ]
-        },
-        {
-            "id": 1,
-            "minThermalOutput": 0.0,
-            "failsafePercent": 100.0,
-            "pids": [
-                {
-                    "name": "Fan4",
-                    "type": "fan",
-                    "inputs": ["Fan4"],
-                    "setpoint": 90.0,
-                    "pid": {
-                        "samplePeriod": 0.1,
-                        "proportionalCoeff": 0.0,
-                        "integralCoeff": 0.0,
-                        "feedFwdOffsetCoeff": 0.0,
-                        "feedFwdGainCoeff": 1.0,
-                        "integralLimit_min": 0.0,
-                        "integralLimit_max": 0.0,
-                        "outLim_min": 10.0,
-                        "outLim_max": 100.0,
-                        "slewNeg": 0.0,
-                        "slewPos": 0.0
-                    }
-                },
-                 {
-                    "name": "EVB_Temp",
-                    "type": "stepwise",
-                    "inputs": ["EVB_Temp"],
-                    "setpoint": 30.0,
-                    "pid": {
-                        "samplePeriod": 1.0,
-                        "positiveHysteresis": 0.0,
-                        "negativeHysteresis": 0.0,
-                        "isCeiling": false,
-                        "reading": {
-                            "0": 25,
-                            "1": 28,
-                            "2": 31,
-                            "3": 34,
-                            "4": 37,
-                            "5": 40,
-                            "6": 43,
-                            "7": 46,
-                            "8": 49,
-                            "9": 52,
-                            "10": 55,
-                            "11": 58,
-                            "12": 61,
-                            "13": 64,
-                            "14": 67,
-                            "15": 70
-                        },
-                        "output": {
-                            "0": 10,
-                            "1": 10,
-                            "2": 20,
-                            "3": 20,
-                            "4": 20,
-                            "5": 30,
-                            "6": 30,
-                            "7": 30,
-                            "8": 40,
-                            "9": 50,
-                            "10": 60,
-                            "11": 70,
-                            "12": 80,
-                            "13": 90,
-                            "14": 100,
-                            "15": 100
-                        }
-
-
-                    }
-                }
-
-            ]
-        }
-    ]
-
-    ```
-    The [PID README](https://github.com/openbmc/phosphor-pid-control/blob/master/configure.md) provide more detail about the meaning for each parameter.
-
-    Roughly speaking, there are two main section in configuration file: **sensor** and **zones**.
-    **Sensors** defined the all component which are involved PID like temperature sensors, or fans.
-    **Zones** defined the mechanism how the swampd control each fans by setting parameters.
-
-    The most important in **sensors** section is the settings of `readPath` and `writePath`.
-    Sensors like temperature sensor or margin sensor must only set readPath, and fill up empty string to writePath.
-    Fans could set the D-Bus path to readPath, also set the pwm system path to writePath.
-    More detail about readPath and writePath please refer README that mentioned above.
-
-    There are four PID controller types user can use: `fan`, `temp`, `margin`, and `stepwise` in **zones**.
-    User can tune the PID parameters following the [tuning README](https://github.com/openbmc/phosphor-pid-control/blob/master/tuning.md). 
-
-    In above example case, the fan PID controller has a lot of PID parameters. And we only use the stepwise controller to control whole zone, so the PID parameters in fan controller like `integralCoeff` or `outLim_max` would not work.
-    And the parameter `inputs` for stepwise controller must be thermal sensor.
-    Please note the parameter `setpoint` is no meaning for type `fan` and `stepwise` currently, and cannot be left out.
-
-    If user want to control whole zone by stepwise controller like example configuration, the key point is set reading and output.
-    The `stepwise` PID use the mapping of reading and output value instead of set RPM setpoint.
-    The reading and output value should be a pair, and user can set 20 pairs in maximum, one more pairs at least.
-    And the `stepwise` will return output setpoint if temperature **is larger** than reading value.
-    For example, assume here are pairs of `stepwise` reading and output:
-    ```
-    {
-      "reading": {25, 26, 27},
-      "output": {10, 20, 30}
-    }
-    ```
-
-    If the temperature reading is 25.5°C, the return value will be 10.
-    And if the reading value is 26.5°C, the stepwise controller will set 20% RPM to fan(s).
-
-
-* OpenBMC will run swampd through [phosphor-pid-control.service](https://github.com/Nuvoton-Israel/openbmc/blob/npcm-v2.10/meta-evb/meta-evb-nuvoton/meta-evb-npcm845/recipes-phosphor/fans/phosphor-pid-control/phosphor-pid-control.service) that controls the fans by pre-defined zones. Here is a example service.
-    ```
-    [Service]
-    Type=simple
-    ExecStart=/usr/bin/swampd
-    Restart=always
-    RestartSec=5
-    StartLimitInterval=0
-    ExecStopPost=/usr/bin/fan-default-speed.sh
-    ```
-    + **ExecStopPost** that means an additional commands that are executed after the service is stopped.
-
-**Maintainer**
-* Tim Lee		    
