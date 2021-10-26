@@ -31,18 +31,19 @@ Please submit any patches against the meta-evb-npcm845 layer to the maintainer o
   * [Programming Firmware for the first time](#programming-firmware-for-the-first-time)
     + [Bootloader](#bootloader)
     + [OpenBMC](#openbmc)
-- [Interfaces](#interfaces)
+- [Peripheral Interfaces](#peripheral-interfaces)
   * [UART](#uart)
   * [Network](#network)
   * [I3C](#i3c)
-  * [JTag Master](#jtag-master)
+  * [JTAG Master](#jtag-master)
   * [SMB](#smb)
   * [ESPI](#espi)
   * [SIOX](#siox)
   * [VGA](#vga)
   * [USB](#usb)
-- [Features of NPCM845 EVB](#features-of-npcm845-evb)
-  * [MCU Firmware Update](#mcu-firmware-update)
+  * [ADC](#adc)
+  * [FAN](#fan)
+  * [TMPS](#tmps)
 
 # Getting Started
 
@@ -114,6 +115,10 @@ bitbake obmc-phosphor-image
 DISTRO=arbel-evb-entity bitbake obmc-phosphor-image
 ```
 
+If you are using Blue EVB board, please remove the dts patch below.
+
+[DTS patch](https://github.com/Nuvoton-Israel/openbmc/blob/npcm-v2.10/meta-evb/meta-evb-nuvoton/meta-evb-npcm845/recipes-kernel/linux/linux-nuvoton_%25.bbappend#L5)
+
 ### 4) Output Images
 * You will find images in path build/evb-npcm845/tmp/deploy/images/evb-npcm845
 
@@ -149,9 +154,11 @@ python ./ProgramAll_Secure.py
 
 #### Flash in UBOOT
 
-* User can program bootloader or openbmc image in u-boot.
-* Because the flash 0 size of EVB is smaller than the openbmc image, so the full openbmc image will be programmed to EVB flash 1.
-* Therefore, the openbmc is booted from flash 1.
+* User can program bootloader(image-u-boot) and openbmc image(image-bmc) by u-boot command.
+* If you are using Red EVB board:
+  - The flash 0 size is 4MB, you should program openbmc image to flash 1.
+* If you are using Blue EVB board:
+  - The flash 0 size is 128MB, you can leave all images at flash 0.
 
 1. Setting up:
 * Power on your EVB and stop BMC at u-boot stage.
@@ -179,8 +186,16 @@ setenv romboot 'sf probe 0:1; run common_bootargs; echo Booting Kernel from flas
 setenv stderr serial
 setenv stdin serial
 setenv stdout serial
+```
+* Blue EVB, boot from flash 0
+```ruby
+setenv uimage_flash_addr 0x80200000
+```
+* Red EVB, boot from flash 1
+```ruby
 setenv uimage_flash_addr 0x88200000
 ```
+
 * Save uboot env to flash
 ```ruby
 saveenv
@@ -193,6 +208,9 @@ saveenv
 sf probe 0:1
 setenv ethact gmac2
 tftp 10000000 image-bmc
+/* Blue EVB */
+cp.b 0x10000000 0x80000000 ${filesize}
+/* Red EVB */
 cp.b 0x10000000 0x88000000 ${filesize}
 ```
 
@@ -201,12 +219,14 @@ cp.b 0x10000000 0x88000000 ${filesize}
 sf probe 0:1
 setenv ethact gmac2
 tftp 10000000 image-kernel
+/* Blue EVB */
+cp.b 0x10000000 0x88200000 ${filesize}
+/* Red EVB */
 cp.b 0x10000000 0x88200000 ${filesize}
 ```
 
 * Flash bootloader
 ```ruby
-/* BMC is booted from flsh0, please flash bootloader to flash0 */
 setenv ethact gmac2
 tftp 10000000 image-u-boot
 cp.b 0x10000000 0x80000000 ${filesize}
@@ -231,7 +251,7 @@ Phosphor OpenBMC (Phosphor OpenBMC Project Reference Distro) 0.1.0 evb-npcm845 t
 evb-npcm845 login:
 ```
 
-# Interfaces
+# Peripheral Interfaces
 
 ## UART
 
@@ -716,42 +736,61 @@ The evb has 2 x USB device ports and 1 x USB host port.
         * After clicking `Start`, you will see a new USB device on HOST OS
         * If you want to stop this service, just click `Stop` to stop VM network service.
 
-## Features of NPCM845 EVB
-### MCU Firmware Update
+## ADC
+The evb contains an Analog-to-Digital Converter (ADC) input interface.
 
-There is a MCU (ATtiny1634) connected to NPCM845 SMB4. The fimrware can be programmed via the following pins.
+VCC source is 1.2v and voltage is divided to:
+- ADCI0: 54 mV
+- ADCI1: 1146 mV
+- ADCI2: 1090 mV
+- ADCI3: 384 mV 
+- ADCI4: 816 mV
+- ADCI5: 1000 mV
+- ADCI6: 200mV
+- ADCI7: 110 mV
+
+** Read ADC by command**
 ```
-GPIO29: MCU SCLK
-GPIO28: MCU MOSI
-GPIO76: MCU MISO
-GPIO77: MCU RESET#
+cat /sys/class/hwmon/hwmon4/in1_input
+cat /sys/class/hwmon/hwmon4/in2_input
+cat /sys/class/hwmon/hwmon4/in3_input
+cat /sys/class/hwmon/hwmon4/in4_input
+cat /sys/class/hwmon/hwmon4/in5_input
+cat /sys/class/hwmon/hwmon4/in6_input
+cat /sys/class/hwmon/hwmon4/in7_input
+cat /sys/class/hwmon/hwmon4/in8_input
 ```
 
-- kernel dts
+## FAN
+
+The evb has 4 x FAN connectors
+- FAN0: PWM0/FANIN0
+- FAN1: PWM1/FANIN1
+- FAN2: PWM2/FANIN2
+- FAN3: PWM3/FANIN3 
+
+**Fan control test**
+1. Test FAN RPMS by command
 ```
-    mcu_flash {
-        compatible = "nuvoton,npcm845-mcu-flash";
-        status = "okay";
-        #address-cells = <1>;
-        #size-cells = <1>;
-        dev-num = <0>;    /* /dev/mcu0 */
-        mfsel-offset = <0x260>; /* MFSEL1 */
-        smb-offset = <1>; /* SMBSEL offset of MFSEL */
-        mcu-gpios = <&gpio0 29 GPIO_ACTIVE_HIGH>,     /* GPIO29: SCLK */
-            <&gpio0 28 GPIO_ACTIVE_HIGH>,     /* GPIO28: MOSI */
-            <&gpio2 12 GPIO_ACTIVE_HIGH>,      /* GPIO76: MISO */
-            <&gpio2 13 GPIO_ACTIVE_LOW>;      /* GPIO77: RESET# */
-    };
+echo 25 > /sys/class/hwmon/hwmon1/pwm1
+echo 50 > /sys/class/hwmon/hwmon1/pwm2
+echo 100 > /sys/class/hwmon/hwmon1/pwm3
+echo 255 > /sys/class/hwmon/hwmon1/pwm4
 ```
-- Enable kernel config
+2. Read FAN RPMS by command
 ```
-CONFIG_NPCM7XX_MCU_FLASH=y
+cat /sys/class/hwmon/hwmon1/fan1_input
+cat /sys/class/hwmon/hwmon1/fan2_input
+cat /sys/class/hwmon/hwmon1/fan3_input
+cat /sys/class/hwmon/hwmon1/fan4_input
 ```
-- Build programming tool [loadmcu](https://github.com/Nuvoton-Israel/loadmcu)
+
+# TMPS
+
+BMC Temperature Sensor (TMPS)
+
+**Read BMC Temperature from sys node**
 ```
-bitbake loadmcu
-```
-- Programming
-```
-loadmcu -d /dev/mcu0 -s mcu_fw.bin
+cat /sys/class/thermal/thermal_zone0/temp
+cat /sys/class/thermal/thermal_zone1/temp
 ```
