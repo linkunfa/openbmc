@@ -147,6 +147,15 @@ do_prepare_bootloaders[depends] += " \
     npcm8xx-igps-native:do_populate_sysroot \
     "
 
+# link images for we only need to flash partial image with idea name
+do_generate_ext4_tar_append() {
+    cd ${DEPLOY_DIR_IMAGE}
+    ln -sf ${UBOOT_BINARY} image-u-boot
+    ln -sf ${DEPLOY_DIR_IMAGE}/${FLASH_KERNEL_IMAGE} image-kernel
+    ln -sf ${S}/ext4/${IMAGE_LINK_NAME}.${FLASH_EXT4_BASETYPE}.zst image-rofs
+    ln -sf ${IMGDEPLOYDIR}/${IMAGE_LINK_NAME}.rwfs.${FLASH_EXT4_OVERLAY_BASETYPE} image-rwfs
+}
+
 addtask do_prepare_bootloaders before do_generate_static after do_generate_rwfs_static
 
 
@@ -168,3 +177,4 @@ do_make_ubi_append() {
 do_make_ubi[depends] += "${PN}:do_prepare_bootloaders"
 do_generate_ubi_tar[depends] += "${PN}:do_prepare_bootloaders"
 do_generate_static_tar[depends] += "${PN}:do_prepare_bootloaders"
+do_generate_ext4_tar[depends] += "${PN}:do_prepare_bootloaders"
