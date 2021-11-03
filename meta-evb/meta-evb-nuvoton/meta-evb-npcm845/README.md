@@ -31,6 +31,7 @@ Please submit any patches against the meta-evb-npcm845 layer to the maintainer o
   * [Programming Firmware for the first time](#programming-firmware-for-the-first-time)
     + [Bootloader](#bootloader)
     + [OpenBMC](#openbmc)
+  * [Boot from eMMC](#boot-from-emmc)
 - [Peripheral Interfaces](#peripheral-interfaces)
   * [UART](#uart)
   * [Network](#network)
@@ -251,6 +252,38 @@ run romboot
 Phosphor OpenBMC (Phosphor OpenBMC Project Reference Distro) 0.1.0 evb-npcm845 ttyS0
 
 evb-npcm845 login:
+```
+
+## Boot from eMMC
+Openbmc system can be loaded from the onboard eMMC storage.
+
+* build eMMC image, the image contains fitimage and rofs.
+```
+DISTRO=arbel-evb-emmc bitbake obmc-phosphor-image
+```
+image-emmc.gz is generated in the image deploy folder.
+
+* u-boot must enable the following configs.
+```
+CONFIG_CMD_UNZIP=y
+CONFIG_CMD_EXT4=y
+CONFIG_PARTITION_UUIDS=y
+CONFIG_EFI_PARTITION=y
+```
+
+*  flash eMMC image in u-boot.
+```
+tftp 10000000 image-emmc.gz
+gzwrite mmc 0 10000000 ${filesize}
+```
+
+* boot Openbmc
+```
+setenv bootargs earlycon=uart8250,mmio32,0xf0000000 console=ttyS0,115200n8
+setenv setmmcargs 'setenv bootargs ${bootargs} rootwait root=PARTLABEL=${rootfs}'
+setenv loadaddr 0x10000000
+setenv mmcboot 'setenv bootpart 2; setenv rootfs rofs-a; run setmmcargs; ext4load mmc 0:${bootpart} ${loadaddr} fitImage && bootm; echo Error loading kernel FIT image'
+run mmcboot
 ```
 
 # Peripheral Interfaces
