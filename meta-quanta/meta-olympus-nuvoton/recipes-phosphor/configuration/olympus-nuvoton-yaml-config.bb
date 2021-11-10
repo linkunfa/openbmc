@@ -10,6 +10,7 @@ SRC_URI:olympus-nuvoton = " \
     file://olympus-nuvoton-ipmi-fru-properties.yaml \
     file://olympus-nuvoton-ipmi-sensors.yaml \
     file://olympus-nuvoton-dbus-monitor-config.yaml \
+    file://olympus-nuvoton-ipmi-inventory-sensors.yaml \
     "
 
 S = "${WORKDIR}"
@@ -21,6 +22,8 @@ do_install:olympus-nuvoton() {
         ${D}${datadir}/${BPN}/ipmi-fru-read.yaml
     install -m 0644 -D olympus-nuvoton-ipmi-sensors.yaml \
         ${D}${datadir}/${BPN}/ipmi-sensors.yaml
+    install -m 0644 -D olympus-nuvoton-ipmi-inventory-sensors.yaml \
+        ${D}${datadir}/${BPN}/ipmi-inventory-sensors.yaml
     install -m 0644 -D olympus-nuvoton-dbus-monitor-config.yaml \
         ${D}${datadir}/phosphor-dbus-monitor/dbus-monitor-config.yaml
 }
@@ -29,6 +32,7 @@ FILES:${PN}-dev = " \
     ${datadir}/${BPN}/ipmi-extra-properties.yaml \
     ${datadir}/${BPN}/ipmi-fru-read.yaml \
     ${datadir}/${BPN}/ipmi-sensors.yaml \
+    ${datadir}/${BPN}/ipmi-inventory-sensors.yaml \
     ${datadir}/phosphor-dbus-monitor/dbus-monitor-config.yaml \
     "
 
