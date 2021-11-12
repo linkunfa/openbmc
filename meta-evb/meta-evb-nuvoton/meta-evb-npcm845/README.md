@@ -118,7 +118,7 @@ bitbake obmc-phosphor-image
 DISTRO=arbel-evb-entity bitbake obmc-phosphor-image
 ```
 
-If you are using Blue EVB board, please remove the dts patch below.
+If you are using Red EVB board, please enable the dts patch below.
 
 [DTS patch](https://github.com/Nuvoton-Israel/openbmc/blob/npcm-v2.10/meta-evb/meta-evb-nuvoton/meta-evb-npcm845/recipes-kernel/linux/linux-nuvoton_%25.bbappend#L5)
 
@@ -223,7 +223,7 @@ sf probe 0:1
 setenv ethact gmac2
 tftp 10000000 image-kernel
 /* Blue EVB */
-cp.b 0x10000000 0x88200000 ${filesize}
+cp.b 0x10000000 0x80200000 ${filesize}
 /* Red EVB */
 cp.b 0x10000000 0x88200000 ${filesize}
 ```
