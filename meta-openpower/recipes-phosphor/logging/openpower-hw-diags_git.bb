@@ -15,11 +15,11 @@ PR = "r1"
 PV = "0.1+git${SRCPV}"
 
 SRC_URI = "git://github.com/openbmc/openpower-hw-diags"
-SRCREV = "276e9813915d608358422e12109faf5dabdbe0d0"
+SRCREV = "135793a84b6631127d791757f5003f8b54ccf472"
 
 S = "${WORKDIR}/git"
 
-inherit meson systemd
+inherit pkgconfig meson systemd
 
 SYSTEMD_SERVICE:${PN} = "attn_handler.service"
 
@@ -30,6 +30,6 @@ DEPENDS = "boost libgpiod pdbg phosphor-logging sdbusplus openpower-libhei \
 RDEPENDS:${PN} += "openpower-libhei"
 
 # Conditionally pull in PHAL APIs, if available.
-PACKAGECONFIG ??= "${@bb.utils.filter('OBMC_MACHINE_FEATURES', 'phal', d)}"
-PACKAGECONFIG[phal] = "-Dphal=enabled, -Dphal=disabled, pdata"
+PACKAGECONFIG ??= "${@bb.utils.filter('MACHINE_FEATURES', 'phal', d)}"
+PACKAGECONFIG[phal] = "-Dphal=enabled, -Dphal=disabled, ipl pdata"
 

@@ -54,6 +54,7 @@ DEPENDS += "phosphor-dbus-interfaces"
 DEPENDS += "libcereal"
 DEPENDS += "nlohmann-json"
 DEPENDS += "cli11"
+DEPENDS += "libgpiod"
 
 RDEPENDS:${PN}-chassis += "bash"
 
@@ -83,6 +84,9 @@ SYSTEMD_SERVICE:${PN}-discover += "phosphor-discover-system-state@.service"
 
 FILES:${PN}-host-check = "${bindir}/phosphor-host-check"
 SYSTEMD_SERVICE:${PN}-host-check += "phosphor-reset-host-running@.service"
+FILES:${PN}-host-check = "${bindir}/phosphor-host-reset-recovery"
+SYSTEMD_SERVICE:${PN}-host-check += "phosphor-reset-host-recovery@.service"
+
 
 SYSTEMD_SERVICE:${PN}-reset-sensor-states += "phosphor-reset-sensor-states@.service"
 
@@ -181,7 +185,8 @@ SYSTEMD_LINK:${PN}-obmc-targets += "${@compose_list(d, 'HOST_LINK_ACTION_FMT', '
 SYSTEMD_LINK:${PN}-obmc-targets += "${@compose_list(d, 'FAN_LINK_FMT', 'OBMC_CHASSIS_INSTANCES')}"
 SYSTEMD_LINK:${PN}-obmc-targets += "${@compose_list(d, 'QUIESCE_FMT', 'HOST_ERROR_TARGETS', 'OBMC_HOST_INSTANCES')}"
 
+
 SRC_URI += "git://github.com/openbmc/phosphor-state-manager"
-SRCREV = "2bfb1efc4bc7e781224e19c05b51e6675f13a488"
+SRCREV = "1e89e62283ea037823319244fc2de6c351c18538"
 
 S = "${WORKDIR}/git"

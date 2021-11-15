@@ -83,8 +83,8 @@ DISTRO ?= "openbmc-openpower"
 #  - 'package_ipk' for ipk files are used by opkg (a debian style embedded package manager)
 #  - 'package_rpm' for rpm style packages
 # E.g.: PACKAGE_CLASSES ?= "package_rpm package_deb package_ipk"
-# We default to rpm:
-PACKAGE_CLASSES ?= "package_rpm"
+# We default to ipk:
+PACKAGE_CLASSES ?= "package_ipk"
 
 #
 # SDK target architecture
@@ -256,3 +256,9 @@ CONF_VERSION = "2"
 
 # Set the root password to '0penBmc'
 # Defaults from meta-phosphor/conf/distro/include/phosphor-defaults.inc
+
+# Add default administrative account (login: admin, password: admin)
+DEFAULT_ADMIN_PASSWORD = "'\$6\$Fze0kFe8\$YjEc0mvYcwZvjBtnVWQ4Os4gFMDj.ogBkg2jTSjpOgFQpT33hDitAUheGGJcSZ0PkzRuzOq/xhpJ5bmrFg46R.'"
+EXTRA_USERS_PARAMS:append:pn-obmc-phosphor-image = "\
+  useradd -p ${DEFAULT_ADMIN_PASSWORD} -g users -G priv-admin,ipmi -N admin; \
+"
