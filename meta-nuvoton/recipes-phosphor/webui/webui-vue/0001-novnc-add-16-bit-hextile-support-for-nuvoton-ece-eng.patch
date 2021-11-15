@@ -1,15 +1,16 @@
-From 6dd35b3926b93be6f9f0b4bc89e5fb03cf6f77a7 Mon Sep 17 00:00:00 2001
+From c33f0a97a15c99ca3144c9f8e67a67abe8fcee0a Mon Sep 17 00:00:00 2001
 From: Joseph Liu <kwliu@nuvoton.com>
-Date: Fri, 11 Jun 2021 10:25:59 +0800
+Date: Thu, 11 Nov 2021 16:10:26 +0800
 Subject: [PATCH] novnc: add 16-bit hextile support for nuvoton ece engine
 
+Signed-off-by: Joseph Liu <kwliu@nuvoton.com>
 ---
  package-lock.json | 5 ++---
  package.json      | 2 +-
  2 files changed, 3 insertions(+), 4 deletions(-)
 
 diff --git a/package-lock.json b/package-lock.json
-index 18185d54..be5fa415 100644
+index 413dd624..759fe1ba 100644
 --- a/package-lock.json
 +++ b/package-lock.json
 @@ -3281,9 +3281,8 @@
@@ -25,7 +26,7 @@ index 18185d54..be5fa415 100644
      "@npmcli/move-file": {
        "version": "1.0.1",
 diff --git a/package.json b/package.json
-index 9a99d162..d6b54e51 100644
+index 91d45434..9cb3e226 100644
 --- a/package.json
 +++ b/package.json
 @@ -16,7 +16,7 @@
@@ -34,9 +35,9 @@ index 9a99d162..d6b54e51 100644
      "@carbon/icons-vue": "10.28.0",
 -    "@novnc/novnc": "1.2.0",
 +    "@novnc/novnc": "Nuvoton-Israel/noVNC.git#openbmc-v1.2.0",
-     "axios": "0.21.1",
+     "axios": "0.21.4",
      "bootstrap": "4.6.0",
      "bootstrap-vue": "2.21.2",
 -- 
-2.17.1
+2.25.1
 

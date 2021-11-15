@@ -1,4 +1,4 @@
-From 6e734645794e1f97410ee31f88d8e5f0a601ca61 Mon Sep 17 00:00:00 2001
+From 690eefec2bd5018921dfedcfe3fc69aa6fc12297 Mon Sep 17 00:00:00 2001
 From: "Jason M. Bills" <jason.m.bills@linux.intel.com>
 Date: Tue, 10 Dec 2019 12:28:00 +0800
 Subject: [PATCH] Add option for SEL commands for Journal-based SEL entries
@@ -10,19 +10,20 @@ It adds an option for Get SEL Info, Get SEL Entry, Add SEL
 Entry, and Clear SEL, to get and add entries using the journal.
 
 Signed-off-by: Jason M. Bills <jason.m.bills@linux.intel.com>
+Signed-off-by: Joseph Liu <kwliu@nuvoton.com>
 ---
  configure.ac       |   8 +
- sdrutils.hpp       | 183 +++++++++++++
+ sdrutils.hpp       | 183 ++++++++++++
  selutility.hpp     | 109 ++++++++
  sensorhandler.hpp  |   9 +
  sensorutils.hpp    | 186 +++++++++++++
- storagehandler.cpp | 670 ++++++++++++++++++++++++++++++++++++++++++++-
- 6 files changed, 1161 insertions(+), 4 deletions(-)
+ storagehandler.cpp | 678 ++++++++++++++++++++++++++++++++++++++++++++-
+ 6 files changed, 1168 insertions(+), 5 deletions(-)
  create mode 100644 sdrutils.hpp
  create mode 100644 sensorutils.hpp
 
 diff --git a/configure.ac b/configure.ac
-index a7586b74..e559db97 100644
+index 0fbf5375..009a9eb9 100644
 --- a/configure.ac
 +++ b/configure.ac
 @@ -56,6 +56,14 @@ AS_IF([test "x$enable_softoff" != "xno"],
@@ -231,10 +232,10 @@ index 00000000..7297467e
 +#endif // JOURNAL_SEL
 \ No newline at end of file
 diff --git a/selutility.hpp b/selutility.hpp
-index 06fc453e..85fb7c25 100644
+index fa28fb19..44cbbc4d 100644
 --- a/selutility.hpp
 +++ b/selutility.hpp
-@@ -39,6 +39,114 @@ static constexpr auto lastEntry = 0xFFFF;
+@@ -46,6 +46,114 @@ static constexpr auto lastEntry = 0xFFFF;
  static constexpr auto entireRecord = 0xFF;
  static constexpr auto selRecordSize = 16;
  
@@ -349,7 +350,7 @@ index 06fc453e..85fb7c25 100644
  namespace operationSupport
  {
  static constexpr bool overflow = false;
-@@ -47,6 +155,7 @@ static constexpr bool partialAddSelEntry = false;
+@@ -54,6 +162,7 @@ static constexpr bool partialAddSelEntry = false;
  static constexpr bool reserveSel = true;
  static constexpr bool getSelAllocationInfo = false;
  } // namespace operationSupport
@@ -571,7 +572,7 @@ index 00000000..4f9466f8
 +} // namespace ipmi
 +#endif // JOURNAL_SEL
 diff --git a/storagehandler.cpp b/storagehandler.cpp
-index eecc18b7..b7a0dd52 100644
+index b225e30f..a8f0121d 100644
 --- a/storagehandler.cpp
 +++ b/storagehandler.cpp
 @@ -11,6 +11,8 @@
@@ -583,8 +584,8 @@ index eecc18b7..b7a0dd52 100644
  #include <chrono>
  #include <cstdio>
  #include <cstring>
-@@ -20,7 +22,9 @@
- #include <phosphor-logging/elog-errors.hpp>
+@@ -22,7 +24,9 @@
+ #include <phosphor-logging/elog.hpp>
  #include <phosphor-logging/log.hpp>
  #include <sdbusplus/server.hpp>
 +#include <sdrutils.hpp>
@@ -592,25 +593,8 @@ index eecc18b7..b7a0dd52 100644
 +#include <string_view>
  #include <variant>
  #include <xyz/openbmc_project/Common/error.hpp>
- 
-@@ -46,6 +50,8 @@ constexpr auto PROPERTY_ELAPSED = "Elapsed";
- 
- } // namespace
- 
-+
-+#ifndef JOURNAL_SEL
- namespace cache
- {
- /*
-@@ -61,6 +67,7 @@ namespace cache
- ipmi::sel::ObjectPaths paths;
- 
- } // namespace cache
-+#endif
- 
- using InternalFailure =
-     sdbusplus::xyz::openbmc_project::Common::Error::InternalFailure;
-@@ -76,6 +83,509 @@ enum class AccessMode
+ #include <xyz/openbmc_project/Logging/SEL/error.hpp>
+@@ -216,6 +220,509 @@ enum class AccessMode
      words  ///< Device is accessed by words
  };
  
@@ -1120,7 +1104,7 @@ index eecc18b7..b7a0dd52 100644
  /** @brief implements the get SEL Info command
   *  @returns IPMI completion code plus response data
   *   - selVersion - SEL revision
-@@ -470,6 +980,7 @@ ipmi::RspType<uint8_t // erase status
+@@ -527,6 +1034,7 @@ ipmi::RspType<uint8_t // erase status
      return ipmi::responseSuccess(
          static_cast<uint8_t>(ipmi::sel::eraseComplete));
  }
@@ -1128,7 +1112,7 @@ index eecc18b7..b7a0dd52 100644
  
  /** @brief implements the get SEL time command
   *  @returns IPMI completion code plus response data
-@@ -579,6 +1090,145 @@ ipmi::RspType<uint16_t> ipmiStorageReserveSel()
+@@ -636,6 +1144,156 @@ ipmi::RspType<uint16_t> ipmiStorageReserveSel()
      return ipmi::responseSuccess(reserveSel());
  }
  
@@ -1222,8 +1206,19 @@ index eecc18b7..b7a0dd52 100644
 +
 +    if (recordType == ipmi::sel::systemEvent)
 +    {
-+        std::string sensorPath = getPathFromSensorNumber(sensorNum);
-+        if(sensorPath.length() == 0){
++        std::string sensorPath;
++
++        for (const auto& it : invSensors)
++        {
++            if (it.second.sensorID == sensorNum)
++            {
++                sensorPath = it.first;
++                break;
++            }
++        }
++
++        if(sensorPath.length() == 0)
++        {
 +            return ipmi::responseSensorInvalid();
 +        }
 +
@@ -1274,7 +1269,7 @@ index eecc18b7..b7a0dd52 100644
  /** @brief implements the Add SEL entry command
   * @request
   *
-@@ -619,6 +1269,7 @@ ipmi::RspType<uint16_t // recordID of the Added SEL entry
+@@ -697,6 +1355,7 @@ ipmi::RspType<uint16_t // recordID of the Added SEL entry
  
      return ipmi::responseSuccess(recordID);
  }
@@ -1282,12 +1277,7 @@ index eecc18b7..b7a0dd52 100644
  
  bool isFruPresent(const std::string& fruPath)
  {
-@@ -752,11 +1403,11 @@ ipmi::RspType<uint8_t,  // SDR version
- 
- void register_netfn_storage_functions()
- {
-+
-     // <Get SEL Info>
+@@ -840,7 +1499,6 @@ void register_netfn_storage_functions()
      ipmi::registerHandler(ipmi::prioOpenBmcBase, ipmi::netFnStorage,
                            ipmi::storage::cmdGetSelInfo, ipmi::Privilege::User,
                            ipmiStorageGetSelInfo);
@@ -1295,10 +1285,11 @@ index eecc18b7..b7a0dd52 100644
      // <Get SEL Time>
      ipmi::registerHandler(ipmi::prioOpenBmcBase, ipmi::netFnStorage,
                            ipmi::storage::cmdGetSelTime, ipmi::Privilege::User,
-@@ -771,25 +1422,36 @@ void register_netfn_storage_functions()
+@@ -850,26 +1508,36 @@ void register_netfn_storage_functions()
      ipmi::registerHandler(ipmi::prioOpenBmcBase, ipmi::netFnStorage,
-                           ipmi::storage::cmdReserveSel, ipmi::Privilege::User,
-                           ipmiStorageReserveSel);
+                           ipmi::storage::cmdSetSelTime,
+                           ipmi::Privilege::Operator, ipmiStorageSetSelTime);
+-
 +#ifndef JOURNAL_SEL
      // <Get SEL Entry>
      ipmi_register_callback(NETFUN_STORAGE, IPMI_CMD_GET_SEL_ENTRY, NULL,
