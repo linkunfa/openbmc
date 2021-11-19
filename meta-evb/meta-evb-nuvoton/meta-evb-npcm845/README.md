@@ -28,16 +28,21 @@ Please submit any patches against the meta-evb-npcm845 layer to the maintainer o
 - [Getting Started](#getting-started)
   * [Setting up EVB](#setting-up-evb)
   * [Building your OpenBMC project](#building-your-openbmc-project)
+    + [Enable ECC](#enable-ecc)
+    + [Configuration](#configuration)
+    + [Build](#build)
+    + [Output Images](#output-images)
   * [Programming Firmware for the first time](#programming-firmware-for-the-first-time)
     + [Bootloader](#bootloader)
     + [OpenBMC](#openbmc)
   * [Boot from eMMC](#boot-from-emmc)
-- [Peripheral Interfaces](#peripheral-interfaces)
+- [BMC Modules](#bmc-modules)
   * [UART](#uart)
+  * [FIU](#fiu)
   * [Network](#network)
   * [I3C](#i3c)
   * [JTAG Master](#jtag-master)
-  * [SMB](#smb)
+  * [SMBus](#smbus)
   * [ESPI](#espi)
   * [SIOX](#siox)
   * [VGA](#vga)
@@ -85,18 +90,7 @@ TipROM 0x104 ** Secure boot is enabled
 
 ## Building your OpenBMC project
 
-### 1) Target EVB NPCM845
-Source the setup script as follows:
-```ruby
-. setup evb-npcm845
-```
-
-### 2) Configuration
-
-If secure boot is enabled, please enable [SECURED TIPFW](https://github.com/Nuvoton-Israel/openbmc/blob/npcm-v2.10/meta-evb/meta-evb-nuvoton/meta-evb-npcm845/conf/machine/evb-npcm845.conf#L8)
-```ruby
-SECURED_TIPFW = "True"
-```
+### Enable ECC
 
 To enable memory ECC function, please enable [MC_CAPABILITY_ECC_EN](https://github.com/Nuvoton-Israel/openbmc/blob/npcm-v2.10/meta-nuvoton/recipes-bsp/images/npcm8xx-igps/BootBlockAndHeader_ArbelEVB.xml#L181)
 ```ruby
@@ -112,22 +106,35 @@ To enable memory ECC function, please enable [MC_CAPABILITY_ECC_EN](https://gith
 	<content format='32bit'>0x01</content>  
 </BinField>
 ```
-### 3) Build
-[Inventory manager distro](https://github.com/openbmc/phosphor-inventory-manager)
+
+### Configuration
+
+- If you are using Red EVB board, please enable the [dts patch](https://github.com/Nuvoton-Israel/openbmc/blob/npcm-v2.10/meta-evb/meta-evb-nuvoton/meta-evb-npcm845/recipes-kernel/linux/linux-nuvoton_%25.bbappend#L5)
+
+- If secure boot is enabled, please make sure [SECURED TIPFW](https://github.com/Nuvoton-Israel/openbmc/blob/npcm-v2.10/meta-evb/meta-evb-nuvoton/meta-evb-npcm845/conf/machine/evb-npcm845.conf#L8) is enabled.
+```ruby
+SECURED_TIPFW = "True"
+```
+### Build
+1. Target EVB NPCM845
+Source the setup script as follows:
+```ruby
+. setup evb-npcm845
+```
+
+2. Choose the distro
+
+* [Inventory manager distro](https://github.com/openbmc/phosphor-inventory-manager)
 ```
 bitbake obmc-phosphor-image
 ```
 
-[Entity manager distro](https://github.com/openbmc/entity-manager)
+* [Entity manager distro](https://github.com/openbmc/entity-manager)
 ```
 DISTRO=arbel-evb-entity bitbake obmc-phosphor-image
 ```
 
-If you are using Red EVB board, please enable the dts patch below.
-
-[DTS patch](https://github.com/Nuvoton-Israel/openbmc/blob/npcm-v2.10/meta-evb/meta-evb-nuvoton/meta-evb-npcm845/recipes-kernel/linux/linux-nuvoton_%25.bbappend#L5)
-
-### 4) Output Images
+### Output Images
 * You will find images in path build/evb-npcm845/tmp/deploy/images/evb-npcm845
 
 Type          | Description                                                                                                     |
@@ -190,7 +197,7 @@ setenv common_bootargs 'setenv bootargs earlycon=${earlycon} root=/dev/ram0 cons
 setenv console 'ttyS0,115200n8'
 setenv earlycon 'uart8250,mmio32,0xf0000000'
 setenv mem 880M
-setenv romboot 'sf probe 0:1; run common_bootargs; echo Booting Kernel from flash; echo +++ uimage at 0x${uimage_flash_addr}; echo Using bootargs: ${bootargs};bootm ${uimage_flash_addr}'
+setenv romboot 'run common_bootargs; echo Booting Kernel from flash; echo +++ uimage at 0x${uimage_flash_addr}; echo Using bootargs: ${bootargs};bootm ${uimage_flash_addr}'
 setenv stderr serial
 setenv stdin serial
 setenv stdout serial
@@ -213,7 +220,6 @@ saveenv
 
 * Flash full openbmc image
 ```ruby
-sf probe 0:1
 setenv ethact gmac2
 tftp 10000000 image-bmc
 /* Blue EVB */
@@ -224,7 +230,6 @@ cp.b 0x10000000 0x88000000 ${filesize}
 
 * Flash linux kernel
 ```ruby
-sf probe 0:1
 setenv ethact gmac2
 tftp 10000000 image-kernel
 /* Blue EVB */
@@ -291,7 +296,7 @@ setenv mmcboot 'setenv bootpart 2; setenv rootfs rofs-a; run setmmcargs; ext4loa
 run mmcboot
 ```
 
-# Peripheral Interfaces
+# BMC Modules
 
 ## UART
 
@@ -319,6 +324,96 @@ The EVB has FTDI USB_TO_UART and UART Headers, the user can select the UART rotu
   * Turn on strap 7 of the SW1 dip switch
   * Set baud rate to 115200.
 
+## FIU
+
+The Arbel EVB has 4 Nor-flash mounted
+- FIU0 - SPI0CS0 and SPI0CS2
+- FIU1 - SPI1CS0
+- FIU3 - SPI3CS0
+
+### Linux test
+
+**FIU3 test**
+
+1. Probe flash
+- In nuvoton-npcm845-evb.dts, we have enabled fiu3 and definded partition.
+```ruby
+#kernel message
+spi-nor spi3.0: w25q256 (32768 Kbytes)
+1 fixed-partitions partitions found on MTD device spi3.0
+Creating 1 MTD partitions on "spi3.0":
+0x000000000000-0x000002000000 : "spi3-system1
+```
+```ruby
+#MTD number for fiu3 is mtd7
+root@evb-npcm845:~# cat /proc/mtd
+dev:    size   erasesize  name
+mtd0: 02000000 00001000 "bmc"
+mtd1: 000c0000 00001000 "u-boot"
+mtd2: 00040000 00001000 "u-boot-env"
+mtd3: 00800000 00001000 "kernel"
+mtd4: 01500000 00001000 "rofs"
+mtd5: 00100000 00001000 "rwfs"
+mtd6: 00400000 00001000 "spi1-system1"
+mtd7: 02000000 00001000 "spi3-system1
+```
+
+2. Erase/Write/Read flash
+```ruby
+root@evb-npcm845:/tmp# tftp -g -r image-bmc 192.168.0.128
+root@evb-npcm845:/tmp# flashcp -v image-bmc /dev/mtd7
+Erasing block: 8192/8192 (100%)
+Writing kb: 32768/32768 (100%)
+Verifying kb: 32768/32768 (100%)
+```
+
+**U-boot test**
+
+**FIU3 test**
+1. Probe flash
+```ruby
+U-Boot>sf probe 3:0
+SF: Detected w25q256 with page size 256 Bytes, erase size 4 KiB, total 32 MiB
+```
+
+2. Erase flash
+```ruby
+U-Boot>sf erase 0 0x1000
+SF: 4096 bytes @ 0x0 Erased: OK
+```
+
+3. Write flash
+```ruby
+U-Boot>sf write 0x8000 0 0x1000
+device 0 offset 0x0, size 0x1000
+SF: 4096 bytes @ 0x0 Written: OK
+```
+
+4. Read flash
+
+- The SPI3 cs0 is mapped to A000_0000h to A7FF_FFFFh, you can use md command to direct read flash.
+- Still, you can use sf read command to read flash.
+
+```ruby
+U-Boot>md 0xa0000000
+a0000000: 1400000a d503201f 00008000 00000000    ..... ..........
+a0000010: 00092548 00000000 00092548 00000000    H%......H%......
+a0000020: 000986d8 00000000 14000042 10003ea0    ........B....>..
+a0000030: d5384241 f100303f 540000a0 f100203f    AB8.?0.....T? ..
+a0000040: 54000120 f100103f 54000160 d51ec000     ..T?...`..T....
+a0000050: d53e1100 b2400c00 d51e1100 d51e115f    ..>...@....._...
+a0000060: 14000008 d51cc000 d2867fe0 d51c1140    ............@...
+a0000070: 14000004 d518c000 d2a00600 d5181040    ............@...
+a0000080: d5033fdf 94000003 9400086e 940005cd    .?......n.......
+a0000090: aa1e03fd d5380000 d344fc00 92402c00    ......8...D..,@.
+a00000a0: f1340c1f 54000100 d5380000 d344fc00    ..4....T..8...D.
+a00000b0: 92402c00 f1341c1f 54000080 aa1d03fe    .,@...4....T....
+a00000c0: d65f03c0 17fffffe 17fffffd aa1e03fd    .._.............
+a00000d0: 58000340 94000611 58000300 58000321    @..X.......X!..X
+a00000e0: 9400061f aa1d03fe d65f03c0 58000260    .........._.`..X
+a00000f0: 14000624 d65f03c0 10003840 d5384241    $....._.@8..AB8.
+```
+
 ## Network
 
 The EVB has 3 RJ45 headers and 1 NCSI header
@@ -328,9 +423,131 @@ The EVB has 3 RJ45 headers and 1 NCSI header
 - J_RMII:  100/10Mbps RMII, eth3
 - J_EMC: NCSI header, eth2
 
+### Linux Test
+
+**SGMII test**
+
+1. Connect a network cable with J_SGMII 
+```ruby
+# make sure the link is up
+stmmaceth f0802000.eth eth0: Link is Up - 1Gbps/Full - flow control off
+```
+2.  Configure static ip or from DHCP server
+```ruby
+eth0: <BROADCAST,MULTICAST,UP,LOWER_UP> mtu 1500 qdisc mq qlen 1000
+    link/ether 00:00:f7:a0:00:fc brd ff:ff:ff:ff:ff:ff
+    inet 192.168.0.12/24 brd 192.168.0.255 scope global dynamic eth0
+       valid_lft 86191sec preferred_lft 86191sec
+```
+
+3. iperf3 test
+
+```
+root@evb-npcm845:~# iperf3 -c 192.168.0.128 -R
+Connecting to host 192.168.0.128, port 5201
+Reverse mode, remote host 192.168.0.128 is sending
+[  5] local 192.168.0.12 port 45320 connected to 192.168.0.128 port 5201
+[ ID] Interval           Transfer     Bitrate
+[  5]   0.00-1.00   sec   108 MBytes   909 Mbits/sec
+[  5]   1.00-2.00   sec   112 MBytes   938 Mbits/sec
+[  5]   2.00-3.00   sec   109 MBytes   916 Mbits/sec
+[  5]   3.00-4.00   sec   112 MBytes   940 Mbits/sec
+[  5]   4.00-5.00   sec   112 MBytes   938 Mbits/sec
+[  5]   5.00-6.00   sec   112 MBytes   941 Mbits/sec
+[  5]   6.00-7.00   sec   112 MBytes   936 Mbits/sec
+[  5]   7.00-8.00   sec   112 MBytes   941 Mbits/sec
+[  5]   8.00-9.00   sec   112 MBytes   941 Mbits/sec
+[  5]   9.00-10.00  sec   112 MBytes   940 Mbits/sec
+- - - - - - - - - - - - - - - - - - - - - - - - -
+[ ID] Interval           Transfer     Bitrate
+[  5]   0.00-10.00  sec  1.09 GBytes   934 Mbits/sec                  sender
+[  5]   0.00-10.00  sec  1.09 GBytes   934 Mbits/sec                  receiver
+ 
+```
+
+### U-boot Test
+
+**RGMII test**
+
+- eth0: sgmii
+- eth1: rgmii
+- eth3: rmii
+```
+Found phy_id=0x600d8595 addr=0x00 eth0: gmac1
+Found phy_id=0x600d84a2 addr=0x00 , eth1: gmac2
+Found phy_id=0x004061e4 addr=0x00 , eth3: gmac4
+```
+1. Connect a network cable with J_SGMII   
+
+2. Make sure the mac address has been assigned to eth0
+```
+setenv ethact gmac2
+setenv eth1addr 00:00:F7:A0:00:FD
+setenv eth2addr 00:00:F7:A0:00:FE
+setenv eth3addr 00:00:F7:A0:00:FF
+setenv ethaddr 00:00:F7:A0:00:FC
+```
+
+2. configure ip address
+```
+setenv gatewayip            192.168.0.254
+setenv serverip             192.168.0.128
+setenv ipaddr               192.168.0.12
+setenv netmask              255.255.255.0
+```
+
+3. tftp test
+```
+Using gmac device
+TFTP from server 192.168.0.128; our IP address is 192.168.0.12
+Filename 'image-bmc'.
+Load address: 0x10000000
+Loading: #################################################################
+         #################################################################
+         #################################################################
+         #################################################################
+         #################################################################
+         #################################################################
+         #################################################################
+         #################################################################
+         #################################################################
+         #################################################################
+         #################################################################
+         #################################################################
+         #################################################################
+         #################################################################
+         #################################################################
+         #################################################################
+         #################################################################
+         #################################################################
+         #################################################################
+         #################################################################
+         #################################################################
+         #################################################################
+         #################################################################
+         #################################################################
+         #################################################################
+         #################################################################
+         #################################################################
+         #################################################################
+         #################################################################
+         #################################################################
+         #################################################################
+         #################################################################
+         #################################################################
+         #################################################################
+         #################################################################
+         ###########
+         11.9 MiB/s
+done
+Bytes transferred = 33554432 (2000000 hex)
+```
+
 ## I3C
 
 The EVB has I3C0~I3C5 interfaces on the J_I3C header.
+
+### Linux Test
 
 **SPD5118 device**
 - Connect a Renesas SPD5118 moudule to EVB I3C1 interface
@@ -365,6 +582,8 @@ CONFIG_EEPROM_SPD5118=y
 
 The EVB has JTAG Master 1 interface on the J_JTAGM header.
 
+### Linux Test
+
 **Onboard CPLD**
 - Route JTAG Master 1 interface to onboard CPLD.
 ```
@@ -381,11 +600,13 @@ loadsvf -d /dev/jtag0 -s arbelevb_cpld.svf
 - The CPLD SVF can be downloaded from here:
 [arbelevb_cpld.svf](https://github.com/Nuvoton-Israel/openbmc/tree/npcm-v2.10/meta-evb/meta-evb-nuvoton/meta-evb-npcm845/recipes-evb-npcm845/loadsvf/files/arbelevb_cpld.svf )
 
-## SMB
+## SMBus
 
 The EVB has 27 SMB interfaces on J3 and J4 headers.
 
 There is a TMP100 sensor (0x48) connected to SMB module 6.
+
+### Linux test
 
 **TMP100 sensor**
 - The following example in EVB debug console is to detect TMP100.
@@ -468,7 +689,7 @@ i2ctransfer -f -y 0 w4@0x64 0 0 1 3 r0
 i2ctransfer -f -y 0 w2@0x64 0 0 r2
 ```
 
-**Uboot test**
+### U-boot test
 
 A sensor (0x48) is connected to SMB module 6.  
 Wire between SMB module 6 and each SMB target module (0-5, 7-26) before inputting commands in uboot.
@@ -483,7 +704,8 @@ I2c probe 0x48
 
 The EVB has the J_eSPI header to support ESPI transactions.
 
-**Wiring**
+### U-boot test
+1. Wiring
 - Connected to the host ESPI interface.
   * eSPI_ALERT_N (optional): ESPI alert pin.  
   * eSPI_RST_N: ESPI reset pin.  
@@ -497,7 +719,7 @@ The EVB has the J_eSPI header to support ESPI transactions.
 > _If _eSPI_ALERT_N is connected, please configure the alert mode accordingly on the host side._  
 > _To connect the external power 1.8V or 1.0V, please short the pin 2 only on the JP_ESPI_PWR header on EVB._  
 
-**ESPI channel support declaration in u-boot configuration**
+2. ESPI channel support declaration in u-boot configuration
 - Enable u-boot configuration
 > _Edit nuvoton-npcm850-evb.dts in u-boot_  
 ```
@@ -508,7 +730,7 @@ The EVB has the J_eSPI header to support ESPI transactions.
 > _The configuration above claims that all channels would be supported._  
 - Rebuild and flash the u-boot binary.  
 
-**Validate ESPI**
+3. Validate ESPI
 - Boot EVB into u-boot first and then the host device.  
 - Check if values of the following registers are configured properly.  
   * Bits **24~27** of **ESPICFG** register are set to **1** to support all four
@@ -521,34 +743,9 @@ The EVB has the J_eSPI header to support ESPI transactions.
 
 The EVB has two SIOX modules connecting to CPLD. You could controll LED_CPLD_7 and do loopback test.
 
-**How to Use**
-- Please follow JTAG Master section to program CPLD
- 
-- Edit nuvoton-common-npcm8xx.dtsi.
-```
-sgpio1: sgpio@101000 {
-  clocks = <&clk NPCM8XX_CLK_APB3>;
-  compatible = "nuvoton,npcm845-sgpio";
-  interrupts = <GIC_SPI 19 IRQ_TYPE_LEVEL_HIGH>;
-  gpio-controller;
-  pinctrl-names = "default";
-  pinctrl-0 = <&iox1_pins>;
-  reg = <0x101000 0x200>;
-  status = "disabled";
-};
-
-sgpio2: sgpio@102000 {
-  clocks = <&clk NPCM8XX_CLK_APB3>;
-  compatible = "nuvoton,npcm845-sgpio";
-  interrupts = <GIC_SPI 20 IRQ_TYPE_LEVEL_HIGH>;
-  gpio-controller;
-  pinctrl-names = "default";
-  pinctrl-0 = <&iox2_pins>;
-  reg = <0x102000 0x200>;
-  status = "disabled";
-};
-```
-- Edit nuvoton-npcm845-evb.dts to support 64 input and 64 output of the second module, and the ninth output pin is for green LED
+### Linux test
+- Please follow JTAG Master section to program CPLD first
+- The current nuvoton-npcm845-evb.dts is defineded to support 64 input and 64 output of the second siox module, and the ninth output pin is for green LED
 ```
 sgpio2: sgpio@102000 {
 	status = "okay";
@@ -723,7 +920,8 @@ The EVB has a VGA output port.
 5. Once PC run into OS, you should get OS screen from evb's vga port.
 6. If you didn't see the OS screen, please contact the developer.
 
-**iKVM test**
+### Linux test
+- iKVM test in OpenBMC
 1. Connects J_USB1_DEV and host PC with a USB cable
 2. Make sure your workstation and Arbel EVB are in the same network.
 3. Launch a browser in your workstation and you will see the entry page.
@@ -760,7 +958,8 @@ The evb has 2 x USB device ports and 1 x USB host port.
 - The UDC8 is used for usb port 3 if usb device mode
 - The UDC9 is used for usb port 2 if usb device mode
 
-**USB device test**
+### Linux test
+**Virtual Media test in OpenBMC**
 1. Connects J_USB1_DEV and host PC with a USB cable
 
 2. Clone a physical USB drive to an image file
@@ -788,9 +987,9 @@ The evb has 2 x USB device ports and 1 x USB host port.
         * After clicking `Start`, you will see a new USB device on HOST OS
         * If you want to stop this service, just click `Stop` to stop VM network service.
 
-**Uboot test**
+### U-boot test
 
-- Host test
+**Host test**
 
 Use a usb disk formatted in FAT32 and store some contents in it.  
 Insert it into J_USB2_HOST first and then input the following commands.  
@@ -801,7 +1000,7 @@ usb tree
 fatls usb 0
 ```
 
-- Device test
+**Device test**
 
 Connect a mini usb cable between J_USB1_DEV and the host computer.  
 Input the following commands.
@@ -824,7 +1023,8 @@ VCC source is 1.2v and voltage is divided to:
 - ADCI6: 200mV
 - ADCI7: 110 mV
 
-** Read ADC by command**
+### Linux test
+- Read ADC value from hwmon path
 ```
 cat /sys/class/hwmon/hwmon4/in1_input
 cat /sys/class/hwmon/hwmon4/in2_input
@@ -844,7 +1044,7 @@ The evb has 4 x FAN connectors
 - FAN2: PWM2/FANIN2
 - FAN3: PWM3/FANIN3 
 
-**Fan control test**
+### Linux test
 1. Test FAN RPMS by command
 ```
 echo 25 > /sys/class/hwmon/hwmon1/pwm1
@@ -859,9 +1059,9 @@ cat /sys/class/hwmon/hwmon1/fan2_input
 cat /sys/class/hwmon/hwmon1/fan3_input
 cat /sys/class/hwmon/hwmon1/fan4_input
 ```
-3. Change PWM by command in uboot
+### U-boot test
+1. PWM Initial:
 ```
-PWM Initial:
 mw.l 0xf0800264 0x00ff000f 1
 mw.l 0xf0103000 0x00000909 1
 mw.l 0xf0103004 0x00004444 1
@@ -887,7 +1087,7 @@ mw.l 0xf0103030 0x000000ff 1
 mw.l 0xf0103034 0x0 1
 mw.l 0xf0103034 0xff 1
 ```
-4. Read FAN RPMS by command in uboot
+2. Read FAN RPMS
 ```
 MFT0 initial:
 mw.b 0xf0180008 0xff 1
@@ -904,11 +1104,12 @@ md.w 0xf0180002
 f0180002: f88c
 ```
 
-# TMPS
+## TMPS
 
 BMC Temperature Sensor (TMPS)
 
-**Read BMC Temperature from sys node**
+### Linux test
+- Read BMC Temperature from sys node
 ```
 cat /sys/class/thermal/thermal_zone0/temp
 cat /sys/class/thermal/thermal_zone1/temp
@@ -920,14 +1121,14 @@ The PCIERC is used by the BMC CPU to control external PCIe devices connected to 
 
 The EVB has one J_PCIE_RC header.
 
-**How to use**
+### Linux test
 
 - Insert a Nuvoton EVB into J_PCIE_RC header.  
-Here a Runbmc BUV EVB is used.  
+Here a Poleg EVB is used.  
 
-- Power up the BUV EVB and then the Arbel EVB.
+- Power up the Poleg EVB and then the Arbel EVB.
 
-- Locate the buv device by inputting the **lspci** command on the openbmc debug console. Here is an example result.  
+- Locate the poleg evb device by inputting the **lspci** command on the openbmc debug console. Here is an example result.  
 ```
 00:00.0 PCI bridge: PLDA Device 1111 (rev 01)
 01:00.0 PCI bridge: PLDA PCI Express Bridge (rev 02)
@@ -979,8 +1180,9 @@ The example result is:
 
 The evb has an 8G EMMC
 
+### Linux test
 1. Use as internal storage
-```
+```ruby
 mkfs.ext4 /dev/mmcblk0
 mkdir tmp
 mount /dev/mmcblk0 tmp
@@ -988,18 +1190,18 @@ mount /dev/mmcblk0 tmp
 	
 2. Export by Mass Storage
 - You need to setup configfs for mass storage first, then export emmc device node to below path.
-```
+```ruby
 echo "/dev/mmcblk0" > /sys/kernel/config/usb_gadget/mmc-storage/functions/mass_storage.usb0/lun.0/file
 ```
 
-**Uboot test**
+### U-boot test
 
 Follow the test steps in usb device test scenario and format the emmc in FAT32.  
 It's a USB drive attached to the host computer.
 
 - Create a txt file "test.txt" with some content in the USB drive and unplug the mini usb cable from the host computer.  
 - Input the following commands.
-```
+```ruby
 fatls mmc 0
 fatload mmc 0 0x12000000 test.txt
 md.l 0x12000000
@@ -1008,28 +1210,35 @@ You can check if the content at 0x12000000 is the same as what's stored in test.
 
 ## BIOS POST Code
 
-The evb support a FIFO for monitoring BIOS POST Code.
+- The evb support a FIFO for monitoring BIOS POST Code.
+- Typically, this feature is used by the BMC to watch host boot progress via port 0x80 writes made by the BIOS during the boot process.
 
-Typically, this feature is used by the BMC to watch host boot progress
-
-via port 0x80 writes made by the BIOS during the boot process.
-
-** Read BIOS POST Code by command in uboot**
+### Linux test
+```ruby
+# OpenBMC BIOS post code app
+snoopd -b 1 -d /dev/npcm7xx-lpc-bpc0
 ```
-BIOS POST Code Initial for Port 80:
+
+### U-boot test
+```ruby
+# BIOS POST Code Initial for Port 80:
 mw.b 0xf0007046 0x98
 mw.b 0xf000704c 0x28
 mw.b 0xf0007050 0x80
 
-Read BIOS POST Code from Port 80:
+# Read BIOS POST Code from Port 80:
 md.b 0xf000704a 1
 ```
 
 ## AES
 
-**Uboot test**
+### Linux test
+```
+openssl aes-256-cbc -pbkdf2 -e -kfile /tmp/aes.key -in /tmp/plaintext -out /tmp/encrypted -engine afalg
+openssl aes-256-cbc -pbkdf2 -d -kfile /tmp/aes.key -in /tmp/encrypted -out /tmp/plaintext2 -engine afalg
+```
 
-- Input the following commands.
+### U-boot test
 ```
 mw.b 600000 11 20
 mw.b 600020 22 10
@@ -1044,27 +1253,25 @@ md.b 600050 10
 
 ## SHA
 
-**Uboot test**
-
-- Input the following command.
+### U-boot test
 ```
 hash sha256 600040 10
 ```
 
 ## RNG
+### Linux test
+```
+dd if=/dev/hwrng of=./rng.img bs=1 count=8
+```
 
-**Uboot test**
-
-- Input the following command.
+### U-boot test
 ```
 rng
 ```
 
 ## OTP
 
-**Uboot test**
-
-- Input the following command.
+### U-boot test
 ```
 fuse read 0 0 64
 ```
