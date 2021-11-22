@@ -178,7 +178,7 @@ python ./ProgramAll_Secure.py
 
 1. Setting up:
 * Power on your EVB and stop BMC at u-boot stage.
-* Prepare an ethernet cable and connect to J_SGMII
+* Prepare an ethernet cable and connect to J_RGMII
 
 * Set BMC ip and tftp server ip in uboot env
 ```ruby
@@ -307,7 +307,7 @@ The EVB has FTDI USB_TO_UART and UART Headers, the user can select the UART rotu
 
 - Strap 5 of the SW_STRAP1_8 dip switch
   * Turn on strap 5 that BMC UART can rout via SI2 pins.
-  * Aslo, all logs can be rout to the same UART port.
+  * Also, all logs can be rout to the same UART port.
 
 - Strap 7 of the SW1 dip switch
   * Turn on strap 7 to isolate USB FTDI.
