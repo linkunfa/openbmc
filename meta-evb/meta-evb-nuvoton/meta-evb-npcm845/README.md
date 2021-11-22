@@ -70,7 +70,7 @@ Please submit any patches against the meta-evb-npcm845 layer to the maintainer o
 * The other straps remain off.
 
 ### 2) Power Source selector
-* JP_5V_SEL set to 1-2, If On-Board VR(12V->5V) is used to power the EVB (<span style="color: green">Remcommanded)
+* JP_5V_SEL set to 1-2, If On-Board VR(12V->5V) is used to power the EVB (<span style="color: green">Recommended)
 * JP_5V_SEL set to 2-3, If USB VBUS is used to power the EVB
 
 ### 3) BMC Console
@@ -159,7 +159,7 @@ Python 2.7 is required.<br/>
 * Turn on strap 9 of the SW_STRAP9-16 dip switch and issue power-on reset
 
 2. Image programming:
-* Non scure boot
+* Non secure boot
 ```
 python ./ProgramAll_Basic.py
 ```
@@ -303,7 +303,7 @@ run mmcboot
 
 ## UART
 
-The EVB has FTDI USB_TO_UART and UART Headers, the user can select the UART rotue through the dip switch.
+The EVB has FTDI USB_TO_UART and UART Headers, the user can select the UART route through the dip switch.
 
 1. Strap Settings
 
@@ -339,7 +339,7 @@ The Arbel EVB has 4 Nor-flash mounted
 **FIU3 test**
 
 1. Probe flash
-- In nuvoton-npcm845-evb.dts, we have enabled fiu3 and definded partition.
+- In nuvoton-npcm845-evb.dts, we have enabled fiu3 and defined partition.
 ```ruby
 #kernel message
 spi-nor spi3.0: w25q256 (32768 Kbytes)
@@ -553,7 +553,7 @@ The EVB has I3C0~I3C5 interfaces on the J_I3C header.
 ### Linux Test
 
 **SPD5118 device**
-- Connect a Renesas SPD5118 moudule to EVB I3C1 interface
+- Connect a Renesas SPD5118 module to EVB I3C1 interface
   * connect J_I3C.3 to device SCL
   * connect J_I3C.4 to device SDA
   * connect TP_3.3V to device 3V3
@@ -744,11 +744,11 @@ The EVB has the J_eSPI header to support ESPI transactions.
 
 ## SIOX
 
-The EVB has two SIOX modules connecting to CPLD. You could controll LED_CPLD_7 and do loopback test.
+The EVB has two SIOX modules connecting to CPLD. You could control LED_CPLD_7 and do loopback test.
 
 ### Linux test
 - Please follow JTAG Master section to program CPLD first
-- The current nuvoton-npcm845-evb.dts is defineded to support 64 input and 64 output of the second siox module, and the ninth output pin is for green LED
+- The current nuvoton-npcm845-evb.dts is defined to support 64 input and 64 output of the second siox module, and the ninth output pin is for green LED
 ```
 sgpio2: sgpio@102000 {
 	status = "okay";
@@ -763,7 +763,7 @@ sgpio2: sgpio@102000 {
 ```
 CONFIG_GPIO_NUVOTON_SGPIO=y
 ```
-- Boot EVB to Openbmc, you can check gpiochip8 infomation
+- Boot EVB to Openbmc, you can check gpiochip8 information
 ```
 root@evb-npcm845:~# gpioinfo 8
 gpiochip8 - 128 lines:
@@ -1431,7 +1431,7 @@ FFEF4018
 
 ## ECC
 
-The NPCM8XX has an cadence memory contreoller.
+The NPCM8XX has an cadence memory controller.
 
 ### Linux Test
 
@@ -1451,9 +1451,9 @@ CONFIG_EDAC_SUPPORT=y
 CONFIG_EDAC_NPCM8XX=y
 ```
 - Boot to Openbmc, there is a sysfs interface that allow to force ecc event
-- Read this path to get more usage infomation
+- Read this path to get more usage information
 - You can force uncorrectable or correctable event and error on any bit
-- For data erro, the bit range must be between 0 and 63
+- For data err, the bit range must be between 0 and 63
 - For checkcode error, the bit range must be between 0 and 7 
 ```
 echo CE data 0 > /sys/devices/system/edac/mc/mc0/forced_ecc_error
