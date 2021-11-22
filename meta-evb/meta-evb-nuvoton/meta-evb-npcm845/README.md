@@ -57,6 +57,7 @@ Please submit any patches against the meta-evb-npcm845 layer to the maintainer o
   * [SHA](#sha)
   * [RNG](#rng)
   * [OTP](#otp)
+  * [PSPI](#pspi)
 
 # Getting Started
 
@@ -1275,3 +1276,101 @@ rng
 ```
 fuse read 0 0 64
 ```
+
+## PSPI
+
+The EVB has one Peripheral SPI interface on J4 header.
+
+- Physical connection
+
+Connect an external spi flash to PSPI bus.
+```
+J4.29 (SPI CK)
+J4.31 (SPI MOSI)
+J4.33 (SPI MISO)
+J4.36 (CS, GPIO15)
+J4.1 (VCC_3.3V)
+J4.2 (GND)
+```
+
+### Linux test
+- dts setup of spi flash on PSPI bus
+```
+@ arch/arm64/boot/dts/nuvoton/nuvoton-npcm845-evb.dts
+            spi1: spi@201000 {
+                cs-gpios = <&gpio0 15 GPIO_ACTIVE_LOW>;
+                status = "okay";
+                Flash@0 {
+                    compatible = "jedec,spi-nor";
+                    reg = <0x0>;
+                    #address-cells = <1>;
+                    #size-cells = <1>;
+                    spi-max-frequency = <1000000>;
+                    partition@0 {
+                        label = "spi1_spare0";
+                        reg = <0x0 0x0>;
+                    };
+                };
+            };
+```
+- set high slew rate for PSPI pins
+```
+@ arch/arm64/boot/dts/nuvoton/nuvoton-npcm845-evb.dts
+   pinctrl: pinctrl@f0800000 {
+        pinctrl-names = "default";
+        pinctrl-0 = <
+                &pin17_slew
+                &pin18_slew
+                &pin19_slew;
+    };
+
+@ arch/arm64/boot/dts/nuvoton/nuvoton-npcm845-pincfg-evb.dtsi
+# add the followings to pinctrl configurations.
+
+        pin17_slew: pin17_slew {
+            pins = "GPIO17/PSPI_DI/CP1_GPIO5";
+            slew-rate = <1>;
+        };
+        pin18_slew: pin18_slew {
+            pins = "GPIO18/PSPI_D0/SMB4B_SDA";
+            slew-rate = <1>;
+        };
+        pin19_slew: pin19_slew {
+            pins = "GPIO19/PSPI_CK/SMB4B_SCL";
+            slew-rate = <1>;
+        };
+
+```
+
+- There will be one mtd device called 'spi1_spare0' after booting to Linux
+```
+root@evb-npcm845:~# cat /proc/mtd
+dev:    size   erasesize  name
+mtd8: 08000000 00001000 "spi1_spare0"
+```
+
+- use flashcp to test the spi flash (get the device node from /proc/mtd)
+```
+dd if=/dev/random of=/tmp/tmp.bin bs=32 count=1
+flashcp /tmp/tmp.bin /dev/mtd8
+```
+
+### U-boot test
+- dts
+```
+    pspi: pspi@f0201000 {
+        status = "okay";
+        #address-cells = <1>;
+        #size-cells = <0>;
+        spi-max-frequency = <1000000>;
+        cs-gpios = <&gpio0 15 GPIO_ACTIVE_HIGH>;
+    };
+
+```
+
+- use sspi command to read the JEDEC ID, it should return the correct ID (0xEF4018 in this example).
+```
+U-Boot>sspi 5:0@10000000 32 9f
+FFEF4018
+```
+
