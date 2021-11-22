@@ -113,7 +113,7 @@ python do_generate_static_prepend() {
         file3.close()
 
     if d.getVar('SECURED', True) == "True":
-        d.setVar('KMT_TIPFW_BINARY', "Kmt_TipFw_signed.bin")  
+        d.setVar('KMT_TIPFW_BINARY', "Kmt_TipFw.bin")
     else:
         CRC32_binary(os.path.join(d.getVar('DEPLOY_DIR_IMAGE', True), '%s' % d.getVar('KMT_BINARY',True)),
             112, 12,
