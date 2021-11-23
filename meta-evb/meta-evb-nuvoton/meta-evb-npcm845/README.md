@@ -211,6 +211,7 @@ setenv uimage_flash_addr 0x80200000
 ```
 * Red EVB, boot from flash 1
 ```ruby
+setenv bootcmd 'mw fb000000 030111BC; run romboot'
 setenv uimage_flash_addr 0x88200000
 ```
 
@@ -226,9 +227,11 @@ saveenv
 setenv ethact gmac2
 tftp 10000000 image-bmc
 /* Blue EVB */
-cp.b 0x10000000 0x80000000 ${filesize}
+sf probe 0:0
+sf update 0x10000000 0x0 ${filesize}
 /* Red EVB */
-cp.b 0x10000000 0x88000000 ${filesize}
+sf probe 0:1
+sf update 0x10000000 0x0 ${filesize}
 ```
 
 * Flash linux kernel
@@ -236,23 +239,26 @@ cp.b 0x10000000 0x88000000 ${filesize}
 setenv ethact gmac2
 tftp 10000000 image-kernel
 /* Blue EVB */
-cp.b 0x10000000 0x80200000 ${filesize}
+sf probe 0:0
+sf update 0x10000000 0x200000 ${filesize}
 /* Red EVB */
-cp.b 0x10000000 0x88200000 ${filesize}
+sf probe 0:1
+sf update 0x10000000 0x200000 ${filesize}
 ```
 
 * Flash bootloader
 ```ruby
 setenv ethact gmac2
 tftp 10000000 image-u-boot
-cp.b 0x10000000 0x80000000 ${filesize}
+sf probe 0:0
+sf update 0x10000000 0x0 ${filesize}
 ```
 
 3. Booting to OpenBMC:
 
 * Enter boot command
 ```ruby
-run romboot
+boot
 ```
 
 4. OpenBMC Login Prompts.
