@@ -33,8 +33,8 @@ Please submit any patches against the meta-evb-npcm845 layer to the maintainer o
     + [Build](#build)
     + [Output Images](#output-images)
   * [Programming Firmware for the first time](#programming-firmware-for-the-first-time)
-    + [Bootloader](#bootloader)
-    + [OpenBMC](#openbmc)
+    + [IGPS](#igps)
+    + [U-BOOT](#u-boot)
   * [Boot from eMMC](#boot-from-emmc)
 - [BMC Modules](#bmc-modules)
   * [UART](#uart)
@@ -60,6 +60,7 @@ Please submit any patches against the meta-evb-npcm845 layer to the maintainer o
   * [OTP](#otp)
   * [PSPI](#pspi)
   * [ECC](#ecc)
+  * [Host Serial Port](#host-serial-port)
 
 # Getting Started
 
@@ -149,7 +150,7 @@ image-rofs    |  OpenBMC Root Filesystem                                        
 
 ## Programming Firmware for the first time
 
-### Bootloader
+### IGPS
 
 #### Flashing through IGPS
 Python 2.7 is required.<br/>
@@ -168,9 +169,9 @@ python ./ProgramAll_Basic.py
 ```
 python ./ProgramAll_Secure.py
 ```
-### OpenBMC
+### U-BOOT
 
-#### Flash in UBOOT
+#### Flash in U-BOOT
 
 * User can program bootloader(image-u-boot) and openbmc image(image-bmc) by u-boot command.
 * If you are using Red EVB board:
@@ -1482,3 +1483,32 @@ The result of forcing an ecc event is:
 ```
 EDAC MC0: 1 CE DDR ECC nuvoton,npcm8xx-sdram-edac: addr=0xac8f080 data=0x5565ec5106 source_id=0x042800 on unknown memory (memory:0 page:0xac8f offset:0x80 grain:1 syndrome:0xf4)
 ```
+
+## Host Serial Port
+
+- To test the host serial port, please make sure that the espi/lpc between Arbel EVB and Host is properly connected.
+- Please work with the BIOS team to check the host serial is from SP1 or SP2 or BOTH.
+
+### U-Boot test
+
+**Test SP1 to SI2 on Arbel EVB**
+ 1. make sure only strap5 of the SW_STRAP1_8 dip switch is turned off, then issue power on reset.
+ 2. Now the BMC logs will output from BSP TX/RX
+ 3. Update the BMC regs to achieve the behavior
+  ```r
+  mw.l 0xf0800038 0x00000020  // bit 0-2 = 0, set uart mode to 1
+  mw.l 0xf0800260 0x00216a08  //bit11 = 1, mfse1.9:  BSP TX/RX selected
+  mw.l 0xf080026C 0x19a00100  //bit1 = 0, mfsel4.1: SI2_TXD/RXD selected.
+  ```
+4. Power on the host, you will get host message from SI2_TXD/RXD
+
+**Test SP1 to SI1 on Arbel EVB**
+ 1. make sure only strap5 of the SW_STRAP1_8 dip switch is turned on, then issue power on reset.
+ 2. Now the BMC logs will output from SI2_TXD/RXD
+ 3. Update the BMC regs to achieve the behavior
+  ```r
+  mw.l 0xf0800038 0x00000026  //bit 0-2 = 6, set uart mode to 7
+  mw.l 0xf0800268 0x00000e00 //bit24 = 0, mfse3.24: GPIO63/SI1_TXD and GPIO43/SI1_RXD are selected
+  mw.l 0xf0800260 0x00216408 //bit10 = 1, mfse1.10: SI1_TXD/RXD selected.
+  ```
+4. Power on the host, you will get host message from SI1_TXD/RXD
