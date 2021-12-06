@@ -34,6 +34,7 @@ Please submit any patches against the meta-evb-npcm845 layer to the maintainer o
     + [Output Images](#output-images)
   * [Programming Firmware for the first time](#programming-firmware-for-the-first-time)
     + [IGPS](#igps)
+    + [ISP](#ISP)
     + [U-BOOT](#u-boot)
   * [Boot from eMMC](#boot-from-emmc)
 - [BMC Modules](#bmc-modules)
@@ -156,9 +157,12 @@ image-rofs    |  OpenBMC Root Filesystem                                        
 #### Flashing through IGPS
 Python 2.7 is required.<br/>
 
-1. Setting up:
+1. BMC enter to FUP Mode :
 * Connect a Mini-USB cable to J_USB_TO_UART 
-* Turn on strap 9 of the SW_STRAP9-16 dip switch and issue power-on reset
+* STRAP9 on
+* Quit terminal app 
+* Issue PORST_N (Power-On-Reset). 
+
 
 2. Image programming:
 * Non secure boot
@@ -170,11 +174,32 @@ python ./ProgramAll_Basic.py
 ```
 python ./ProgramAll_Secure.py
 ```
+
+### ISP
+
+#### In-system-programing using FTDI
+
+1. BMC enter to tri-state
+* Connect a Mini-USB cable to J_USB_TO_UART 
+* STRAP7 on(BMC pins are at Hi-Z) and STRAP5 on (Rout BSP signals via Host SI2 pins).
+* Quit terminal app 
+* Issue PORST_N (Power-On-Reset). 
+
+2. Programming bootloader
+```
+Arbel_EVB_FlashProg.exe -open-desc "NPCM8mnx_Evaluation_Board B" -verify-on -prog-file "image-u-boot" 0 0 -1 -reset 
+```
+
+3. Programming full image
+```
+Arbel_EVB_FlashProg.exe -open-desc "NPCM8mnx_Evaluation_Board B" -verify-on -prog-file "image-bmc" 0 0 -1 -reset 
+```
+
 ### U-BOOT
 
 #### Flash in U-BOOT
 
-* User can program bootloader(image-u-boot) and openbmc image(image-bmc) by u-boot command.
+* User can program images by u-boot command.
 * If you are using Red EVB board:
   - The flash 0 size is 4MB, you should program openbmc image to flash 1.
 * If you are using Blue EVB board:
