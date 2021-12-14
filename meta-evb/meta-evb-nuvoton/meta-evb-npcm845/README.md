@@ -831,6 +831,11 @@ echo 70 > /sys/class/gpio/export
 echo out > /sys/class/gpio/gpio70/direction
 echo 1 > /sys/class/gpio/gpio70/value
 ```
+- Read CPLD ID, no error outputed if ID is correct.
+```
+# loadsvf -d /dev/jtag0 -s arbelevb_readid.svf
+loading time is 0 ms
+```
 - Program CPLD, arbelevb_cpld.svf is the firmware file.
 ```
 loadsvf -d /dev/jtag0 -s arbelevb_cpld.svf
@@ -838,7 +843,7 @@ loadsvf -d /dev/jtag0 -s arbelevb_cpld.svf
 - After CPLD is programmed, three LEDs (blue/yellow/red, near to SW1) are turned on.
 
 - The CPLD SVF can be downloaded from here:
-[arbelevb_cpld.svf](https://github.com/Nuvoton-Israel/openbmc/tree/npcm-v2.10/meta-evb/meta-evb-nuvoton/meta-evb-npcm845/recipes-evb-npcm845/loadsvf/files/arbelevb_cpld.svf )
+[arbelevb_cpld.svf](https://github.com/Nuvoton-Israel/openbmc/tree/npcm-v2.10/meta-evb/meta-evb-nuvoton/meta-evb-npcm845/recipes-evb-npcm845/loadsvf/files/arbelevb_cpld.svf ), [arbelevb_readid.svf](https://github.com/Nuvoton-Israel/openbmc/tree/npcm-v2.10/meta-evb/meta-evb-nuvoton/meta-evb-npcm845/recipes-evb-npcm845/loadsvf/files/arbelevb_readid.svf )
 
 ## SMBus
 
