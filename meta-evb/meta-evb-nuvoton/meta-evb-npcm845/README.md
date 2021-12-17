@@ -907,33 +907,73 @@ The EVB has I3C0~I3C5 interfaces on the J_I3C header.
 ### Linux Test
 
 **SPD5118 device**
-- Connect a Renesas SPD5118 module to EVB I3C1 interface
-  * connect J_I3C.3 to device SCL
-  * connect J_I3C.4 to device SDA
-  * connect TP_3.3V to device 3V3
-  * connect GND to device GND
-- Edit nuvoton-npcm845-evb.dts. (The slave static address 0x57 depends on HSA pin of DIMM)
+- Connect a Renesas SPD5118 module to EVB I3C2 interface
+  * connect J_I3C.5 to device SCL
+  * connect J_I3C.6 to device SDA
+  * connect J3.1 (VCC_3.3V) to device 3V3
+  * Wire GND between EVB and DIMM
+- Edit nuvoton-npcm845-evb.dts. (The slave static address of SPD Hub depends on HSA pin of DIMM)
 ```
-    i3c1: i3c@fff11000 {
+    i3c2: i3c@fff12000 {
         status = "okay";
         i2c-scl-hz = <400000>;
         i3c-scl-hz = <4000000>;
         static-address;
-        eeprom@0x57 {
+        hub@0x57 {
             reg = <0x57 0x4CC 0x51180000>;
         };
-
+        ts0@0x17 {
+            reg = <0x17 0x4CC 0x51110000>;
+        }
+        ts1@0x37 {
+            reg = <0x37 0x4CC 0x51110001>;
+        }
     };
 ```
 - Enable Kernel config
 ```
 CONFIG_I3C=y
+CONFIG_I3CDEV=y
 CONFIG_SVC_I3C_MASTER=y
-CONFIG_EEPROM_SPD5118=y
 ```
-- Boot EVB to Openbmc, there is a sysfs interface that allow to do read/write access to the eeprom of the DIMM.  The size of eeprom is 1024 bytes
+- There are 3 I3C device nodes
 ```
-/sys/bus/i3c/devices/1-4cc51180000/eeprom
+HUB: /dev/i3c-2-4cc51180000
+Temperature Sensor 0: /dev/i3c-2-4cc51110000
+Temperature Sensor 1: /dev/i3c-2-4cc51110001
+```
+- Use [i3ctransfer](https://github.com/vitor-soares-snps/i3c-tools) tool to test
+- Read HUB device type
+```
+root@evb-npcm845:~# i3ctransfer -d /dev/i3c-2-4cc51180000 -w "0x00,0x00"
+root@evb-npcm845:~# i3ctransfer -d /dev/i3c-2-4cc51180000 -r 2
+Success on message 0
+  received data:
+    0x51
+    0x18
+```
+- read 10 bytes from SPD5118 NVM addr 0x0
+```
+i3ctransfer -d /dev/i3c-2-4cc51180000 -w "0x80,0x00"
+i3ctransfer -d /dev/i3c-2-4cc51180000 -r 10
+```
+- Read TS0 device type
+```
+root@evb-npcm845:~# i3ctransfer -d /dev/i3c-2-4cc51110000 -w "0x00"
+root@evb-npcm845:~# i3ctransfer -d /dev/i3c-2-4cc51110000 -r 2
+Success on message 0
+  received data:
+    0x51
+    0x11
+```
+- Read TS0 temperature data
+```
+root@evb-npcm845:~# i3ctransfer -d /dev/i3c-2-4cc51110000 -w "0x31"
+root@evb-npcm845:~# i3ctransfer -d /dev/i3c-2-4cc51110000 -r 2
+Success on message 0
+  received data:
+    0xb4
+    0x01
 ```
 ## JTAG Master
 
