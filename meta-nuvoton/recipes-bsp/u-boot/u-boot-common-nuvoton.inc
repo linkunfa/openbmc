@@ -10,7 +10,7 @@ UBRANCH = "npcm7xx-v2019.01"
 SRCREV = "dea06330cfdc1e61f3567039fb6b90e61268dc35"
 
 UBRANCH_npcm8xx = "npcm-v2021.04"
-SRCREV_npcm8xx = "8af38aa4af67a6abca4e663b83b3607aabada722"
+SRCREV_npcm8xx = "be078ee12f591a4dab8776bb021f7c22704fa73c"
 
 SRC_URI = "git://github.com/Nuvoton-Israel/u-boot.git;branch=${UBRANCH}"
 
