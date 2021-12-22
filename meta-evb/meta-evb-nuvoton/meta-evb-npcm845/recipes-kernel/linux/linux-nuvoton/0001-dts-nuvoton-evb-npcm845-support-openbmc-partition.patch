@@ -43,9 +43,9 @@ index b568f8b04aec..8be09d21f60a 100644
 -						reg = <0x0140000 0xC0000>;
 -						};
 +					};
-+					u-boot-env@100000{
++					u-boot-env@1c0000{
 +						label = "u-boot-env";
-+						reg = <0x00100000 0x40000>;
++						reg = <0x001c0000 0x40000>;
 +					};
  					kernel@200000 {
  						label = "kernel";
