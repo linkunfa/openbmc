@@ -928,6 +928,9 @@ The EVB has I3C0~I3C5 interfaces on the J_I3C header.
         ts1@0x37 {
             reg = <0x37 0x4CC 0x51110001>;
         }
+        pmic@0x4f {
+            reg = <0x4F 0x4CC 0x89000000>;
+        }
     };
 ```
 - Enable Kernel config
@@ -936,11 +939,16 @@ CONFIG_I3C=y
 CONFIG_I3CDEV=y
 CONFIG_SVC_I3C_MASTER=y
 ```
-- There are 3 I3C device nodes
+- There are 4 I3C device nodes on Bus 2.
 ```
+# ls /dev/i3c-2-*
+/dev/i3c-2-4cc51110000  /dev/i3c-2-4cc51180000
+/dev/i3c-2-4cc51110001  /dev/i3c-2-4cc89000000
+
 HUB: /dev/i3c-2-4cc51180000
 Temperature Sensor 0: /dev/i3c-2-4cc51110000
 Temperature Sensor 1: /dev/i3c-2-4cc51110001
+PMIC: /dev/i3c-2-4cc89000000
 ```
 - Use [i3ctransfer](https://github.com/vitor-soares-snps/i3c-tools) tool to test
 - Read HUB device type
@@ -974,6 +982,15 @@ Success on message 0
   received data:
     0xb4
     0x01
+```
+- Read PMIC register. The following example is to read register 0x32.
+```
+# i3ctransfer -d /dev/i3c-2-4cc89000000 -w "0x32"
+Success on message 0
+# i3ctransfer -d /dev/i3c-2-4cc89000000 -r 1
+Success on message 0
+  received data:
+    0x40
 ```
 ## JTAG Master
 
