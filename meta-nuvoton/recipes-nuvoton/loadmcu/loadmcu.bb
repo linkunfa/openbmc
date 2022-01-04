@@ -18,7 +18,7 @@ SRC_URI += " git://github.com/Nuvoton-Israel/loadmcu.git \
              file://mcu-version.sh \
              file://mcu-version@.service \
            "
-SRCREV = "${AUTOREV}"
+SRCREV = "12fed94b53f6fa0fe1c96bee264c7e363f2ed7d8"
 S = "${WORKDIR}/git"
 
 SYSTEMD_PACKAGES = "${PN}"
