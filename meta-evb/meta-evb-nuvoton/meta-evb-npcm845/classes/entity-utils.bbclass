@@ -1,4 +1,4 @@
-# Helper function for check buv-entity distro
+# Helper function for check entity-manager distro
 
 # Usage example:
 # EXTRA_OECONF_append = " \

@@ -1,5 +1,8 @@
-Common targets are:
-     obmc-phosphor-image
+Make inventory-manager target
+     bitbake obmc-phosphor-image
 
-Make buv-entity image by following command:
+Make entity-manager target
      DISTRO=arbel-evb-entity bitbake obmc-phosphor-image
+
+Make emmc image (inventory-manager) (boot linux/openbmc from emmc)
+     DISTRO=arbel-evb-emmc bitbake obmc-phosphor-image
