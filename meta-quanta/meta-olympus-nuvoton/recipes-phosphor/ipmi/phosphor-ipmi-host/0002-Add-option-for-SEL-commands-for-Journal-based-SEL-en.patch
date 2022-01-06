@@ -1,4 +1,4 @@
-From 690eefec2bd5018921dfedcfe3fc69aa6fc12297 Mon Sep 17 00:00:00 2001
+From f9be229e4346404c017812ebd7b230bab62eefe6 Mon Sep 17 00:00:00 2001
 From: "Jason M. Bills" <jason.m.bills@linux.intel.com>
 Date: Tue, 10 Dec 2019 12:28:00 +0800
 Subject: [PATCH] Add option for SEL commands for Journal-based SEL entries
@@ -572,7 +572,7 @@ index 00000000..4f9466f8
 +} // namespace ipmi
 +#endif // JOURNAL_SEL
 diff --git a/storagehandler.cpp b/storagehandler.cpp
-index b225e30f..a8f0121d 100644
+index cdd61daf..5a9ba235 100644
 --- a/storagehandler.cpp
 +++ b/storagehandler.cpp
 @@ -11,6 +11,8 @@
@@ -1275,9 +1275,9 @@ index b225e30f..a8f0121d 100644
  }
 +#endif // JOURNAL_SEL
  
- bool isFruPresent(const std::string& fruPath)
+ bool isFruPresent(ipmi::Context::ptr& ctx, const std::string& fruPath)
  {
-@@ -840,7 +1499,6 @@ void register_netfn_storage_functions()
+@@ -847,7 +1506,6 @@ void register_netfn_storage_functions()
      ipmi::registerHandler(ipmi::prioOpenBmcBase, ipmi::netFnStorage,
                            ipmi::storage::cmdGetSelInfo, ipmi::Privilege::User,
                            ipmiStorageGetSelInfo);
@@ -1285,7 +1285,7 @@ index b225e30f..a8f0121d 100644
      // <Get SEL Time>
      ipmi::registerHandler(ipmi::prioOpenBmcBase, ipmi::netFnStorage,
                            ipmi::storage::cmdGetSelTime, ipmi::Privilege::User,
-@@ -850,26 +1508,36 @@ void register_netfn_storage_functions()
+@@ -857,26 +1515,36 @@ void register_netfn_storage_functions()
      ipmi::registerHandler(ipmi::prioOpenBmcBase, ipmi::netFnStorage,
                            ipmi::storage::cmdSetSelTime,
                            ipmi::Privilege::Operator, ipmiStorageSetSelTime);
@@ -1327,5 +1327,5 @@ index b225e30f..a8f0121d 100644
      ipmi::registerHandler(ipmi::prioOpenBmcBase, ipmi::netFnStorage,
                            ipmi::storage::cmdGetFruInventoryAreaInfo,
 -- 
-2.25.1
+2.17.1
 
