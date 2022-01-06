@@ -1,24 +1,28 @@
-From 6f9d660c881931dbb5f62aa99454bede15d031bf Mon Sep 17 00:00:00 2001
+From 1ea1bcc3c7e0114be0b4ebc057be79052adde4bc Mon Sep 17 00:00:00 2001
 From: Brian Ma <chma0@nuvoton.com>
-Date: Thu, 14 Oct 2021 17:50:12 +0800
-Subject: [PATCH] redfish: update_service: fix fwUpdateErrorMatcher cannot
- working
+Date: Wed, 1 Dec 2021 17:05:54 +0800
+Subject: [PATCH] update_service: fix fwUpdateErrorMatcher cannot working
 
-Because the phosphor logging commit ef952af2 disable the propChanged
-before ifacesAdded, the fwUpdateErrorMatcher cannot get any software
-error after image update. In this case we can only get internal error
-by fwAvailableTimer.
+Because the phosphor logging commit ef952af2 stop emitting the
+propChanged signal before ifacesAdded signal raising, the
+fwUpdateErrorMatcher cannot get any software error after image update.
 Update fwUpdateErrorMatcher to get ifacesAdded dbus signal to handle
-software error correctly.
+software error.
+
+Tested:
+  Post bad manifest image and get "Invalid manifest" error response
+
+Signed-off-by: Brian Ma <chma0@nuvoton.com>
+Change-Id: I066e0cec0ddf7569dd73b2601f838c697bac24da
 ---
- redfish-core/lib/update_service.hpp | 138 ++++++++++++++++------------
- 1 file changed, 81 insertions(+), 57 deletions(-)
+ redfish-core/lib/update_service.hpp | 141 ++++++++++++++++------------
+ 1 file changed, 82 insertions(+), 59 deletions(-)
 
 diff --git a/redfish-core/lib/update_service.hpp b/redfish-core/lib/update_service.hpp
-index 663d48bec..098f9c180 100644
+index f3987d4c7..569ebda14 100644
 --- a/redfish-core/lib/update_service.hpp
 +++ b/redfish-core/lib/update_service.hpp
-@@ -316,68 +316,92 @@ static void monitorForSoftwareAvailable(
+@@ -316,69 +316,92 @@ static void monitorForSoftwareAvailable(
  
      fwUpdateErrorMatcher = std::make_unique<sdbusplus::bus::match::match>(
          *crow::connections::systemBus,
@@ -54,39 +58,42 @@ index 663d48bec..098f9c180 100644
 -                redfish::messages::invalidUpload(asyncResp->res, url,
 -                                                 "Invalid archive");
 -            }
--            else if (*type == "xyz.openbmc_project.Software.Image.Error."
--                              "ManifestFileFailure")
+-            else if (
+-                *type ==
+-                "xyz.openbmc_project.Software.Image.Error.ManifestFileFailure")
 -            {
 -                redfish::messages::invalidUpload(asyncResp->res, url,
 -                                                 "Invalid manifest");
 -            }
 -            else if (*type ==
 -                     "xyz.openbmc_project.Software.Image.Error.ImageFailure")
--            {
--                redfish::messages::invalidUpload(asyncResp->res, url,
--                                                 "Invalid image format");
--            }
--            else if (*type == "xyz.openbmc_project.Software.Version.Error."
--                              "AlreadyExists")
 +            std::vector<std::pair<
 +                std::string,
 +                std::vector<std::pair<std::string, std::variant<std::string>>>>>
 +                interfacesProperties;
-+
 +            sdbusplus::message::object_path objPath;
 +            m.read(objPath, interfacesProperties);
 +            BMCWEB_LOG_DEBUG << "obj path = " << objPath.str;
 +            for (auto& interface : interfacesProperties)
              {
+-                redfish::messages::invalidUpload(asyncResp->res, url,
+-                                                 "Invalid image format");
+-            }
+-            else if (*type ==
+-                     "xyz.openbmc_project.Software.Version.Error.AlreadyExists")
+-            {
+-
+-                redfish::messages::invalidUpload(
+-                    asyncResp->res, url, "Image version already exists");
 +                if (interface.first == "xyz.openbmc_project.Logging.Entry")
 +                {
 +                    BMCWEB_LOG_DEBUG << "Error Match fired";
-+                    auto values = interface.second; // vector<std::pair>
++                    auto& values = interface.second; // vector<std::pair>
 +                    auto find = std::find_if(
 +                        values.begin(), values.end(),
 +                        [](const std::pair<
-+                            std::string, std::variant<std::string>>& val_pair) {
-+                            return val_pair.first == "Message";
++                            std::string, std::variant<std::string>>& valPair) {
++                            return valPair.first == "Message";
 +                        });
 +                    if (find == values.end())
 +                    {
@@ -96,8 +103,8 @@ index 663d48bec..098f9c180 100644
 +                        std::get_if<std::string>(&(find->second));
 +                    if (type == nullptr)
 +                    {
-+                        return; // if this was our message, timeout will cover
-+                                // it
++                        // if this was our message, timeout will cover it
++                        return;
 +                    }
 +                    if (!boost::starts_with(*type,
 +                                            "xyz.openbmc_project.Software"))
@@ -117,19 +124,17 @@ index 663d48bec..098f9c180 100644
 +                        redfish::messages::invalidUpload(asyncResp->res, url,
 +                                                         "Invalid manifest");
 +                    }
-+                    else if (*type == "xyz.openbmc_project.Software.Image."
-+                                      "Error.ImageFailure")
++                    else if (
++                        *type ==
++                        "xyz.openbmc_project.Software.Image.Error.ImageFailure")
 +                    {
 +                        redfish::messages::invalidUpload(
 +                            asyncResp->res, url, "Invalid image format");
 +                    }
-+                    else if (*type ==
-+                             "xyz.openbmc_project.Software.Version.Error."
-+                             "AlreadyExists")
++                    else if (
++                        *type ==
++                        "xyz.openbmc_project.Software.Version.Error.AlreadyExists")
 +                    {
- 
--                redfish::messages::invalidUpload(
--                    asyncResp->res, url, "Image version already exists");
 +                        redfish::messages::invalidUpload(
 +                            asyncResp->res, url,
 +                            "Image version already exists");
@@ -151,8 +156,9 @@ index 663d48bec..098f9c180 100644
 +                            "UpdateService.v1_5_0.UpdateService", "Version",
 +                            "uploaded version");
 +                    }
-+                    else if (*type == "xyz.openbmc_project.Software.Image."
-+                                      "Error.BusyFailure")
++                    else if (
++                        *type ==
++                        "xyz.openbmc_project.Software.Image.Error.BusyFailure")
 +                    {
 +                        redfish::messages::resourceExhaustion(asyncResp->res,
 +                                                              url);

@@ -1,4 +1,4 @@
-From 63b216c7ac3e3ebaf74da65d6ec1860428553ea5 Mon Sep 17 00:00:00 2001
+From a911f14e1caecaf458b1942ac49c9a3fae67dc8d Mon Sep 17 00:00:00 2001
 From: Tim Lee <timlee660101@gmail.com>
 Date: Wed, 10 Mar 2021 17:22:26 +0800
 Subject: [PATCH 2/2] add support chassis on/off target files
@@ -6,23 +6,21 @@ Subject: [PATCH 2/2] add support chassis on/off target files
 Signed-off-by: Tim Lee <timlee660101@gmail.com>
 Signed-off-by: Joseph Liu <kwliu@nuvoton.com>
 ---
- src/power_control.cpp | 51 +++++++++++++++++++++++++++++++++++++++----
- 1 file changed, 47 insertions(+), 4 deletions(-)
+ src/power_control.cpp | 47 +++++++++++++++++++++++++++++++++++++++----
+ 1 file changed, 43 insertions(+), 4 deletions(-)
 
 diff --git a/src/power_control.cpp b/src/power_control.cpp
-index de249c4..e9c23a2 100644
+index 1c0418b..5398468 100644
 --- a/src/power_control.cpp
 +++ b/src/power_control.cpp
-@@ -502,10 +502,49 @@ static void setBootProgress(const BootProgressStage stage)
+@@ -492,10 +492,45 @@ static void setBootProgress(const BootProgressStage stage)
  {
      bootIface->set_property("BootProgress",
                              std::string(getBootProgressStage(stage)));
 -    std::cerr << "Moving boot progress to \""
 -            << std::string(getBootProgressStage(stage)) << "\" stage.\n";
-+    std::string logMsg =
-+        "Moving boot progress to " + std::string(getBootProgressStage(stage)) + " stage.\n";
-+
-+    phosphor::logging::log<phosphor::logging::level::INFO>(logMsg.c_str());
++    lg2::info("Moving boot progress to {BOOT_STAGE} stage.",
++             "BOOT_STAGE", std::string(getBootProgressStage(stage)));
  }
  
 +static constexpr auto systemdBusname = "org.freedesktop.systemd1";
@@ -37,9 +35,8 @@ index de249c4..e9c23a2 100644
 +        [](boost::system::error_code ec) {
 +            if (ec)
 +            {
-+                phosphor::logging::log<phosphor::logging::level::ERR>(
-+                    "Failed to call chassisPowerOn",
-+                    phosphor::logging::entry("ERR=%s", ec.message().c_str()));
++                lg2::error("Failed to call chassisPowerOn (ec = {ERROR_MSG})",
++                    "ERROR_MSG", ec.message());
 +            }
 +        },
 +        systemdBusname, systemdPath, systemdInterface, "StartUnit",
@@ -53,9 +50,8 @@ index de249c4..e9c23a2 100644
 +        [](boost::system::error_code ec) {
 +            if (ec)
 +            {
-+                phosphor::logging::log<phosphor::logging::level::ERR>(
-+                    "Failed to call chassisPowerOff",
-+                    phosphor::logging::entry("ERR=%s", ec.message().c_str()));
++                lg2::error("Failed to call chassisPowerOff (ec = {ERROR_MSG})",
++                    "ERROR_MSG", ec.message());
 +            }
 +        },
 +        systemdBusname, systemdPath, systemdInterface, "StartUnit",
@@ -65,7 +61,7 @@ index de249c4..e9c23a2 100644
  
  static constexpr std::string_view getHostState(const PowerState state)
  {
-@@ -1594,6 +1633,8 @@ static void currentHostStateMonitor()
+@@ -1521,6 +1556,8 @@ static void currentHostStateMonitor()
          pohCounterTimerStart();
          // Clear the restart cause set for the next restart
          clearRestartCause();
@@ -74,7 +70,7 @@ index de249c4..e9c23a2 100644
      }
      else
      {
-@@ -1602,7 +1643,7 @@ static void currentHostStateMonitor()
+@@ -1529,7 +1566,7 @@ static void currentHostStateMonitor()
          // If HostState is trurned to OFF, Set 'OperatingSystemState' to 'Inactive'
          osIface->set_property("OperatingSystemState", std::string("Inactive"));
          setBootProgress(BootProgressStage::Unspecified);
@@ -83,7 +79,7 @@ index de249c4..e9c23a2 100644
          // Set the restart cause set for this restart
          setRestartCause();
      }
-@@ -1672,7 +1713,7 @@ static void currentHostStateMonitor()
+@@ -1595,7 +1632,7 @@ static void currentHostStateMonitor()
                                        std::string("Inactive"));
  
                  setBootProgress(BootProgressStage::Unspecified);
@@ -92,7 +88,7 @@ index de249c4..e9c23a2 100644
                  // Set the restart cause set for this restart
                  setRestartCause();
                  resetACBootProperty();
-@@ -2323,12 +2364,14 @@ static void postCompleteHandler(bool state)
+@@ -2212,12 +2249,14 @@ static void postCompleteHandler(bool state)
          sendPowerControlEvent(Event::postCompleteAssert);
          osIface->set_property("OperatingSystemState", std::string("Standby"));
          setBootProgress(BootProgressStage::OSStart);
@@ -108,5 +104,5 @@ index de249c4..e9c23a2 100644
  }
  
 -- 
-2.25.1
+2.17.1
 
