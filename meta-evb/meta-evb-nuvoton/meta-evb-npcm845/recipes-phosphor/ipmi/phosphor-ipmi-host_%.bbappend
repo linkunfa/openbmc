@@ -8,5 +8,6 @@ DEPENDS_append_evb-npcm845 = " evb-npcm845-yaml-config"
 EXTRA_OECONF_evb-npcm845 = " \
     --with-journal-sel \
     SENSOR_YAML_GEN=${STAGING_DIR_HOST}${datadir}/evb-npcm845-yaml-config/ipmi-sensors.yaml \
+    FRU_YAML_GEN=${STAGING_DIR_HOST}${datadir}/evb-npcm845-yaml-config/ipmi-fru-read.yaml \
     "
 
