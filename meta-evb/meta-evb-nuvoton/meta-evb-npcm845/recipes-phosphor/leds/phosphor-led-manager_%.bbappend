@@ -1,6 +1,6 @@
-FILESEXTRAPATHS_prepend_olympus-nuvoton := "${THISDIR}/${PN}:"
+FILESEXTRAPATHS_prepend_evb-npcm845 := "${THISDIR}/${PN}:"
 
-SRC_URI_append_olympus-nuvoton = " file://LED_GroupManager.conf"
+SRC_URI_append_evb-npcm845 = " file://LED_GroupManager.conf"
 
 SYSTEMD_OVERRIDE_${PN}-ledmanager += "LED_GroupManager.conf:xyz.openbmc_project.LED.GroupManager.service.d/LED_GroupManager.conf"
 
