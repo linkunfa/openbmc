@@ -429,7 +429,7 @@
             "Bus": 6,
             "EntityId": 7,
             "EntityInstance": 3,
-            "Name": "ARBEL_Temp",
+            "Name": "EVB_Temp",
             "Thresholds": [
                 {
                     "Direction": "greater than",
@@ -460,7 +460,7 @@
         }
     ],
     "Name": "EVB_ARBEL_NUVOTON",
-    "Probe": "xyz.openbmc_project.FruDevice({'BOARD_PRODUCT_NAME': 'ARBEL-EVB-BMC'})",
+    "Probe": "xyz.openbmc_project.FruDevice({'BOARD_PRODUCT_NAME': 'NUVOTON-ARBEL-EVB'})",
     "Type": "Board",
     "xyz.openbmc_project.Inventory.Decorator.Ipmi": {
         "EntityId": 7,
