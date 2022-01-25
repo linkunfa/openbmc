@@ -1,0 +1,34 @@
+From b7a4d4c2c152390293cf16933e60d2667dff0c00 Mon Sep 17 00:00:00 2001
+From: Joseph Liu <kwliu@nuvoton.com>
+Date: Fri, 21 Jan 2022 16:51:08 +0800
+Subject: [PATCH] hwmon temp: add tmp100 support
+
+Signed-off-by: Joseph Liu <kwliu@nuvoton.com>
+---
+ src/HwmonTempMain.cpp | 3 ++-
+ 1 file changed, 2 insertions(+), 1 deletion(-)
+
+diff --git a/src/HwmonTempMain.cpp b/src/HwmonTempMain.cpp
+index 60a8fdec..022c4837 100644
+--- a/src/HwmonTempMain.cpp
++++ b/src/HwmonTempMain.cpp
+@@ -40,7 +40,7 @@ static constexpr bool debug = false;
+ static constexpr float pollRateDefault = 0.5;
+ 
+ namespace fs = std::filesystem;
+-static constexpr std::array<const char*, 16> sensorTypes = {
++static constexpr std::array<const char*, 17> sensorTypes = {
+     "xyz.openbmc_project.Configuration.EMC1412",
+     "xyz.openbmc_project.Configuration.EMC1413",
+     "xyz.openbmc_project.Configuration.EMC1414",
+@@ -50,6 +50,7 @@ static constexpr std::array<const char*, 16> sensorTypes = {
+     "xyz.openbmc_project.Configuration.MAX6654",
+     "xyz.openbmc_project.Configuration.SBTSI",
+     "xyz.openbmc_project.Configuration.LM95234",
++    "xyz.openbmc_project.Configuration.TMP100",
+     "xyz.openbmc_project.Configuration.TMP112",
+     "xyz.openbmc_project.Configuration.TMP175",
+     "xyz.openbmc_project.Configuration.TMP421",
+-- 
+2.25.1
+
