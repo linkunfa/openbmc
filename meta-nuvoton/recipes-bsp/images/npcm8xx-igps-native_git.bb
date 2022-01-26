@@ -6,10 +6,10 @@ LIC_FILES_CHKSUM = "file://LICENSE;md5=b234ee4d69f5fce4486a80fdaf4a4263"
 
 SRC_URI = " \
     git://github.com/Nuvoton-Israel/igps \
-    file://KmtAndHeader_ArbelEVB.xml \
-    file://TipFwAndHeader_ArbelEVB.xml \
-    file://BootBlockAndHeader_ArbelEVB.xml \
-    file://UbootHeader_ArbelEVB.xml \
+    file://KmtAndHeader_${IGPS_MACHINE}.xml \
+    file://TipFwAndHeader_${IGPS_MACHINE}.xml \
+    file://BootBlockAndHeader_${IGPS_MACHINE}.xml \
+    file://UbootHeader_${IGPS_MACHINE}.xml \
 "
 
 # tag IGPS_02.01.12
@@ -21,9 +21,9 @@ DEST = "${D}${datadir}/${BPN}"
 
 do_install() {
 	install -d ${DEST}
-  install ${WORKDIR}/KmtAndHeader_ArbelEVB.xml ${DEST}
-  install ${WORKDIR}/TipFwAndHeader_ArbelEVB.xml ${DEST}
-  install ${WORKDIR}/BootBlockAndHeader_ArbelEVB.xml ${DEST}
+  install ${WORKDIR}/KmtAndHeader_${IGPS_MACHINE}.xml ${DEST}
+  install ${WORKDIR}/TipFwAndHeader_${IGPS_MACHINE}.xml ${DEST}
+  install ${WORKDIR}/BootBlockAndHeader_${IGPS_MACHINE}.xml ${DEST}
 	install ${WORKDIR}/UbootHeader_${IGPS_MACHINE}.xml ${DEST}
 }
 
