@@ -5,6 +5,8 @@
         "PwrOK": "PS_PWROK",
         "PwrOut": "POWER_OUT",
         "RstButton": "RESET_BUTTON",
-        "RstOut": "RESET_OUT"
+        "RstOut": "RESET_OUT",
+        "NMIOut": "NMI_OUT",
+        "NMIButton": "NMI_BUTTON"
     }
 }
