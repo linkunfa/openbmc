@@ -6,3 +6,4 @@ SRC_URI_append_evb-npcm845 = " file://0001-dts-nuvoton-evb-npcm845-support-openb
 SRC_URI_append_evb-npcm845 = " file://0003-dts-meta-evb-npcm845-update-pin-configuration-for-SP.patch"
 SRC_URI_append_evb-npcm845 = " file://0004-dts-nuvoton-evb-npcm845-add-SPD-i3c-devices-on-bus2.patch"
 SRC_URI_append_evb-npcm845 = " file://0005-ARM-dts-evb-npcm845-Add-eeprom-on-i2c-bus-1.patch"
+SRC_URI_append_evb-npcm845 = " file://0006-dts-npcm845-evb-add-ipmb-device-on-i2c-bus.patch"
