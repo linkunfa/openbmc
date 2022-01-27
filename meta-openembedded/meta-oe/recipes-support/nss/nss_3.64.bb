@@ -49,6 +49,8 @@ TUNE_CCARGS_remove = "-mcpu=cortex-a55+crc -mcpu=cortex-a55 -mcpu=cortex-a55+crc
 
 TARGET_CC_ARCH += "${LDFLAGS}"
 
+CFLAGS_append_class-native = " -D_XOPEN_SOURCE "
+
 do_configure_prepend_libc-musl () {
     sed -i -e '/-DHAVE_SYS_CDEFS_H/d' ${S}/nss/lib/dbm/config/config.mk
 }
@@ -280,3 +282,6 @@ FILES_${PN}-dev = "\
 RDEPENDS_${PN}-smime = "perl"
 
 BBCLASSEXTEND = "native nativesdk"
+
+# CVE-2006-5201 affects only Sun Solaris
+CVE_CHECK_WHITELIST += "CVE-2006-5201"

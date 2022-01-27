@@ -57,6 +57,18 @@ SRC_URI = "https://download.qemu.org/${BPN}-${PV}.tar.xz \
            file://CVE-2020-27821.patch \
            file://CVE-2021-20263.patch \
            file://CVE-2021-3392.patch \
+           file://0001-vhost-user-gpu-fix-memory-disclosure-in-virgl_cmd_ge.patch \
+           file://0002-vhost-user-gpu-fix-resource-leak-in-vg_resource_crea.patch \
+           file://0003-vhost-user-gpu-fix-memory-leak-in-vg_resource_attach.patch \
+           file://0004-vhost-user-gpu-fix-memory-leak-while-calling-vg_reso.patch \
+           file://0005-vhost-user-gpu-fix-memory-leak-in-virgl_cmd_resource.patch \
+           file://0006-vhost-user-gpu-fix-memory-leak-in-virgl_resource_att.patch \
+           file://0007-vhost-user-gpu-fix-OOB-write-in-virgl_cmd_get_capset.patch \
+           file://CVE-2021-3527-1.patch \
+           file://CVE-2021-3527-2.patch \
+           file://CVE-2021-3582.patch \
+           file://CVE-2021-3607.patch \
+           file://CVE-2021-3608.patch \
            "
 UPSTREAM_CHECK_REGEX = "qemu-(?P<pver>\d+(\.\d+)+)\.tar"
 
@@ -64,6 +76,26 @@ SRC_URI[sha256sum] = "cb18d889b628fbe637672b0326789d9b0e3b8027e0445b936537c78549
 
 SRC_URI_append_class-target = " file://cross.patch"
 SRC_URI_append_class-nativesdk = " file://cross.patch"
+
+# Applies against virglrender < 0.6.0 and not qemu itself
+CVE_CHECK_WHITELIST += "CVE-2017-5957"
+
+# The VNC server can expose host files uder some circumstances. We don't
+# enable it by default.
+CVE_CHECK_WHITELIST += "CVE-2007-0998"
+
+# 'The issues identified by this CVE were determined to not constitute a vulnerability.'
+# https://bugzilla.redhat.com/show_bug.cgi?id=1609015#c11
+CVE_CHECK_WHITELIST += "CVE-2018-18438"
+
+# Following CVE's affect ESP (NCR53C90) part of chip STP2000 (Master I/O).
+# On Sparc32 it is the NCR89C100 part of the chip.
+# On Macintosh Quadra it is NCR53C96.
+# Both are not supported by yocto.
+# Reference: https://www.openwall.com/lists/oss-security/2021/04/16/3
+CVE_CHECK_WHITELIST += "CVE-2020-35504"
+CVE_CHECK_WHITELIST += "CVE-2020-35505"
+CVE_CHECK_WHITELIST += "CVE-2020-35506"
 
 COMPATIBLE_HOST_mipsarchn32 = "null"
 COMPATIBLE_HOST_mipsarchn64 = "null"
