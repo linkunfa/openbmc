@@ -1,32 +1,18 @@
-From 81fd7eb2f7df4c949516ab2848f84e81e6e52239 Mon Sep 17 00:00:00 2001
-From: Stanley Chu <yschu@nuvoton.com>
-Date: Thu, 27 Jan 2022 11:27:11 +0800
-Subject: [PATCH] Support bridging commands
-
-Signed-off-by: Stanley Chu <yschu@nuvoton.com>
----
- Makefile.am          |   1 +
- bridgingcommands.cpp | 542 +++++++++++++++++++++++++++++++++++++++++++
- bridgingcommands.hpp | 212 +++++++++++++++++
- 3 files changed, 755 insertions(+)
- create mode 100644 bridgingcommands.cpp
- create mode 100644 bridgingcommands.hpp
-
 diff --git a/Makefile.am b/Makefile.am
-index a4211ec..c48745c 100644
+index fbeb3793..bf5eab89 100644
 --- a/Makefile.am
 +++ b/Makefile.am
-@@ -113,6 +113,7 @@ libipmi20_la_SOURCES = \
+@@ -112,6 +112,7 @@ libipmi20_la_SOURCES = \
+ 	read_fru_data.cpp \
  	sensordatahandler.cpp \
  	user_channel/channelcommands.cpp \
- 	smbiosmdrv2handler.cpp \
 +	bridgingcommands.cpp \
  	$(libipmi20_la_TRANSPORTOEM) \
  	$(libipmi20_BUILT_LIST)
  
 diff --git a/bridgingcommands.cpp b/bridgingcommands.cpp
 new file mode 100644
-index 0000000..b3ce11b
+index 00000000..b3ce11bb
 --- /dev/null
 +++ b/bridgingcommands.cpp
 @@ -0,0 +1,542 @@
@@ -574,7 +560,7 @@ index 0000000..b3ce11b
 +}
 diff --git a/bridgingcommands.hpp b/bridgingcommands.hpp
 new file mode 100644
-index 0000000..545d24a
+index 00000000..545d24a4
 --- /dev/null
 +++ b/bridgingcommands.hpp
 @@ -0,0 +1,212 @@
@@ -790,6 +776,3 @@ index 0000000..545d24a
 +  private:
 +    std::vector<IpmbResponse> responseQueue;
 +};
--- 
-2.17.1
-
