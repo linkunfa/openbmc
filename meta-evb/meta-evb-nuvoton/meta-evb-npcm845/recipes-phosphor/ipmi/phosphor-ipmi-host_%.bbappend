@@ -14,3 +14,4 @@ EXTRA_OECONF_evb-npcm845 = " \
     "
 
 SRC_URI_append_evb-npcm845 = " file://0001-Support-bridging-commands.patch"
+SRC_URI_append_evb-npcm845 = " file://0002-add-oem-command-get-bios-post-code.patch"
