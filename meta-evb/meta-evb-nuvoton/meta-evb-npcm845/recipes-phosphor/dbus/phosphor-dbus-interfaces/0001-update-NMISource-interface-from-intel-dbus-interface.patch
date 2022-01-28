@@ -1,4 +1,4 @@
-From 66ac7f6d3fbfb4696b6bcce6663c6841767234f0 Mon Sep 17 00:00:00 2001
+From 2c432e5808de8973d2797b86f3b2b193d2a4e1b9 Mon Sep 17 00:00:00 2001
 From: Joseph Liu <kwliu@nuvoton.com>
 Date: Fri, 28 Jan 2022 14:44:59 +0800
 Subject: [PATCH] update NMISource interface from intel-dbus-interface
@@ -10,10 +10,10 @@ Signed-off-by: Joseph Liu <kwliu@nuvoton.com>
  .../Chassis/Control/NMISource.interface.yaml  | 28 +++++++++----------
  1 file changed, 14 insertions(+), 14 deletions(-)
 
-diff --git a/xyz/openbmc_project/Chassis/Control/NMISource.interface.yaml b/xyz/openbmc_project/Chassis/Control/NMISource.interface.yaml
+diff --git a/yaml/xyz/openbmc_project/Chassis/Control/NMISource.interface.yaml b/yaml/xyz/openbmc_project/Chassis/Control/NMISource.interface.yaml
 index a04bd10d..a1721596 100644
---- a/xyz/openbmc_project/Chassis/Control/NMISource.interface.yaml
-+++ b/xyz/openbmc_project/Chassis/Control/NMISource.interface.yaml
+--- a/yaml/xyz/openbmc_project/Chassis/Control/NMISource.interface.yaml
++++ b/yaml/xyz/openbmc_project/Chassis/Control/NMISource.interface.yaml
 @@ -1,19 +1,16 @@
  description: >
      An interface for NMI signal source.
