@@ -17,7 +17,7 @@
   bExp: 0
   rExp: 0
   unit: xyz.openbmc_project.Sensor.Value.Unit.DegreesC
-  mutability: Mutability::Write|Mutability::Read
+  mutability: Mutability::Read
   serviceInterface: org.freedesktop.DBus.Properties
   readingType: readingData
   sensorNamePattern: nameLeaf
@@ -46,7 +46,7 @@
   offsetB: 0
   bExp: 0
   rExp: -4
-  mutability: Mutability::Write|Mutability::Read
+  mutability: Mutability::Read
   serviceInterface: org.freedesktop.DBus.Properties
   readingType: readingData
   sensorNamePattern: nameLeaf
@@ -106,6 +106,7 @@
   unit: xyz.openbmc_project.Sensor.Value.Unit.RPMS
   serviceInterface: org.freedesktop.DBus.Properties
   readingType: readingData
+  mutability: Mutability::Read
   sensorNamePattern: nameLeaf
   interfaces:
     xyz.openbmc_project.Sensor.Value:
@@ -128,4 +129,3 @@
   <<: *fan_tach
   entityInstance: 4
   path: /xyz/openbmc_project/sensors/fan_tach/Fan4
-
