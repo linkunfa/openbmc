@@ -11,7 +11,8 @@ UBOOT_SUFFIX_append = ".${MERGED_SUFFIX}"
 SECURED = "${SECURED_TIPFW}"
 
 IGPS_DIR = "${STAGING_DIR_NATIVE}/${datadir}/npcm8xx-igps"
-inherit logging 
+inherit logging
+
 # Prepare the Bootblock and U-Boot images using npcm8xx-bingo
 do_prepare_bootloaders() {
     local olddir="$(pwd)"
@@ -32,7 +33,7 @@ do_prepare_bootloaders() {
     cd "$olddir"
 }
 
-python do_generate_static_prepend() {
+python do_merge_bootloaders() {
 
     def crc32_tab_val( c ):
         crc = c  % (1<<32)
@@ -158,7 +159,8 @@ do_generate_ext4_tar_append() {
 }
 
 addtask do_prepare_bootloaders before do_generate_static after do_generate_rwfs_static
-
+addtask do_merge_bootloaders before do_generate_static after do_prepare_bootloaders
+addtask do_merge_bootloaders before do_generate_ext4_tar after do_prepare_bootloaders
 
 # Include the full bootblock and u-boot in the final static image
 python do_generate_static_append() {
@@ -177,5 +179,8 @@ do_make_ubi_append() {
 
 do_make_ubi[depends] += "${PN}:do_prepare_bootloaders"
 do_generate_ubi_tar[depends] += "${PN}:do_prepare_bootloaders"
+do_generate_ubi_tar[depends] += "${PN}:do_merge_bootloaders"
 do_generate_static_tar[depends] += "${PN}:do_prepare_bootloaders"
+do_generate_static_tar[depends] += "${PN}:do_merge_bootloaders"
 do_generate_ext4_tar[depends] += "${PN}:do_prepare_bootloaders"
+do_generate_ext4_tar[depends] += "${PN}:do_merge_bootloaders"
