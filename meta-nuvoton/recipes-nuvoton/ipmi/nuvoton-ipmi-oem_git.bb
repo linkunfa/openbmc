@@ -17,8 +17,8 @@ DEPENDS += "phosphor-ipmi-host"
 DEPENDS += "nlohmann-json"
 
 S = "${WORKDIR}/git"
-SRC_URI = "git://github.com/Nuvoton-Israel/nuvoton-ipmi-oem;branch=legacy"
-SRCREV = "fe6a355c1e8ac1eb334a40e11ae0e9ff52eda062"
+SRC_URI = "git://github.com/Nuvoton-Israel/nuvoton-ipmi-oem;branch=master"
+SRCREV = "49b70e38e324152bf1cd3ec7bb7d0e6ea416c534"
 
 FILES_${PN}_append = " ${libdir}/ipmid-providers/lib*${SOLIBS}"
 FILES_${PN}_append = " ${libdir}/host-ipmid/lib*${SOLIBS}"

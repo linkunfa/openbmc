@@ -43,6 +43,7 @@ RDEPENDS_${PN}-system = " \
         htop \
         ipmitool \
         phosphor-ipmi-ipmb \
+        nuvoton-ipmi-oem \
         openssl-bin \
         openssl-engines \
         phosphor-host-postd \
