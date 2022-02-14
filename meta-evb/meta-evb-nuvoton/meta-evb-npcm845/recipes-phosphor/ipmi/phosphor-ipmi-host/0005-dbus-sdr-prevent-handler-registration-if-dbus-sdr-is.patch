@@ -1,4 +1,4 @@
-From 484399a686661537a518d0854dd4b7c6b7960752 Mon Sep 17 00:00:00 2001
+From d47fb0d42865ac7df32556db0b7bea0caf91f174 Mon Sep 17 00:00:00 2001
 From: Willy Tu <wltu@google.com>
 Date: Thu, 12 Aug 2021 14:33:40 -0700
 Subject: [PATCH] dbus-sdr: prevent handler registration if dbus-sdr is enabled
@@ -51,7 +51,7 @@ index 5926615f..8b48f0f0 100644
                            ipmi::Privilege::User, ipmiStorageGetFruInvAreaInfo);
      // <READ FRU Data>
 diff --git a/sensorhandler.cpp b/sensorhandler.cpp
-index 881ea353..3af380a6 100644
+index 881ea353..728ff923 100644
 --- a/sensorhandler.cpp
 +++ b/sensorhandler.cpp
 @@ -1096,15 +1096,10 @@ ipmi_ret_t ipmicmdPlatformEvent(ipmi_netfn_t netfn, ipmi_cmd_t cmd,
@@ -86,6 +86,10 @@ index 881ea353..3af380a6 100644
                            ipmi::sensor_event::cmdGetSensorThreshold,
                            ipmi::Privilege::User, ipmiSensorGetSensorThresholds);
  
++    // <Get Device SDR>
++    ipmi_register_callback(NETFUN_SENSOR, IPMI_CMD_GET_DEVICE_SDR, nullptr,
++                           ipmi_sen_get_sdr, PRIVILEGE_USER);
++
 +#endif
 +
 +    // Common Handers used by both implementation.
@@ -98,10 +102,6 @@ index 881ea353..3af380a6 100644
 +    ipmi::registerHandler(ipmi::prioOpenBmcBase, ipmi::netFnSensor,
 +                          ipmi::sensor_event::cmdGetSensorType,
 +                          ipmi::Privilege::User, ipmiGetSensorType);
-+
-+    // <Get Device SDR>
-+    ipmi_register_callback(NETFUN_SENSOR, IPMI_CMD_GET_DEVICE_SDR, nullptr,
-+                           ipmi_sen_get_sdr, PRIVILEGE_USER);
      return;
  }
 diff --git a/storagehandler.cpp b/storagehandler.cpp
