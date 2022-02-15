@@ -1,8 +1,10 @@
+inherit entity-utils
+
 # Enable Redfish BMC Journal support
 EXTRA_OEMESON_append_evb-npcm845  = " -Dredfish-bmc-journal=enabled"
 
-# Enable DBUS log service
-EXTRA_OEMESON_append_evb-npcm845  = " -Dredfish-dbus-log=enabled"
+# Enable Redfish DBUS log/Journal support
+EXTRA_OECMAKE_append_evb-npcm845 = " ${@entity_enabled(d, '-Dredfish-bmc-journal=enabled', '-Dredfish-dbus-log=enabled')}"
 
 # Enable TFTP
 EXTRA_OEMESON_append_evb-npcm845  = " -Dinsecure-tftp-update=enabled"
