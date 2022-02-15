@@ -1,1 +1,1 @@
-PACKAGECONFIG:append:gbs = " send-to-logger log-alarm log-watchdog"
+PACKAGECONFIG:append:evb-npcm845 = " send-to-logger log-alarm log-watchdog"
