@@ -25,3 +25,5 @@ SRC_URI_append_evb-npcm845 = " file://0005-dbus-sdr-prevent-handler-registration
 
 # avoid build error after remove ipmi-fru
 WHITELIST_CONF_evb-npcm845 = "${S}/host-ipmid-whitelist.conf"
+
+SRC_URI_append_evb-npcm845 = " file://0006-Correct-IPMI-firmware-revision-report.patch"
