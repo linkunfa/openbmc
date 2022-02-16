@@ -24,3 +24,5 @@ PACKAGECONFIG:append:evb-npcm845 = " ${@entity_enabled(d, 'dynamic-sensors', '')
 
 # avoid build error after remove ipmi-fru
 WHITELIST_CONF:evb-npcm845 = "${S}/host-ipmid-whitelist.conf"
+
+SRC_URI:append:evb-npcm845 = " file://0006-Correct-IPMI-firmware-revision-report.patch"
