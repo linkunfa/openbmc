@@ -33,7 +33,7 @@ RDEPENDS:${PN}-flash = " \
 
 SUMMARY:${PN}-system = "EVB NPCM845 System"
 RDEPENDS:${PN}-system = " \
-        phosphor-webui \
+        webui-vue \
         obmc-ikvm \
         iperf3 \
         usb-emmc-storage \
