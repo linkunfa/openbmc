@@ -11,3 +11,6 @@ EXTRA_OEMESON:append:evb-npcm845  = " -Dinsecure-tftp-update=enabled"
 
 # Increase body limit for FW size
 EXTRA_OEMESON:append:evb-npcm845  = " -Dhttp-body-limit=65"
+
+# Enable dbus rest API /xyz/
+EXTRA_OEMESON:append:evb-npcm845 = " -Drest=enabled"
