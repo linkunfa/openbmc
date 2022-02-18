@@ -1,97 +1,75 @@
-From 0d1971ad96ac8f6a0ea5a8a2f2628e37102c5d35 Mon Sep 17 00:00:00 2001
+From 4d2f20d31457999ce48f7de22bdacdb8cc736921 Mon Sep 17 00:00:00 2001
 From: Joseph Liu <kwliu@nuvoton.com>
-Date: Fri, 5 Feb 2021 10:44:15 +0800
+Date: Fri, 18 Feb 2022 14:13:26 +0800
 Subject: [PATCH] driver: video: nuvoton add video driver
 
 Signed-off-by: Joseph Liu <kwliu@nuvoton.com>
 ---
- .../dts/nuvoton-npcm750-runbmc-olympus.dts    |   15 +
- drivers/media/platform/Kconfig                |   18 +-
- drivers/media/platform/Makefile               |    2 +-
+ .../dts/nuvoton-npcm750-runbmc-olympus.dts    |    9 +-
+ drivers/media/platform/Kconfig                |    7 +
+ drivers/media/platform/Makefile               |    2 +
  drivers/media/platform/nuvoton-video.c        | 1922 +++++++++++++++++
- 4 files changed, 1947 insertions(+), 10 deletions(-)
+ 4 files changed, 1939 insertions(+), 1 deletion(-)
  create mode 100644 drivers/media/platform/nuvoton-video.c
 
 diff --git a/arch/arm/boot/dts/nuvoton-npcm750-runbmc-olympus.dts b/arch/arm/boot/dts/nuvoton-npcm750-runbmc-olympus.dts
-index 9183b1996571..e59a0b9f7f15 100644
+index 1d434b6694d1..fc3f32f4a2c0 100644
 --- a/arch/arm/boot/dts/nuvoton-npcm750-runbmc-olympus.dts
 +++ b/arch/arm/boot/dts/nuvoton-npcm750-runbmc-olympus.dts
-@@ -56,6 +56,20 @@
- 		reg = <0 0x40000000>;
- 	};
- 
-+	reserved-memory {
-+		#address-cells = <1>;
-+		#size-cells = <1>;
-+		ranges;
-+
-+		video_memory: framebuffer {
-+			reg = <0x1b000000 0x01000000>;
-+			alignment = <0x01000000>;
-+			compatible = "shared-dma-pool";
-+			reusable;
-+		};
-+
-+	};
-+
- 	iio-hwmon {
- 		compatible = "iio-hwmon";
- 		io-channels = <&adc 0>, <&adc 1>, <&adc 2>, <&adc 3>,
-@@ -243,6 +257,7 @@
- 
- 		vcd: vcd@f0810000 {
- 			status = "okay";
-+			memory-region = <&video_memory>;
+@@ -81,6 +81,13 @@ ece_memory: framebuffer@0x1e800000 {
+ 			no-map;
  		};
  
- 		ece: ece@f0820000 {
++		video_memory: framebuffer {
++                       reg = <0x1b000000 0x01000000>;
++                       alignment = <0x01000000>;
++                       compatible = "shared-dma-pool";
++                       reusable;
++               };
++
+ 	};
+ 
+ 	iio-hwmon {
+@@ -990,7 +997,7 @@ &pcimbox {
+ 
+ &vcd {
+ 	status = "okay";
+-	memory-region = <&vcd_memory>, <&gfx_memory>;
++	memory-region = <&video_memory>;
+ };
+ 
+ &ece {
 diff --git a/drivers/media/platform/Kconfig b/drivers/media/platform/Kconfig
-index d298d529e814..0ed223fb1cfb 100644
+index 7e152bbb4fa6..8ab1e3ee3b36 100644
 --- a/drivers/media/platform/Kconfig
 +++ b/drivers/media/platform/Kconfig
-@@ -41,6 +41,15 @@ config VIDEO_ASPEED
- 	  AST2400 and AST2500 SOCs. The VE can capture and compress video data
- 	  from digital or analog sources.
+@@ -31,6 +31,13 @@ source "drivers/media/platform/davinci/Kconfig"
+ 
+ source "drivers/media/platform/omap/Kconfig"
  
 +config VIDEO_NUVOTON
-+	tristate "Nuvoton NPCM V4L2 Video Engine driver"
-+	depends on VIDEO_V4L2
-+	select VIDEOBUF2_CORE
-+	select VIDEOBUF2_VMALLOC
-+	select VIDEOBUF2_DMA_CONTIG
-+	help
-+		Support for Nuvoton SOCs
++       tristate "Nuvoton NPCM V4L2 Video Engine driver"
++       depends on VIDEO_V4L2
++       select VIDEOBUF2_DMA_CONTIG
++       help
++               Support for Nuvoton SOCs
 +
- config VIDEO_SH_VOU
- 	tristate "SuperH VOU video output driver"
- 	depends on MEDIA_CAMERA_SUPPORT
-@@ -686,12 +695,3 @@ config VIDEO_RCAR_DRIF
- 	  will be called rcar_drif.
- 
- endif # SDR_PLATFORM_DRIVERS
--
--menuconfig VIDEO_NUVOTON
--        bool "Nuvoton VCD/ECE Driver"
--
--if VIDEO_NUVOTON
--
--source "drivers/media/platform/nuvoton/Kconfig"
--
--endif #VIDEO_NUVOTON
+ config VIDEO_ASPEED
+ 	tristate "Aspeed AST2400 and AST2500 Video Engine driver"
+ 	depends on VIDEO_V4L2
 diff --git a/drivers/media/platform/Makefile b/drivers/media/platform/Makefile
-index bb1c3dd1cfac..09bc6205ad42 100644
+index 62b6cdc8c730..8bfd680a6aae 100644
 --- a/drivers/media/platform/Makefile
 +++ b/drivers/media/platform/Makefile
-@@ -102,4 +102,4 @@ obj-y					+= cros-ec-cec/
+@@ -80,3 +80,5 @@ obj-$(CONFIG_VIDEO_QCOM_CAMSS)		+= qcom/camss/
+ obj-$(CONFIG_VIDEO_QCOM_VENUS)		+= qcom/venus/
  
  obj-y					+= sunxi/
- 
--obj-$(CONFIG_VIDEO_NUVOTON)     += nuvoton/
++
 +obj-$(CONFIG_VIDEO_NUVOTON)     += nuvoton-video.o
-\ No newline at end of file
 diff --git a/drivers/media/platform/nuvoton-video.c b/drivers/media/platform/nuvoton-video.c
 new file mode 100644
-index 000000000000..16acee509991
+index 000000000000..d4eaa29e2325
 --- /dev/null
 +++ b/drivers/media/platform/nuvoton-video.c
 @@ -0,0 +1,1922 @@
@@ -1858,14 +1836,14 @@ index 000000000000..16acee509991
 +		V4L2_CAP_STREAMING;
 +	vdev->v4l2_dev = v4l2_dev;
 +	strscpy(vdev->name, DEVICE_NAME, sizeof(vdev->name));
-+	vdev->vfl_type = VFL_TYPE_GRABBER;
++	vdev->vfl_type = VFL_TYPE_VIDEO;
 +	vdev->vfl_dir = VFL_DIR_RX;
 +	vdev->release = video_device_release_empty;
 +	vdev->ioctl_ops = &nuvoton_video_ioctls;
 +	vdev->lock = &video->video_lock;
 +
 +	video_set_drvdata(vdev, video);
-+	rc = video_register_device(vdev, VFL_TYPE_GRABBER, 0);
++	rc = video_register_device(vdev, VFL_TYPE_VIDEO, 0);
 +	if (rc) {
 +		vb2_queue_release(vbq);
 +		v4l2_ctrl_handler_free(&video->ctrl_handler);
@@ -2018,5 +1996,5 @@ index 000000000000..16acee509991
 +MODULE_DESCRIPTION("Nuvoton video driver");
 +MODULE_LICENSE("GPL");
 -- 
-2.17.1
+2.25.1
 
