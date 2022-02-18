@@ -13,8 +13,8 @@ SRC_URI:append:nuvoton = " file://0015-driver-misc-nuvoton-vdm-support-openbmc-l
 SRC_URI:append:nuvoton = " file://0017-drivers-i2c-workaround-for-i2c-slave-behavior.patch"
 
 # V4L2 VCD driver
-#SRC_URI:append:nuvoton = " file://v4l2.cfg"
-#SRC_URI:append:nuvoton = " file://1111-driver-video-nuvoton-add-video-driver.patch"
+# SRC_URI:append:nuvoton = " file://v4l2.cfg"
+# SRC_URI:append:nuvoton = " file://1111-driver-video-nuvoton-add-video-driver.patch"
 
 # New Arch VDMX/VDMA driver
 #SRC_URI:append:nuvoton = " file://2222-driver-misc-add-nuvoton-vdmx-vdma-driver.patch"
