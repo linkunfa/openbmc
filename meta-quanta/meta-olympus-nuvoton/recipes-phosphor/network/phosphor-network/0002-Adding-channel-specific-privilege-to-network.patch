@@ -1,7 +1,7 @@
-From cc60bd9bc697e2e76dc16731eb8865cd0c388e7f Mon Sep 17 00:00:00 2001
+From 3569a899ad14f78fb0cd9f8df5371b21df3ac8dd Mon Sep 17 00:00:00 2001
 From: Joseph Liu <kwliu@nuvoton.com>
 Date: Thu, 11 Nov 2021 16:03:31 +0800
-Subject: [PATCH] Adding channel specific privilege to network
+Subject: [PATCH 2/2] Adding channel specific privilege to network
 
 - Adding the channel access information to the network
    interface object. This privilege will be used in
@@ -27,10 +27,10 @@ Signed-off-by: Joseph Liu <kwliu@nuvoton.com>
  4 files changed, 270 insertions(+), 1 deletion(-)
 
 diff --git a/src/ethernet_interface.cpp b/src/ethernet_interface.cpp
-index 43a8ee0..44dfe6b 100644
+index 3da9a57..e3435d8 100644
 --- a/src/ethernet_interface.cpp
 +++ b/src/ethernet_interface.cpp
-@@ -48,6 +48,10 @@ constexpr auto PROPERTY_INTERFACE = "org.freedesktop.DBus.Properties";
+@@ -45,6 +45,10 @@ constexpr auto PROPERTY_INTERFACE = "org.freedesktop.DBus.Properties";
  constexpr auto RESOLVED_SERVICE_PATH = "/org/freedesktop/resolve1/link/";
  constexpr auto METHOD_GET = "Get";
  
@@ -38,10 +38,10 @@ index 43a8ee0..44dfe6b 100644
 +    "/var/channel_intf_data.json";
 +static constexpr const char* defaultChannelPriv = "priv-admin";
 +
- struct EthernetIntfSocket
- {
-     EthernetIntfSocket(int domain, int type, int protocol)
-@@ -132,6 +136,7 @@ EthernetInterface::EthernetInterface(sdbusplus::bus::bus& bus,
+ std::map<EthernetInterface::DHCPConf, std::string> mapDHCPToSystemd = {
+     {EthernetInterface::DHCPConf::both, "true"},
+     {EthernetInterface::DHCPConf::v4, "ipv4"},
+@@ -115,6 +119,7 @@ EthernetInterface::EthernetInterface(sdbusplus::bus::bus& bus,
      EthernetInterfaceIntf::autoNeg(std::get<2>(ifInfo));
      EthernetInterfaceIntf::speed(std::get<0>(ifInfo));
  #endif
@@ -49,7 +49,7 @@ index 43a8ee0..44dfe6b 100644
  
      // Emit deferred signal.
      if (emitSignal)
-@@ -1320,5 +1325,124 @@ std::string EthernetInterface::defaultGateway6(std::string gateway)
+@@ -1269,5 +1274,124 @@ std::string EthernetInterface::defaultGateway6(std::string gateway)
  
      return gw;
  }

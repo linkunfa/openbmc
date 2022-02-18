@@ -1,7 +1,7 @@
-From ac5f2d349384af8ca493198b3ab5b2f3b66abedc Mon Sep 17 00:00:00 2001
+From 04ea6e72ce19ac1f0142e5ff703f1727c96b72bd Mon Sep 17 00:00:00 2001
 From: Joseph Liu <kwliu@nuvoton.com>
 Date: Mon, 11 Jan 2021 18:24:09 +0800
-Subject: [PATCH 1/2] support host boot progress
+Subject: [PATCH 1/3] support host boot progress
 
 Signed-off-by: Joseph Liu <kwliu@nuvoton.com>
 ---
@@ -9,10 +9,10 @@ Signed-off-by: Joseph Liu <kwliu@nuvoton.com>
  1 file changed, 97 insertions(+), 2 deletions(-)
 
 diff --git a/src/power_control.cpp b/src/power_control.cpp
-index fbe1266..1c0418b 100644
+index b897c3b..ee9bc7c 100644
 --- a/src/power_control.cpp
 +++ b/src/power_control.cpp
-@@ -105,6 +105,7 @@ static std::string buttonDbusName = "xyz.openbmc_project.Chassis.Buttons";
+@@ -109,6 +109,7 @@ static std::string buttonDbusName = "xyz.openbmc_project.Chassis.Buttons";
  static std::string nmiDbusName = "xyz.openbmc_project.Control.Host.NMI";
  static std::string rstCauseDbusName =
      "xyz.openbmc_project.Control.Host.RestartCause";
@@ -20,8 +20,8 @@ index fbe1266..1c0418b 100644
  static std::shared_ptr<sdbusplus::asio::dbus_interface> hostIface;
  static std::shared_ptr<sdbusplus::asio::dbus_interface> chassisIface;
  #ifdef CHASSIS_SYSTEM_RESET
-@@ -205,6 +206,16 @@ static void beep(const uint8_t& beepPriority)
-         "xyz.openbmc_project.BeepCode", "Beep", uint8_t(beepPriority));
+@@ -237,6 +238,16 @@ static void setOperatingSystemState(const OperatingSystemStateStage stage)
+               getOperatingSystemStateStage(stage));
  }
  
 +enum class BootProgressStage
@@ -37,7 +37,7 @@ index fbe1266..1c0418b 100644
  enum class PowerState
  {
      on,
-@@ -452,6 +463,40 @@ static uint64_t getCurrentTimeMs()
+@@ -484,6 +495,40 @@ static uint64_t getCurrentTimeMs()
      return currentTimeMs;
  }
  
@@ -78,7 +78,7 @@ index fbe1266..1c0418b 100644
  static constexpr std::string_view getHostState(const PowerState state)
  {
      switch (state)
-@@ -1480,6 +1525,11 @@ static void currentHostStateMonitor()
+@@ -1572,6 +1617,11 @@ static void currentHostStateMonitor()
      else
      {
          pohCounterTimer.cancel();
@@ -90,30 +90,30 @@ index fbe1266..1c0418b 100644
          // Set the restart cause set for this restart
          setRestartCause();
      }
-@@ -1544,6 +1594,8 @@ static void currentHostStateMonitor()
-                 osIface->set_property("OperatingSystemState",
-                                       std::string("Inactive"));
+@@ -1635,6 +1685,8 @@ static void currentHostStateMonitor()
+                 // if HostState is trurned to OFF.
+                 setOperatingSystemState(OperatingSystemStateStage::Inactive);
  
 +                setBootProgress(BootProgressStage::Unspecified);
 +
                  // Set the restart cause set for this restart
                  setRestartCause();
                  resetACBootProperty();
-@@ -2159,11 +2211,13 @@ static void postCompleteHandler(bool state)
+@@ -2250,11 +2302,13 @@ static void postCompleteHandler(bool state)
      {
          sendPowerControlEvent(Event::postCompleteAssert);
-         osIface->set_property("OperatingSystemState", std::string("Standby"));
+         setOperatingSystemState(OperatingSystemStateStage::Standby);
 +        setBootProgress(BootProgressStage::OSStart);
      }
      else
      {
          sendPowerControlEvent(Event::postCompleteDeAssert);
-         osIface->set_property("OperatingSystemState", std::string("Inactive"));
+         setOperatingSystemState(OperatingSystemStateStage::Inactive);
 +        setBootProgress(BootProgressStage::Unspecified);
      }
  }
  
-@@ -2708,6 +2762,47 @@ int main(int argc, char* argv[])
+@@ -2793,6 +2847,47 @@ int main(int argc, char* argv[])
      lg2::info("Initializing power state.");
      logStateTransition(powerState);
  
@@ -161,7 +161,7 @@ index fbe1266..1c0418b 100644
      // Power Control Service
      sdbusplus::asio::object_server hostServer =
          sdbusplus::asio::object_server(conn);
-@@ -3184,8 +3279,8 @@ int main(int argc, char* argv[])
+@@ -3269,8 +3364,8 @@ int main(int argc, char* argv[])
          sdbusplus::asio::object_server(conn);
  
      // OS State Interface

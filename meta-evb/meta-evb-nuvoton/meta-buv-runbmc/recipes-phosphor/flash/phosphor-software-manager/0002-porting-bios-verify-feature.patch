@@ -1,5 +1,17 @@
+From 553a48765b1b80c11da6cc3f1d7a303f8b4edb16 Mon Sep 17 00:00:00 2001
+From: Brian Ma <chma0@nuvoton.com>
+Date: Thu, 17 Feb 2022 08:54:24 +0800
+Subject: [PATCH 2/3] porting bios verify feature
+
+Signed-off-by: Brian Ma <chma0@nuvoton.com>
+---
+ image_verify.cpp |  1 +
+ item_updater.cpp | 24 +++++++++++++++++++++++-
+ meson.build      |  2 ++
+ 3 files changed, 26 insertions(+), 1 deletion(-)
+
 diff --git a/image_verify.cpp b/image_verify.cpp
-index b7654aa..c66a4b6 100644
+index d67cfac..071e124 100644
 --- a/image_verify.cpp
 +++ b/image_verify.cpp
 @@ -93,6 +93,7 @@ bool Signature::verifyFullImage()
@@ -11,10 +23,10 @@ index b7654aa..c66a4b6 100644
          fs::path(imageDirPath) / "image-hostfw.sig",
          fs::path(imageDirPath) / "image-kernel.sig",
 diff --git a/item_updater.cpp b/item_updater.cpp
-index b6464f6..46e80cc 100644
+index fe9c808..730b9f7 100644
 --- a/item_updater.cpp
 +++ b/item_updater.cpp
-@@ -748,6 +748,28 @@ bool ItemUpdater::checkImage(const std::string& filePath,
+@@ -749,6 +749,28 @@ bool ItemUpdater::checkImage(const std::string& filePath,
  }
  
  #ifdef HOST_BIOS_UPGRADE
@@ -43,7 +55,7 @@ index b6464f6..46e80cc 100644
  void ItemUpdater::createBIOSObject()
  {
      std::string path = BIOS_OBJPATH;
-@@ -763,7 +785,7 @@ void ItemUpdater::createBIOSObject()
+@@ -764,7 +786,7 @@ void ItemUpdater::createBIOSObject()
      createFunctionalAssociation(path);
  
      auto versionId = path.substr(pos + 1);
@@ -53,7 +65,7 @@ index b6464f6..46e80cc 100644
      biosActivation = std::make_unique<Activation>(
          bus, path, *this, versionId, server::Activation::Activations::Active,
 diff --git a/meson.build b/meson.build
-index e182f46..46cd239 100644
+index 1367a72..0d16964 100644
 --- a/meson.build
 +++ b/meson.build
 @@ -58,6 +58,8 @@ conf.set_quoted('ALT_RWFS', '/media/alt/var/persist')
@@ -65,3 +77,6 @@ index e182f46..46cd239 100644
  # The dir where activation data is stored in files
  conf.set_quoted('PERSIST_DIR', '/var/lib/phosphor-bmc-code-mgmt/')
  
+-- 
+2.17.1
+

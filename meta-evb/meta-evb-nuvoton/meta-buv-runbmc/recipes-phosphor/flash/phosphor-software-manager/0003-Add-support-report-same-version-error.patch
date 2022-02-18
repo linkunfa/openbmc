@@ -1,3 +1,13 @@
+From 55abd2cd1e412c9f704c64407996015610ce0cac Mon Sep 17 00:00:00 2001
+From: Brian Ma <chma0@nuvoton.com>
+Date: Thu, 17 Feb 2022 08:55:45 +0800
+Subject: [PATCH 3/3] Add support report same version error
+
+Signed-off-by: Brian Ma <chma0@nuvoton.com>
+---
+ image_manager.cpp | 12 +++++++++---
+ 1 file changed, 9 insertions(+), 3 deletions(-)
+
 diff --git a/image_manager.cpp b/image_manager.cpp
 index a9a5a69..f4dadee 100644
 --- a/image_manager.cpp
@@ -43,3 +53,6 @@ index a9a5a69..f4dadee 100644
      }
      return 0;
  }
+-- 
+2.17.1
+
