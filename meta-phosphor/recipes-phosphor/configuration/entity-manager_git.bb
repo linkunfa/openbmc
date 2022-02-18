@@ -2,8 +2,10 @@ SUMMARY = "Entity Manager"
 DESCRIPTION = "Entity Manager provides d-bus configuration data \
 and configures system sensors"
 
-SRC_URI = "git://github.com/openbmc/entity-manager.git file://blocklist.json"
-SRCREV = "f466ccece5c08a028b173a017f7894aecfccdcde"
+SRC_URI = "git://github.com/openbmc/entity-manager.git;branch=master;protocol=https \
+           file://blocklist.json \
+          "
+SRCREV = "ed2f07b598eb993f4f864f6cc0915d68d270a9b4"
 PV = "0.1+git${SRCPV}"
 
 LICENSE = "Apache-2.0"
@@ -13,10 +15,12 @@ DEPENDS = "boost \
            dbus \
            nlohmann-json \
            sdbusplus \
-           valijson"
+           valijson \
+           ${PYTHON_PN}-jsonschema-native \
+"
 
 S = "${WORKDIR}/git"
-inherit pkgconfig meson systemd
+inherit pkgconfig meson systemd python3native
 
 EXTRA_OEMESON = "-Dtests=disabled"
 

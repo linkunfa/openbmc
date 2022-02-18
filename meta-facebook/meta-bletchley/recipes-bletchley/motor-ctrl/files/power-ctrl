@@ -28,7 +28,7 @@ function wait_for_switch() {
 
 function trigger_power_button() {
     local sled_num=$1
-    local  delay_time=$2
+    local delay_time=$2
 
     #SLED{N}_MS_DETECT1  (initial position)
     GPIO_DETECT_PIN1="SLED${sled_num}_MS_DETECT1"
@@ -45,7 +45,7 @@ function trigger_power_button() {
         echo "Press power key for Sled${1} ${delay_time} seconds..."
         sleep "$delay_time"
     else
-        echo "Power key switch not trigger, back motor to initail position"
+        echo "Power key switch not trigger, back motor to initial position"
     fi
 
     motor-ctrl "sled${sled_num}" r >/dev/null
@@ -54,17 +54,57 @@ function trigger_power_button() {
     if [ "$(get_gpio  "$GPIO_DETECT_PIN1")" -eq 0 ];then
         echo "Motor reverse to initial position successful"
     else
-        echo "Initail position switch not trigger, force stop motor"
+        echo "Initial position switch not trigger, force stop motor"
     fi
+}
+
+function release_power_button() {
+    local sled_num=$1
+    GPIO_DETECT_PIN1="SLED${sled_num}_MS_DETECT1"
+
+    if [ "$(get_gpio  "$GPIO_DETECT_PIN1")" -eq 0 ]; then
+        echo "Motor at initial position already"
+        return 0
+    fi
+
+    motor-ctrl "sled${sled_num}" r >/dev/null
+    wait_for_switch "${GPIO_DETECT_PIN1}"
+    motor-ctrl "sled${sled_num}" s >/dev/null
+    if [ "$(get_gpio  "$GPIO_DETECT_PIN1")" -eq 0 ];then
+        echo "Motor reverse to initial position successful"
+        return 0
+    fi
+
+    echo "Error: Initial position switch not trigger"
+    return 1
+}
+
+function press_power_button() {
+    local sled_num=$1
+
+    GPIO_DETECT_PIN0="SLED${sled_num}_MS_DETECT0"
+
+    echo "Motor go forward to press Power button"
+    motor-ctrl "sled${sled_num}" f >/dev/null
+    wait_for_switch "${GPIO_DETECT_PIN0}"
+    motor-ctrl "sled${sled_num}" s >/dev/null
+
+    if [ "$(get_gpio  "$GPIO_DETECT_PIN0")" -eq 0 ];then
+        echo "Power button switch triggered"
+        return 0
+    fi
+
+    echo "Error: Power button switch not trigger"
+    return 1
 }
 
 #Get i2c bus number for sledN
 function get_bus_num() {
     SLED_NUM=$1
     local bus=0
-
-    if [[ "$SLED_NUM" = [0-5] ]]; then
-        bus="$SLED_NUM"
+    #Mapping Sled number 1~6 to i2c bus number 0~5
+    if [[ "$SLED_NUM" = [1-6] ]]; then
+        bus=$(( SLED_NUM - 1 ))
     fi
     echo "$bus"
 }
@@ -120,7 +160,7 @@ function get_ac_status(){
 }
 
 function show_usage(){
-    echo "Usage: power-ctrl [sled0 | sled1 | sled2 | sled3 | sled4 | sled5]  [on off ac-on ac-off status]"
+    echo "Usage: power-ctrl [sled1 | sled2 | sled3 | sled4 | sled5 | sled6]  [on off ac-on ac-off status]"
     echo "       power-ctrl chassis-cycle"
 }
 
@@ -142,7 +182,7 @@ if [ $# -gt 2 ]; then
   exit  1;
 fi
 
-if [[ "$1" =~ ^(slot[0-5]{1})$ ]] || [[ "$1" =~ ^(sled[0-5]{1})$ ]]; then
+if [[ "$1" =~ ^(sled[1-6]{1})$ ]]; then
   SLED=$1
   ACTION=$2
   SLED_NUM=${SLED:4}
@@ -172,6 +212,35 @@ elif [[ "$ACTION" == "ac-on" ]];then
     set_gpio "power-host${SLED_NUM}" 1
 elif [[ "$ACTION" == "ac-off" ]];then
     set_gpio "power-host${SLED_NUM}" 0
+elif [[ "$ACTION" == "dfu" ]]; then
+    echo "Set host$SLED_NUM DFU mode"
+
+    # turn ac off
+    echo "SLED$SLED_NUM: turn ac-off"
+    set_gpio "power-host${SLED_NUM}" 0
+    sleep 1
+
+    # press power button, and hold for 10 seconds
+    echo "SLED$SLED_NUM: pressing power button"
+    if ! press_power_button "$SLED_NUM"; then
+        echo "SLED$SLED_NUM: press power button failed"
+        echo "SLED$SLED_NUM: releasing power button"
+        release_power_button "$SLED_NUM"
+        exit 1
+    fi
+    sleep 10
+
+    # turn ac on
+    echo "SLED$SLED_NUM: turn ac-on"
+    set_gpio "power-host${SLED_NUM}" 1
+    sleep 3
+
+    # release power button
+    echo "SLED$SLED_NUM: releasing host power button"
+    if ! release_power_button "$SLED_NUM"; then
+        echo "SLED$SLED_NUM: release power button failed"
+        exit 1
+    fi
 else
     echo "Unknown action: [ ${ACTION} ]"
     show_usage
