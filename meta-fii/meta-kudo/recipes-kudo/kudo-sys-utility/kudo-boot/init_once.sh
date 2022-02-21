@@ -1,6 +1,6 @@
 #!/bin/bash
 
-source /usr/sbin/kudo-lib.sh
+source /usr/libexec/kudo-fw/kudo-lib.sh
 
 function set_mux_default(){
     # set all mux route to CPU before power on host
@@ -67,3 +67,7 @@ fi
 
 # Create /run/openbmc for system power files
 mkdir "/run/openbmc"
+
+# Restart psusensor service to enusre that the VBAT sensor doesn't say "no reading" until
+# it's second query after a hotswap
+(sleep 45; systemctl restart xyz.openbmc_project.psusensor.service)&

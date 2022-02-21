@@ -46,8 +46,8 @@ IPMI_FLASH_BMC_ADDRESS ?= "0"
 EXTRA_OEMESON:append = " -Dmapped-address=${IPMI_FLASH_BMC_ADDRESS}"
 
 S = "${WORKDIR}/git"
-SRC_URI = "git://github.com/openbmc/phosphor-ipmi-flash"
-SRCREV = "b8fd6d3813baa5a9fc0327750f8dfeec773ba612"
+SRC_URI = "git://github.com/openbmc/phosphor-ipmi-flash;branch=master;protocol=https"
+SRCREV = "99d292a383db1806ee4426f5ad2ef9022fc117ab"
 
 SYSTEMD_PACKAGES = "${PN}"
 SYSTEMD_SERVICE:${PN} += " \
@@ -71,6 +71,7 @@ FILES:${PN}:append = " ${libdir}/tmpfiles.d"
 
 BLOBIPMI_PROVIDER_LIBRARY += "libfirmwareblob.so"
 BLOBIPMI_PROVIDER_LIBRARY += "libversionblob.so"
+BLOBIPMI_PROVIDER_LIBRARY += "liblogblob.so"
 BLOBIPMI_PROVIDER_LIBRARY += "${@bb.utils.contains('PACKAGECONFIG', 'cleanup-delete', 'libfirmwarecleanupblob.so', '', d)}"
 
 do_configure[depends] += "virtual/kernel:do_shared_workdir"

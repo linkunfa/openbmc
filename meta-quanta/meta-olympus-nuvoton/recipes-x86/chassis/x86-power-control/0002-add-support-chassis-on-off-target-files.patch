@@ -1,7 +1,7 @@
-From a911f14e1caecaf458b1942ac49c9a3fae67dc8d Mon Sep 17 00:00:00 2001
+From 36fe8bd2d32e60dafd121bb10b06d0620bc62ef9 Mon Sep 17 00:00:00 2001
 From: Tim Lee <timlee660101@gmail.com>
 Date: Wed, 10 Mar 2021 17:22:26 +0800
-Subject: [PATCH 2/2] add support chassis on/off target files
+Subject: [PATCH 2/3] add support chassis on/off target files
 
 Signed-off-by: Tim Lee <timlee660101@gmail.com>
 Signed-off-by: Joseph Liu <kwliu@nuvoton.com>
@@ -10,10 +10,10 @@ Signed-off-by: Joseph Liu <kwliu@nuvoton.com>
  1 file changed, 43 insertions(+), 4 deletions(-)
 
 diff --git a/src/power_control.cpp b/src/power_control.cpp
-index 1c0418b..5398468 100644
+index ee9bc7c..4c9cd88 100644
 --- a/src/power_control.cpp
 +++ b/src/power_control.cpp
-@@ -492,10 +492,45 @@ static void setBootProgress(const BootProgressStage stage)
+@@ -524,10 +524,45 @@ static void setBootProgress(const BootProgressStage stage)
  {
      bootIface->set_property("BootProgress",
                              std::string(getBootProgressStage(stage)));
@@ -61,7 +61,7 @@ index 1c0418b..5398468 100644
  
  static constexpr std::string_view getHostState(const PowerState state)
  {
-@@ -1521,6 +1556,8 @@ static void currentHostStateMonitor()
+@@ -1613,6 +1648,8 @@ static void currentHostStateMonitor()
          pohCounterTimerStart();
          // Clear the restart cause set for the next restart
          clearRestartCause();
@@ -70,7 +70,7 @@ index 1c0418b..5398468 100644
      }
      else
      {
-@@ -1529,7 +1566,7 @@ static void currentHostStateMonitor()
+@@ -1621,7 +1658,7 @@ static void currentHostStateMonitor()
          // If HostState is trurned to OFF, Set 'OperatingSystemState' to 'Inactive'
          osIface->set_property("OperatingSystemState", std::string("Inactive"));
          setBootProgress(BootProgressStage::Unspecified);
@@ -79,8 +79,8 @@ index 1c0418b..5398468 100644
          // Set the restart cause set for this restart
          setRestartCause();
      }
-@@ -1595,7 +1632,7 @@ static void currentHostStateMonitor()
-                                       std::string("Inactive"));
+@@ -1686,7 +1723,7 @@ static void currentHostStateMonitor()
+                 setOperatingSystemState(OperatingSystemStateStage::Inactive);
  
                  setBootProgress(BootProgressStage::Unspecified);
 -
@@ -88,16 +88,16 @@ index 1c0418b..5398468 100644
                  // Set the restart cause set for this restart
                  setRestartCause();
                  resetACBootProperty();
-@@ -2212,12 +2249,14 @@ static void postCompleteHandler(bool state)
+@@ -2303,12 +2340,14 @@ static void postCompleteHandler(bool state)
          sendPowerControlEvent(Event::postCompleteAssert);
-         osIface->set_property("OperatingSystemState", std::string("Standby"));
+         setOperatingSystemState(OperatingSystemStateStage::Standby);
          setBootProgress(BootProgressStage::OSStart);
 +        power_control::chassisPowerOn();
      }
      else
      {
          sendPowerControlEvent(Event::postCompleteDeAssert);
-         osIface->set_property("OperatingSystemState", std::string("Inactive"));
+         setOperatingSystemState(OperatingSystemStateStage::Inactive);
          setBootProgress(BootProgressStage::Unspecified);
 +        power_control::chassisPowerOff();
      }

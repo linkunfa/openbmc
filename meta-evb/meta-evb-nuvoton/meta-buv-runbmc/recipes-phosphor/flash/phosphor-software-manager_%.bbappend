@@ -1,9 +1,9 @@
 FILESEXTRAPATHS:prepend:buv-runbmc := "${THISDIR}/${PN}:"
 
 SRC_URI:append:buv-runbmc = " \
-    file://support_update_uboot_with_emmc_image.patch \
-    file://restore_verify_bios.patch \
-    file://report_same_version.patch \
+    file://0001-Support-update-uboot-with-emmc-image.patch \
+    file://0002-porting-bios-verify-feature.patch  \
+    file://0003-Add-support-report-same-version-error.patch \
     "
 
 PACKAGECONFIG:append:buv-runbmc = " verify_signature flash_bios"

@@ -16,5 +16,5 @@ DEPENDS += "stdplus"
 RDEPENDS:${PN} += "e2fsprogs"
 
 S = "${WORKDIR}/git"
-SRC_URI = "git://github.com/openbmc/estoraged.git"
-SRCREV = "972c3faae9092f8a513222d0b24c36ad79f4119f"
+SRC_URI = "git://github.com/openbmc/estoraged.git;branch=master;protocol=https"
+SRCREV = "f59b729120078233641564a64a11c690f0a43274"

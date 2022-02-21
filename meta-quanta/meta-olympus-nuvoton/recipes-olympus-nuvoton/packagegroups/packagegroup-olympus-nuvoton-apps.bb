@@ -57,7 +57,6 @@ RDEPENDS:${PN}-system = " \
         iptables \
         bmc-time-sync \
         phosphor-post-code-manager \
-        intel-dbus-interfaces \
         adm1278-hotswap-power-cycle \
         google-ipmi-sys \
         mac-address \
