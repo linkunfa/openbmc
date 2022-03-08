@@ -13,7 +13,7 @@ SECURED = "${SECURED_TIPFW}"
 IGPS_DIR = "${STAGING_DIR_NATIVE}/${datadir}/npcm8xx-igps"
 inherit logging
 
-# Prepare the Bootblock and U-Boot images using npcm8xx-bingo
+# Prepare the Bootblock and U-Boot images using npcm7xx-bingo
 do_prepare_bootloaders() {
     local olddir="$(pwd)"
     cd ${DEPLOY_DIR_IMAGE}
@@ -144,7 +144,7 @@ do_prepare_bootloaders[depends] += " \
     npcm8xx-kmt:do_deploy \
     npcm8xx-tipfw:do_deploy \
     npcm8xx-bootblock:do_deploy \
-    npcm8xx-bingo-native:do_populate_sysroot \
+    npcm7xx-bingo-native:do_populate_sysroot \
     npcm8xx-igps-native:do_populate_sysroot \
     "
 
