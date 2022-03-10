@@ -10,7 +10,7 @@ This layer depends on:
 
 ```
   URI: github.com/Nuvoton-Israel/openbmc.git
-  branch: npcm-v2.10
+  branch: npcm8xx-tz-v2.10
 ```
 
 # Contacts for Patches
