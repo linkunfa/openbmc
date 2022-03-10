@@ -7,8 +7,11 @@ LIC_FILES_CHKSUM = "file://LICENSE;md5=b234ee4d69f5fce4486a80fdaf4a4263"
 SRC_URI = " \
     git://github.com/Nuvoton-Israel/igps \
     file://KmtAndHeader_${IGPS_MACHINE}.xml \
-    file://TipFwAndHeader_${IGPS_MACHINE}.xml \
+    file://TipFwAndHeader_L0_${IGPS_MACHINE}.xml \
+    file://TipFwAndHeader_L1_${IGPS_MACHINE}.xml \
     file://BootBlockAndHeader_${IGPS_MACHINE}.xml \
+    file://BL31_AndHeader_${IGPS_MACHINE}.xml \
+    file://OpTeeAndHeader_${IGPS_MACHINE}.xml \
     file://UbootHeader_${IGPS_MACHINE}.xml \
 "
 
@@ -21,9 +24,12 @@ DEST = "${D}${datadir}/${BPN}"
 
 do_install() {
 	install -d ${DEST}
-  install ${WORKDIR}/KmtAndHeader_${IGPS_MACHINE}.xml ${DEST}
-  install ${WORKDIR}/TipFwAndHeader_${IGPS_MACHINE}.xml ${DEST}
-  install ${WORKDIR}/BootBlockAndHeader_${IGPS_MACHINE}.xml ${DEST}
+	install ${WORKDIR}/KmtAndHeader_${IGPS_MACHINE}.xml ${DEST}
+	install ${WORKDIR}/TipFwAndHeader_L0_${IGPS_MACHINE}.xml ${DEST}
+	install ${WORKDIR}/TipFwAndHeader_L1_${IGPS_MACHINE}.xml ${DEST}
+	install ${WORKDIR}/BootBlockAndHeader_${IGPS_MACHINE}.xml ${DEST}
+	install ${WORKDIR}/BL31_AndHeader_${IGPS_MACHINE}.xml ${DEST}
+	install ${WORKDIR}/OpTeeAndHeader_${IGPS_MACHINE}.xml ${DEST}
 	install ${WORKDIR}/UbootHeader_${IGPS_MACHINE}.xml ${DEST}
 }
 
