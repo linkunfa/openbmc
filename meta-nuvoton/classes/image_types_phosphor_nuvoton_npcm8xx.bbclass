@@ -15,7 +15,7 @@ KMT_TIPFW_BB_UBOOT_BINARY = "u-boot.bin.merged"
 FULL_SUFFIX = "full"
 MERGED_SUFFIX = "merged"
 UBOOT_SUFFIX_append = ".${MERGED_SUFFIX}"
-SECURED = "${SECURED_TIPFW}"
+SECURED = 'false'
 
 IGPS_DIR = "${STAGING_DIR_NATIVE}/${datadir}/npcm8xx-igps"
 inherit logging
