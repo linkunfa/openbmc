@@ -31,7 +31,7 @@ index b568f8b04aec..8be09d21f60a 100644
 -						reg = <0x0100000 0x40000>;
 +					bmc@0{
 +						label = "bmc";
-+						reg = <0x00000000 0x04000000>;
++						reg = <0x00000000 0x02000000>;
 +					};
 +					u-boot@0 {
 +						label = "u-boot";
@@ -74,11 +74,11 @@ index b568f8b04aec..8be09d21f60a 100644
 +					};
 +					rofs@800000 {
 +						label = "rofs";
-+						reg = <0x00a00000 0x02300000>;
++						reg = <0x00a00000 0x01500000>;
 +					};
 +					rwfs@1f00000 {
 +						label = "rwfs";
-+						reg = <0x2D00000 0x100000>;
++						reg = <0x1f00000 0x100000>;
  					};
  				};
  			};
