@@ -8,7 +8,7 @@ inherit systemd
 inherit obmc-phosphor-systemd
 
 DEPENDS += "systemd"
-RDEPENDS_${PN} += "bash"
+RDEPENDS:${PN} += "bash"
 
 SRC_URI += " file://program-vbios.service \
              file://program-vbios.sh \
@@ -18,10 +18,10 @@ SRC_URI += " file://program-vbios.service \
            "
 
 SYSTEMD_PACKAGES = "${PN}"
-SYSTEMD_SERVICE_${PN} = "program-vbios.service"
-SYSTEMD_ENVIRONMENT_FILE_${PN} +="obmc/vbios/program_vbios"
-FILES_${PN} += "/usr/share/vbios/vbios.bin"
-FILES_${PN} += "${sysconfdir}/modprobe.d/dontload.conf"
+SYSTEMD_SERVICE:${PN} = "program-vbios.service"
+SYSTEMD_ENVIRONMENT_FILE:${PN} +="obmc/vbios/program_vbios"
+FILES:${PN} += "/usr/share/vbios/vbios.bin"
+FILES:${PN} += "${sysconfdir}/modprobe.d/dontload.conf"
 
 do_install() {
     install -d ${D}${bindir}
