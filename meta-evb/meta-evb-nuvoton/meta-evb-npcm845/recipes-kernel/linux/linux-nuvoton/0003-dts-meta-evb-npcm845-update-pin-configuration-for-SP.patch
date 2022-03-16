@@ -1,4 +1,4 @@
-From c3ae021c7fd1ebfc6de854b0965d45cd4baaf8ed Mon Sep 17 00:00:00 2001
+From 930294c1e1f8241ed7ad90d6cf7a3d5a07e9183c Mon Sep 17 00:00:00 2001
 From: Stanley Chu <yschu@nuvoton.com>
 Date: Thu, 18 Nov 2021 11:20:12 +0800
 Subject: [PATCH] dts: meta-evb-npcm845: update pin configuration for SPI flash
@@ -6,24 +6,24 @@ Subject: [PATCH] dts: meta-evb-npcm845: update pin configuration for SPI flash
 
 Signed-off-by: Stanley Chu <yschu@nuvoton.com>
 ---
- .../boot/dts/nuvoton/nuvoton-npcm845-evb.dts     |  8 ++++++--
+ .../boot/dts/nuvoton/nuvoton-npcm845-evb.dts     |  6 +++++-
  .../dts/nuvoton/nuvoton-npcm845-pincfg-evb.dtsi  | 16 ++++++++++++++++
- 2 files changed, 22 insertions(+), 2 deletions(-)
+ 2 files changed, 21 insertions(+), 1 deletion(-)
 
 diff --git a/arch/arm64/boot/dts/nuvoton/nuvoton-npcm845-evb.dts b/arch/arm64/boot/dts/nuvoton/nuvoton-npcm845-evb.dts
-index 099fe7e68864..2153456edbff 100644
+index e9ff97d74fe1..6e44d29c81bf 100644
 --- a/arch/arm64/boot/dts/nuvoton/nuvoton-npcm845-evb.dts
 +++ b/arch/arm64/boot/dts/nuvoton/nuvoton-npcm845-evb.dts
-@@ -492,7 +492,7 @@
+@@ -506,7 +506,7 @@
  			};
  
  			spi1: spi@201000 {
 -				cs-gpios = <&gpio0 20 GPIO_ACTIVE_LOW>;
-+				cs-gpios = <&gpio0 15 GPIO_ACTIVE_LOW>;
++				cs-gpios = <&gpio0 8 GPIO_ACTIVE_LOW>;
  				status = "okay";
  				Flash@0 {
  					compatible = "jedec,spi-nor";
-@@ -556,6 +556,10 @@
+@@ -570,6 +570,10 @@
  				&pin242_slew
  				&pin243_slew
  				&spix_pins
@@ -34,15 +34,6 @@ index 099fe7e68864..2153456edbff 100644
  				&pin4_slew
  				&pin5_slew
  				&pin6_slew
-@@ -642,7 +646,7 @@
- };
- 
- &i2c15 {
--	status = "okay";
-+	status = "disabled";
- };
- 
- &i2c16 {
 diff --git a/arch/arm64/boot/dts/nuvoton/nuvoton-npcm845-pincfg-evb.dtsi b/arch/arm64/boot/dts/nuvoton/nuvoton-npcm845-pincfg-evb.dtsi
 index 0cdb35aa8e87..52665c5a1ba1 100644
 --- a/arch/arm64/boot/dts/nuvoton/nuvoton-npcm845-pincfg-evb.dtsi
