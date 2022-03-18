@@ -7,3 +7,6 @@ Type=oneshot
 ExecStart=/usr/bin/program-vbios.sh ${{SOURCE}} ${{TARGET}} ${{SIZE}}
 SyslogIdentifier=program-vbios.sh
 EnvironmentFile=/etc/default/obmc/vbios/program_vbios
+
+[Install]
+WantedBy=multi-user.target
