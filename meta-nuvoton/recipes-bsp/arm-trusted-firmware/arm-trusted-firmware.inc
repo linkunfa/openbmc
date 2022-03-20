@@ -12,7 +12,9 @@ S = "${WORKDIR}/git"
 BRANCH ?= ""
 REPO ?= "git://github.com/Nuvoton-Israel/arm-trusted-firmware.git;protocol=https"
 BRANCHARG = "${@['nobranch=1', 'branch=${BRANCH}'][d.getVar('BRANCH', True) != '']}"
-SRC_URI = "${REPO};${BRANCHARG}"
+SRC_URI = "${REPO};${BRANCHARG} \           
+	   file://0001-add-npcm845x-arch-reset.patch \
+          "
 
 inherit image-artifact-names
 
