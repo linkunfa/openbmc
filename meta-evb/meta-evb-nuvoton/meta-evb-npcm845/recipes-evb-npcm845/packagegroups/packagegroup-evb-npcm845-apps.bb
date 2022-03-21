@@ -55,7 +55,6 @@ RDEPENDS_${PN}-system = " \
         dhrystone \
         ent \
         rw-perf \
-        loadmcu \
         phosphor-ecc \
         i3c-tools \
         phosphor-ipmi-blobs \
