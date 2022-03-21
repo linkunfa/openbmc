@@ -15,7 +15,7 @@ KMT_TIPFW_BB_UBOOT_BINARY = "u-boot.bin.merged"
 FULL_SUFFIX = "full"
 MERGED_SUFFIX = "merged"
 UBOOT_SUFFIX_append = ".${MERGED_SUFFIX}"
-SECURED = 'false'
+SECURED = "${SECURED_TIPFW}"
 
 IGPS_DIR = "${STAGING_DIR_NATIVE}/${datadir}/npcm8xx-igps"
 inherit logging
@@ -134,6 +134,11 @@ python do_merge_bootloaders() {
 
     if d.getVar('SECURED', True) == "True":
         d.setVar('KMT_TIPFW_BINARY', "Kmt_TipFw.bin")
+
+        Merge_bin_files_and_pad(os.path.join(d.getVar('DEPLOY_DIR_IMAGE', True), '%s' % d.getVar('KMT_TIPFW_BINARY',True)),
+            os.path.join(d.getVar('DEPLOY_DIR_IMAGE', True), '%s' % d.getVar('BOOTBLOCK',True)),
+            os.path.join(d.getVar('DEPLOY_DIR_IMAGE', True), '%s' % d.getVar('KMT_TIPFW_BB_BINARY',True)),
+            0x1000, 0x20)
     else:
         CRC32_binary(os.path.join(d.getVar('DEPLOY_DIR_IMAGE', True), '%s' % d.getVar('KMT_BINARY',True)),
             112, 12,
@@ -147,22 +152,22 @@ python do_merge_bootloaders() {
             112, 12,
             os.path.join(d.getVar('DEPLOY_DIR_IMAGE', True), '%s' % d.getVar('TIPFWL1_BINARY',True)))
 
-    Merge_bin_files_and_pad(os.path.join(d.getVar('DEPLOY_DIR_IMAGE', True), '%s' % d.getVar('KMT_BINARY',True)),
-        os.path.join(d.getVar('DEPLOY_DIR_IMAGE', True), '%s' % d.getVar('TIPFWL0_BINARY',True)),
-        os.path.join(d.getVar('DEPLOY_DIR_IMAGE', True), '%s' % d.getVar('KMT_TIPFWL0_BINARY',True)),
-        0x1000, 0x20)
+        Merge_bin_files_and_pad(os.path.join(d.getVar('DEPLOY_DIR_IMAGE', True), '%s' % d.getVar('KMT_BINARY',True)),
+            os.path.join(d.getVar('DEPLOY_DIR_IMAGE', True), '%s' % d.getVar('TIPFWL0_BINARY',True)),
+            os.path.join(d.getVar('DEPLOY_DIR_IMAGE', True), '%s' % d.getVar('KMT_TIPFWL0_BINARY',True)),
+            0x1000, 0x20)
 
-    Merge_bin_files_and_pad(os.path.join(d.getVar('DEPLOY_DIR_IMAGE', True), '%s' % d.getVar('KMT_TIPFWL0_BINARY',True)),
-        os.path.join(d.getVar('DEPLOY_DIR_IMAGE', True), '%s' % d.getVar('TIPFWL1_BINARY',True)),
-        os.path.join(d.getVar('DEPLOY_DIR_IMAGE', True), '%s' % d.getVar('KMT_TIPFWL0L1_BINARY',True)),
-        0x1000, 0x20)
+        Merge_bin_files_and_pad(os.path.join(d.getVar('DEPLOY_DIR_IMAGE', True), '%s' % d.getVar('KMT_TIPFWL0_BINARY',True)),
+            os.path.join(d.getVar('DEPLOY_DIR_IMAGE', True), '%s' % d.getVar('TIPFWL1_BINARY',True)),
+            os.path.join(d.getVar('DEPLOY_DIR_IMAGE', True), '%s' % d.getVar('KMT_TIPFWL0L1_BINARY',True)),
+            0x1000, 0x20)
 
-    os.remove(os.path.join(d.getVar('DEPLOY_DIR_IMAGE', True), '%s' % d.getVar('KMT_TIPFWL0_BINARY',True)))
+        os.remove(os.path.join(d.getVar('DEPLOY_DIR_IMAGE', True), '%s' % d.getVar('KMT_TIPFWL0_BINARY',True)))
 
-    Merge_bin_files_and_pad(os.path.join(d.getVar('DEPLOY_DIR_IMAGE', True), '%s' % d.getVar('KMT_TIPFWL0L1_BINARY',True)),
-        os.path.join(d.getVar('DEPLOY_DIR_IMAGE', True), '%s' % d.getVar('BOOTBLOCK',True)),
-        os.path.join(d.getVar('DEPLOY_DIR_IMAGE', True), '%s' % d.getVar('KMT_TIPFW_BB_BINARY',True)),
-        0x1000, 0x20)
+        Merge_bin_files_and_pad(os.path.join(d.getVar('DEPLOY_DIR_IMAGE', True), '%s' % d.getVar('KMT_TIPFWL0L1_BINARY',True)),
+            os.path.join(d.getVar('DEPLOY_DIR_IMAGE', True), '%s' % d.getVar('BOOTBLOCK',True)),
+            os.path.join(d.getVar('DEPLOY_DIR_IMAGE', True), '%s' % d.getVar('KMT_TIPFW_BB_BINARY',True)),
+            0x1000, 0x20)
 
     Merge_bin_files_and_pad(os.path.join(d.getVar('DEPLOY_DIR_IMAGE', True), '%s' % d.getVar('KMT_TIPFW_BB_BINARY',True)),
         os.path.join(d.getVar('DEPLOY_DIR_IMAGE', True), '%s' % d.getVar('ATF_BINARY',True)),
