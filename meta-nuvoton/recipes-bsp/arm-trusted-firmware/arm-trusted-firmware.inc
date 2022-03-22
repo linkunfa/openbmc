@@ -3,7 +3,7 @@ DESCRIPTION = "ARM Trusted Firmware"
 LICENSE = "BSD"
 LIC_FILES_CHKSUM ?= "file://license.rst;md5=1dd070c98a281d18d9eefd938729b031"
 
-PV="1.0.0+git${SRCPV}"
+PV="1.3.0+git${SRCPV}"
 
 inherit deploy
 
@@ -12,9 +12,7 @@ S = "${WORKDIR}/git"
 BRANCH ?= ""
 REPO ?= "git://github.com/Nuvoton-Israel/arm-trusted-firmware.git;protocol=https"
 BRANCHARG = "${@['nobranch=1', 'branch=${BRANCH}'][d.getVar('BRANCH', True) != '']}"
-SRC_URI = "${REPO};${BRANCHARG} \           
-	   file://0001-add-npcm845x-arch-reset.patch \
-          "
+SRC_URI = "${REPO};${BRANCHARG}"
 
 inherit image-artifact-names
 
