@@ -187,6 +187,7 @@ python do_merge_bootloaders() {
 
 do_prepare_bootloaders[depends] += " \
     npcm8xx-kmt:do_deploy \
+    npcm8xx-kmt-tipfw:do_deploy \
     npcm8xx-tipfw-l0:do_deploy \
     npcm8xx-tipfw-l1:do_deploy \
     npcm8xx-bootblock:do_deploy \
