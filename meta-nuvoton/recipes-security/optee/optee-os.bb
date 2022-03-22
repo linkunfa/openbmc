@@ -46,8 +46,14 @@ do_compile() {
     oe_runmake CFG_TEE_LOGLEVEL=0 CFG_TEE_CORE_LOG_LEVEL=0
 }
 
-# do_install() nothing
-do_install[noexec] = "1"
+do_install () {
+    # Install the TA devkit
+    install -d ${D}/usr/include/optee/export-user_ta/
+
+    for f in ${B}/out/arm-plat-nuvoton/export-ta_arm64/*; do
+        cp -aR $f ${D}/usr/include/optee/export-user_ta/
+    done
+}
 
 do_deploy() {
     install -d ${DEPLOYDIR}
@@ -58,3 +64,5 @@ do_deploy() {
 }
 
 addtask deploy before do_build after do_compile
+
+INSANE_SKIP_${PN}-dev = "staticdev"
