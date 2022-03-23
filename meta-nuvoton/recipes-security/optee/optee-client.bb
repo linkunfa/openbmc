@@ -19,6 +19,9 @@ MACHINE_SOC ?= "npcm8xx"
 
 SYSTEMD_SERVICE_${PN} = "tee-supplicant.service"
 
+EXTRA_OEMAKE = "CFG_TEE_FS_PARENT_PATH=/var/tee \
+        "
+
 do_install() {
     oe_runmake install
 
