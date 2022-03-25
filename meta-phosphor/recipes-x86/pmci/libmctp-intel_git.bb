@@ -1,8 +1,8 @@
-SUMMARY = "libmctp_intel"
+SUMMARY = "libmctp:intel"
 DESCRIPTION = "Implementation of MCTP(DMTF DSP0236)"
 
-SRC_URI = "git://github.com/Intel-BMC/libmctp.git;protocol=ssh;branch=master;protocol=https"
-SRCREV = "2038ad240736c6a4239f89e987d8e95533b6d158"
+SRC_URI = "git://github.com/Intel-BMC/libmctp.git;protocol=ssh"
+SRCREV = "d530c2271e1f9ff5d76a170c0abd64bd03ef40fd"
 
 S = "${WORKDIR}/git"
 
