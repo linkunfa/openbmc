@@ -26,3 +26,6 @@ PACKAGECONFIG:append:evb-npcm845 = " ${@entity_enabled(d, 'dynamic-sensors', '')
 WHITELIST_CONF:evb-npcm845 = "${S}/host-ipmid-whitelist.conf"
 
 SRC_URI:append:evb-npcm845 = " file://0006-Correct-IPMI-firmware-revision-report.patch"
+
+SRC_URI:append:evb-npcm845 = " file://0007-dbus-sdr-storagecommands-Add-option-to-use-Clear-met.patch"
+EXTRA_OECONF:append:evb-npcm845 = " --enable-sel_logger_clears_sel"
