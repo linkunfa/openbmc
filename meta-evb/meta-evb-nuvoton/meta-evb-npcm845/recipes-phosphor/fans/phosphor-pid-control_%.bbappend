@@ -15,7 +15,7 @@ RDEPENDS:${PN} += "bash"
 
 SYSTEMD_SERVICE:${PN}:append:evb-npcm845 = " fan-reboot-control.service"
 SYSTEMD_SERVICE:${PN}:append:evb-npcm845 = " fan-boot-control.service"
-# default recipe already include phosphor-pid-control.service
+SYSTEMD_SERVICE:${PN}:append:evb-npcm845 = " phosphor-pid-control.service"
 
 do_install:append:evb-npcm845() {
     install -d ${D}/${bindir}
@@ -25,12 +25,12 @@ do_install:append:evb-npcm845() {
     install -m 0644 -D ${WORKDIR}/config-evb-npcm845.json \
         ${D}${datadir}/swampd/config.json
 
-    install -d ${D}${systemd_unitdir}/system/
+    install -d ${D}${systemd_system_unitdir}
     install -m 0644 ${WORKDIR}/phosphor-pid-control.service \
-        ${D}${systemd_unitdir}/system
+        ${D}${systemd_system_unitdir}
     install -m 0644 ${WORKDIR}/fan-reboot-control.service \
-        ${D}${systemd_unitdir}/system
+        ${D}${systemd_system_unitdir}
     install -m 0644 ${WORKDIR}/fan-boot-control.service \
-        ${D}${systemd_unitdir}/system
+        ${D}${systemd_system_unitdir}
 }
 

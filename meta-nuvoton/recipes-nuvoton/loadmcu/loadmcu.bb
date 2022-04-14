@@ -11,7 +11,7 @@ inherit autotools pkgconfig
 
 DEPENDS += "systemd"
 DEPENDS += "autoconf-archive-native"
-RDEPENDS_${PN} += "bash"
+RDEPENDS:${PN} += "bash"
 
 SRC_URI = "git://github.com/Nuvoton-Israel/loadmcu.git;protocol=https \
            file://mcu-update.service \
