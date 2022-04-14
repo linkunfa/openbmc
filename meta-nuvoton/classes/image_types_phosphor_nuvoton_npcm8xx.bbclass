@@ -1,9 +1,16 @@
 UBOOT_BINARY := "u-boot.${UBOOT_SUFFIX}"
 BOOTBLOCK = "BootBlockAndHeader.bin"
+ATF_BINARY := "bl31AndHeader.bin"
+OPTEE_BINARY := "teeAndHeader.bin"
 KMT_BINARY = "KmtAndHeader.bin"
-TIPFW_BINARY = "TipFwAndHeader.bin"
-KMT_TIPFW_BINARY = "Kmt_TipFw.bin"
+TIPFWL0_BINARY = "TipFwAndHeader_L0.bin"
+TIPFWL1_BINARY = "TipFwAndHeader_L1.bin"
+KMT_TIPFWL0_BINARY = "Kmt_TipFwL0.bin"
+KMT_TIPFWL0L1_BINARY = "Kmt_TipFwL0L1.bin"
 KMT_TIPFW_BB_BINARY = "Kmt_TipFw_BootBlock.bin"
+KMT_TIPFW_BB_BL31_BINARY = "Kmt_TipFw_BootBlock_BL31.bin"
+KMT_TIPFW_BB_BL31_TEE_BINARY = "Kmt_TipFw_BootBlock_BL31_Tee.bin"
+KMT_TIPFW_BB_BL31_TEE_UBOOT_BINARY = "Kmt_TipFw_BootBlock_BL31_Tee_uboot.bin"
 KMT_TIPFW_BB_UBOOT_BINARY = "u-boot.bin.merged"
 FULL_SUFFIX = "full"
 MERGED_SUFFIX = "merged"
@@ -13,7 +20,7 @@ SECURED = "${SECURED_TIPFW}"
 IGPS_DIR = "${STAGING_DIR_NATIVE}/${datadir}/npcm8xx-igps"
 inherit logging
 
-# Prepare the Bootblock and U-Boot images using npcm7xx-bingo
+# Prepare the Bootblock and U-Boot images using npcm8xx-bingo
 do_prepare_bootloaders() {
     local olddir="$(pwd)"
     cd ${DEPLOY_DIR_IMAGE}
@@ -21,11 +28,20 @@ do_prepare_bootloaders() {
     bingo ${IGPS_DIR}/KmtAndHeader_${IGPS_MACHINE}.xml \
             -o ${DEPLOY_DIR_IMAGE}/${KMT_BINARY}
 
-    bingo ${IGPS_DIR}/TipFwAndHeader_${IGPS_MACHINE}.xml \
-            -o ${DEPLOY_DIR_IMAGE}/${TIPFW_BINARY}
+    bingo ${IGPS_DIR}/TipFwAndHeader_L0_${IGPS_MACHINE}.xml \
+            -o ${DEPLOY_DIR_IMAGE}/${TIPFWL0_BINARY}
+
+    bingo ${IGPS_DIR}/TipFwAndHeader_L1_${IGPS_MACHINE}.xml \
+            -o ${DEPLOY_DIR_IMAGE}/${TIPFWL1_BINARY}
 
     bingo ${IGPS_DIR}/BootBlockAndHeader_${IGPS_MACHINE}.xml \
             -o ${DEPLOY_DIR_IMAGE}/${BOOTBLOCK}
+
+    bingo ${IGPS_DIR}/BL31_AndHeader_${IGPS_MACHINE}.xml \
+            -o ${DEPLOY_DIR_IMAGE}/${ATF_BINARY}
+
+    bingo ${IGPS_DIR}/OpTeeAndHeader_${IGPS_MACHINE}.xml \
+            -o ${DEPLOY_DIR_IMAGE}/${OPTEE_BINARY}
 
     bingo ${IGPS_DIR}/UbootHeader_${IGPS_MACHINE}.xml \
             -o ${UBOOT_BINARY}.${FULL_SUFFIX}
@@ -87,63 +103,96 @@ python do_merge_bootloaders() {
     def CRC32_binary(binfile, begin_offset, embed_ecc, outputFile):
         CalcCRC32(binfile, begin_offset, embed_ecc, outputFile)
 
-    def Merge_bin_files_and_pad(inF1, inF2, outF, align):
+    def Merge_bin_files_and_pad(inF1, inF2, outF, align, padding_at_end):
         padding_size = 0
         padding_size_end = 0
-        if (os.path.getsize(inF1) % align != 0):
-            padding_size = align - (os.path.getsize(inF1) % align)
+        F1_size = os.path.getsize(inF1)
+        F2_size = os.path.getsize(inF2)
 
-        if (os.path.getsize(inF2) % align != 0):
-            padding_size_end = align - (os.path.getsize(inF2) % align)
+        if ((F1_size % align) != 0):
+            padding_size = align - (F1_size % align)
+
+        if ((F2_size % align) != 0):
+            padding_size_end = align - (F2_size % align)
 
         with open(outF, "wb") as file3:
             with open(inF1, "rb") as file1:
                 data = file1.read()
                 file3.write(data)
-            while padding_size > 0:
-                file3.write(b'\xFF')
-                padding_size -= 1
+
+            file3.write(b'\xFF' * padding_size)
+
             with open(inF2, "rb") as file2:
                 data = file2.read()
                 file3.write(data)
-            while padding_size_end > 0:
-                file3.write(b'\xFF')
-                padding_size_end -= 1
+
+            file3.write(b'\xFF' * padding_size_end)
+
         file1.close()
         file2.close()
         file3.close()
 
     if d.getVar('SECURED', True) == "True":
-        d.setVar('KMT_TIPFW_BINARY', "Kmt_TipFw.bin")
+        d.setVar('KMT_TIPFW_BINARY', "Kmt_TipFwL0_TipFwL1.bin")
+
+        Merge_bin_files_and_pad(os.path.join(d.getVar('DEPLOY_DIR_IMAGE', True), '%s' % d.getVar('KMT_TIPFW_BINARY',True)),
+            os.path.join(d.getVar('DEPLOY_DIR_IMAGE', True), '%s' % d.getVar('BOOTBLOCK',True)),
+            os.path.join(d.getVar('DEPLOY_DIR_IMAGE', True), '%s' % d.getVar('KMT_TIPFW_BB_BINARY',True)),
+            0x1000, 0x20)
     else:
         CRC32_binary(os.path.join(d.getVar('DEPLOY_DIR_IMAGE', True), '%s' % d.getVar('KMT_BINARY',True)),
             112, 12,
             os.path.join(d.getVar('DEPLOY_DIR_IMAGE', True), '%s' % d.getVar('KMT_BINARY',True)))
 
-        CRC32_binary(os.path.join(d.getVar('DEPLOY_DIR_IMAGE', True), '%s' % d.getVar('TIPFW_BINARY',True)),
+        CRC32_binary(os.path.join(d.getVar('DEPLOY_DIR_IMAGE', True), '%s' % d.getVar('TIPFWL0_BINARY',True)),
             112, 12,
-            os.path.join(d.getVar('DEPLOY_DIR_IMAGE', True), '%s' % d.getVar('TIPFW_BINARY',True)))
+            os.path.join(d.getVar('DEPLOY_DIR_IMAGE', True), '%s' % d.getVar('TIPFWL0_BINARY',True)))
+
+        CRC32_binary(os.path.join(d.getVar('DEPLOY_DIR_IMAGE', True), '%s' % d.getVar('TIPFWL1_BINARY',True)),
+            112, 12,
+            os.path.join(d.getVar('DEPLOY_DIR_IMAGE', True), '%s' % d.getVar('TIPFWL1_BINARY',True)))
 
         Merge_bin_files_and_pad(os.path.join(d.getVar('DEPLOY_DIR_IMAGE', True), '%s' % d.getVar('KMT_BINARY',True)),
-            os.path.join(d.getVar('DEPLOY_DIR_IMAGE', True), '%s' % d.getVar('TIPFW_BINARY',True)),
-            os.path.join(d.getVar('DEPLOY_DIR_IMAGE', True), '%s' % d.getVar('KMT_TIPFW_BINARY',True)),
-            0x1000)
+            os.path.join(d.getVar('DEPLOY_DIR_IMAGE', True), '%s' % d.getVar('TIPFWL0_BINARY',True)),
+            os.path.join(d.getVar('DEPLOY_DIR_IMAGE', True), '%s' % d.getVar('KMT_TIPFWL0_BINARY',True)),
+            0x1000, 0x20)
 
-    Merge_bin_files_and_pad(os.path.join(d.getVar('DEPLOY_DIR_IMAGE', True), '%s' % d.getVar('KMT_TIPFW_BINARY',True)),
-        os.path.join(d.getVar('DEPLOY_DIR_IMAGE', True), '%s' % d.getVar('BOOTBLOCK',True)),
-        os.path.join(d.getVar('DEPLOY_DIR_IMAGE', True), '%s' % d.getVar('KMT_TIPFW_BB_BINARY',True)),
-        0x1000)
+        Merge_bin_files_and_pad(os.path.join(d.getVar('DEPLOY_DIR_IMAGE', True), '%s' % d.getVar('KMT_TIPFWL0_BINARY',True)),
+            os.path.join(d.getVar('DEPLOY_DIR_IMAGE', True), '%s' % d.getVar('TIPFWL1_BINARY',True)),
+            os.path.join(d.getVar('DEPLOY_DIR_IMAGE', True), '%s' % d.getVar('KMT_TIPFWL0L1_BINARY',True)),
+            0x1000, 0x20)
+
+        os.remove(os.path.join(d.getVar('DEPLOY_DIR_IMAGE', True), '%s' % d.getVar('KMT_TIPFWL0_BINARY',True)))
+
+        Merge_bin_files_and_pad(os.path.join(d.getVar('DEPLOY_DIR_IMAGE', True), '%s' % d.getVar('KMT_TIPFWL0L1_BINARY',True)),
+            os.path.join(d.getVar('DEPLOY_DIR_IMAGE', True), '%s' % d.getVar('BOOTBLOCK',True)),
+            os.path.join(d.getVar('DEPLOY_DIR_IMAGE', True), '%s' % d.getVar('KMT_TIPFW_BB_BINARY',True)),
+            0x1000, 0x20)
 
     Merge_bin_files_and_pad(os.path.join(d.getVar('DEPLOY_DIR_IMAGE', True), '%s' % d.getVar('KMT_TIPFW_BB_BINARY',True)),
+        os.path.join(d.getVar('DEPLOY_DIR_IMAGE', True), '%s' % d.getVar('ATF_BINARY',True)),
+        os.path.join(d.getVar('DEPLOY_DIR_IMAGE', True), '%s' % d.getVar('KMT_TIPFW_BB_BL31_BINARY',True)),
+        0x1000, 0x20)
+
+    Merge_bin_files_and_pad(os.path.join(d.getVar('DEPLOY_DIR_IMAGE', True), '%s' % d.getVar('KMT_TIPFW_BB_BL31_BINARY',True)),
+        os.path.join(d.getVar('DEPLOY_DIR_IMAGE', True), '%s' % d.getVar('OPTEE_BINARY',True)),
+        os.path.join(d.getVar('DEPLOY_DIR_IMAGE', True), '%s' % d.getVar('KMT_TIPFW_BB_BL31_TEE_BINARY',True)),
+        0x1000, 0x20)
+
+    Merge_bin_files_and_pad(os.path.join(d.getVar('DEPLOY_DIR_IMAGE', True), '%s' % d.getVar('KMT_TIPFW_BB_BL31_TEE_BINARY',True)),
         os.path.join(d.getVar('DEPLOY_DIR_IMAGE', True), '%s.full' % d.getVar('UBOOT_BINARY',True)),
         os.path.join(d.getVar('DEPLOY_DIR_IMAGE', True), '%s' % d.getVar('KMT_TIPFW_BB_UBOOT_BINARY',True)),
-        0x1000)
+        0x1000, 0x20)
 }
 
 do_prepare_bootloaders[depends] += " \
     npcm8xx-kmt:do_deploy \
-    npcm8xx-tipfw:do_deploy \
+    npcm8xx-kmt-tipfwl0l1:do_deploy \
+    npcm8xx-tipfw-l0:do_deploy \
+    npcm8xx-tipfw-l1:do_deploy \
     npcm8xx-bootblock:do_deploy \
+    arm-trusted-firmware:do_deploy \
+    optee-os:do_deploy \
     npcm7xx-bingo-native:do_populate_sysroot \
     npcm8xx-igps-native:do_populate_sysroot \
     "

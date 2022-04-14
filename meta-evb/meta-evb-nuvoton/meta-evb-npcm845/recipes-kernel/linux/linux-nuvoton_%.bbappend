@@ -9,3 +9,6 @@ SRC_URI:append:evb-npcm845 = " file://0005-ARM-dts-evb-npcm845-Add-eeprom-on-i2c
 SRC_URI:append:evb-npcm845 = " file://0006-dts-npcm845-evb-add-ipmb-device-on-i2c-bus.patch"
 SRC_URI:append:evb-npcm845 = " file://0007-arm64-dts-nuvoton-npcm845-evb-add-nmi-out-and-button.patch"
 SRC_URI:append:evb-npcm845 = " file://0008-dts-npcm845-evb-add-spi-gpio-node-to-program-vbios.patch"
+SRC_URI:append:evb-npcm845 = " file://0009-dts-npcm8xx-add-psci-smp-method-tz.patch"
+SRC_URI:append:evb-npcm845 = " file://0010-device-tree-optee-enable.patch"
+SRC_URI:append:evb-npcm845 = " file://0011-replace-jtag2-pins-with-tp-jtag3-pins.patch"

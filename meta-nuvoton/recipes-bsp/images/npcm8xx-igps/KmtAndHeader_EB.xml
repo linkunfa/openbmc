@@ -1,18 +1,17 @@
+<?xml version="1.0" encoding="UTF-8"?>
 <!-- SPDX-License-Identifier: GPL-2.0
 #
-# Nuvoton IGPS: Image Generation And Programming Scripts For Poleg BMC
+# Nuvoton IGPS: Image Generation And Programming Scripts For Arbel BMC
 #
-# Copyright (C) 2020 Nuvoton Technologies, All Rights Reserved
-#--------------------------------------------------------------------------->
-
-<?xml version="1.0" encoding="UTF-8"?>
+# Copyright (C) 2022 Nuvoton Technologies, All Rights Reserved
+#======================================== -->
 
 <Bin_Ecc_Map>
 
 	<!-- BMC mandatory fields -->
 	<ImageProperties>
 		<BinSize>0</BinSize> <!-- If 0 the binary size will be calculated by the tool -->
-		<PadValue>0xFF</PadValue>	<!-- Byte value to pad the empty areas, default is 0 -->
+		<PadValue>0</PadValue>	<!-- Byte value to pad the empty areas, default is 0 -->
 	</ImageProperties>
 
 	<BinField>
@@ -32,7 +31,7 @@
 			<offset>4</offset>
 			<size>4</size>
 		</config>
-		<content format='bytes'>0x1E 0xAB 0xF2 0x57</content>  <!-- content the user should fill -->
+		<content format='bytes'>0xE1 0x54 0xF2 0x57</content>  <!-- content the user should fill -->
 	</BinField>
 
 	<BinField>
@@ -87,7 +86,7 @@
 			<offset>120</offset>
 			<size>4</size>
 		</config>
-		<content format='32bit'>0x0005F700</content>     <!-- content the user should fill -->
+		<content format='32bit'>0x0005F000</content>     <!-- content the user should fill -->
 	</BinField>
 
 	<BinField>
@@ -119,6 +118,15 @@
 	</BinField>
 
 	<BinField>
+		<name>TipFwEncryptionControl</name>  <!-- name of field -->
+		<config>
+			<offset>148</offset>
+			<size>1</size>
+		</config>
+		<content format='bytes'>0x0</content>               <!-- content the user should fill -->
+	</BinField>
+
+	<BinField>
 		<name>OtpFwVersion</name>  <!-- name of field -->
 		<config>
 			<offset>152</offset>
@@ -134,15 +142,6 @@
 			<size>4</size>
 		</config>
 		<content format='32bit'>0x80001000</content>               <!-- content the user should fill -->
-	</BinField>
-
-	<BinField>
-		<name>dmeChallengeOffset</name>             <!-- name of field -->
-		<config>
-			<offset>172</offset>
-			<size>4</size>
-		</config>
-		<content format='32bit'>0x8000FFBC</content>        <!-- bit 31 set (valid), points to offfset 0xFFBC -->
 	</BinField>
 
 	<BinField>

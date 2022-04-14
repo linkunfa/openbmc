@@ -10,6 +10,10 @@ PACKAGES = " \
         ${PN}-flash \
         ${PN}-system \
         "
+PROVIDES += "virtual/obmc-chassis-mgmt"
+PROVIDES += "virtual/obmc-fan-mgmt"
+PROVIDES += "virtual/obmc-flash-mgmt"
+PROVIDES += "virtual/obmc-system-mgmt"
 
 RPROVIDES:${PN}-chassis += "virtual-obmc-chassis-mgmt"
 RPROVIDES:${PN}-fans += "virtual-obmc-fan-mgmt"
@@ -60,4 +64,6 @@ RDEPENDS:${PN}-system = " \
         phosphor-ipmi-blobs \
         phosphor-image-signing \
         program-vbios \
+        optee-client \
+        optee-test \
         "
