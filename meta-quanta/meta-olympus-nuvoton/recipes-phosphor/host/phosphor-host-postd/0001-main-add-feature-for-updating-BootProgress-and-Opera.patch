@@ -1,4 +1,4 @@
-From f4892816aad0bc44ae58dffae2b5f969b5c334a9 Mon Sep 17 00:00:00 2001
+From 237ce239886998cdfbbe518ad5b2bc8ba9b38bf5 Mon Sep 17 00:00:00 2001
 From: Tim Lee <timlee660101@gmail.com>
 Date: Wed, 27 Nov 2019 09:56:22 +0800
 Subject: [PATCH] main: add feature for updating BootProgress and
@@ -26,7 +26,7 @@ Signed-off-by: Tim Lee <timlee660101@gmail.com>
  2 files changed, 161 insertions(+)
 
 diff --git a/lpcsnoop/snoop.hpp b/lpcsnoop/snoop.hpp
-index 68d51b4..b2e44ac 100644
+index 34d53b1..ce54c22 100644
 --- a/lpcsnoop/snoop.hpp
 +++ b/lpcsnoop/snoop.hpp
 @@ -9,6 +9,33 @@
@@ -64,10 +64,10 @@ index 68d51b4..b2e44ac 100644
  using ServerObject = typename sdbusplus::server::object::object<T...>;
  using PostInterface = sdbusplus::xyz::openbmc_project::State::Boot::server::Raw;
 diff --git a/main.cpp b/main.cpp
-index 3a3b4ce..91319e0 100644
+index 7ba238c..4b612bd 100644
 --- a/main.cpp
 +++ b/main.cpp
-@@ -34,8 +34,95 @@
+@@ -35,8 +35,95 @@
  #include <stdplus/signal.hpp>
  #include <thread>
  
@@ -163,15 +163,15 @@ index 3a3b4ce..91319e0 100644
  static void usage(const char* name)
  {
      fprintf(stderr,
-@@ -54,6 +141,7 @@ static void usage(const char* name)
- void PostCodeEventHandler(sdeventplus::source::IO& s, int postFd, uint32_t,
-                           PostReporter* reporter, bool verbose)
+@@ -55,6 +142,7 @@ static void usage(const char* name)
+ void PostCodeEventHandler(PostReporter* reporter, bool verbose,
+                           sdeventplus::source::IO& s, int postFd, uint32_t)
  {
 +    postcode_t postcode;
      uint64_t code = 0;
      ssize_t readb;
      while ((readb = read(postFd, &code, codeSize)) > 0)
-@@ -69,6 +157,46 @@ void PostCodeEventHandler(sdeventplus::source::IO& s, int postFd, uint32_t,
+@@ -70,6 +158,46 @@ void PostCodeEventHandler(PostReporter* reporter, bool verbose,
          reporter->value(std::make_tuple(~code, secondary_post_code_t{}), true);
          reporter->value(std::make_tuple(code, secondary_post_code_t{}));
  
@@ -218,7 +218,7 @@ index 3a3b4ce..91319e0 100644
          // read depends on old data being cleared since it doens't always read
          // the full code size
          code = 0;
-@@ -145,6 +273,12 @@ int main(int argc, char* argv[])
+@@ -146,6 +274,12 @@ int main(int argc, char* argv[])
                  }
                  break;
              case 'd':

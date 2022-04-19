@@ -304,8 +304,7 @@ The following package management changes took place:
    This change was made because too many places in DNF/RPM4 stack
    already make that assumption. Only the filenames and the architecture
    tag has changed. Nothing else has changed in OE-core system,
-   particularly in the :ref:`allarch.bbclass <ref-classes-allarch>`
-   class.
+   particularly in the :ref:`ref-classes-allarch` class.
 
 -  Signing of remote package feeds using ``PACKAGE_FEED_SIGN`` is not
    currently supported. This issue will be fully addressed in a future
@@ -371,7 +370,7 @@ The following changes have been made to Wic:
    now the current directory by default instead of the unusual
    ``/var/tmp/wic``.
 
-   The "-o" and "--outdir" options remain unchanged and are used to
+   The ``-o`` and ``--outdir`` options remain unchanged and are used to
    specify your preferred output directory if you do not want to use the
    default directory.
 

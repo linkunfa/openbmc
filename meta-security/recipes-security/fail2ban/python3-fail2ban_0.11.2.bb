@@ -6,8 +6,10 @@ out-of-the-box ready to read many standard log files, such as those for sshd and
 and is easy to configure to read any log file you choose, for any error you choose."
 HOMEPAGE = "http://www.fail2ban.org"
 
-LICENSE = "GPL-2.0"
+LICENSE = "GPL-2.0-only"
 LIC_FILES_CHKSUM = "file://COPYING;md5=ecabc31e90311da843753ba772885d9f"
+
+DEPENDS = "python3-native"
 
 SRCREV ="4fe4ac8dde6ba14841da598ec37f8c6911fe0f64"
 SRC_URI = " git://github.com/fail2ban/fail2ban.git;branch=0.11;protocol=https \
@@ -15,12 +17,17 @@ SRC_URI = " git://github.com/fail2ban/fail2ban.git;branch=0.11;protocol=https \
         file://run-ptest \
 "
 
-inherit update-rc.d ptest setuptools3
+inherit update-rc.d ptest setuptools3_legacy
 
 S = "${WORKDIR}/git"
 
 do_compile () {
     cd ${S}
+
+    #remove symlink to python3
+    # otherwise 2to3 is run against it
+    rm -f bin/fail2ban-python
+
     ./fail2ban-2to3
 }
 

@@ -1,4 +1,4 @@
-From 2c270f8fd9f45ff0792d2730c25eb2f673314115 Mon Sep 17 00:00:00 2001
+From 4be4ce8c2a37b3295731141903c0e97da7acc91b Mon Sep 17 00:00:00 2001
 From: "Kowalski, Mariusz" <mariusz.kowalski@intel.com>
 Date: Thu, 27 Feb 2020 15:48:56 +0100
 Subject: [PATCH] MCTP Daemon D-Bus interface definition.
@@ -16,9 +16,9 @@ Change-Id: Ida66f8ffcf00003655edcb0fb0112202797b8e1a
  .../MCTP/Binding/PCIe.interface.yaml          |  29 +++
  .../MCTP/Binding/SMBus.interface.yaml         |  17 ++
  .../MCTP/BusOwner.interface.yaml              |  17 ++
- .../MCTP/Endpoint.interface.yaml              |   4 +
+ .../MCTP/Endpoint.interface.yaml              |   5 +
  .../MCTP/SupportedMessageTypes.interface.yaml |  36 +++
- 6 files changed, 330 insertions(+)
+ 6 files changed, 331 insertions(+)
  create mode 100644 yaml/xyz/openbmc_project/MCTP/Base.interface.yaml
  create mode 100644 yaml/xyz/openbmc_project/MCTP/Binding/PCIe.interface.yaml
  create mode 100644 yaml/xyz/openbmc_project/MCTP/Binding/SMBus.interface.yaml
@@ -27,7 +27,7 @@ Change-Id: Ida66f8ffcf00003655edcb0fb0112202797b8e1a
 
 diff --git a/yaml/xyz/openbmc_project/MCTP/Base.interface.yaml b/yaml/xyz/openbmc_project/MCTP/Base.interface.yaml
 new file mode 100644
-index 000000000000..9438551e648e
+index 00000000..9438551e
 --- /dev/null
 +++ b/yaml/xyz/openbmc_project/MCTP/Base.interface.yaml
 @@ -0,0 +1,227 @@
@@ -260,7 +260,7 @@ index 000000000000..9438551e648e
 +    - name: VDIANA
 diff --git a/yaml/xyz/openbmc_project/MCTP/Binding/PCIe.interface.yaml b/yaml/xyz/openbmc_project/MCTP/Binding/PCIe.interface.yaml
 new file mode 100644
-index 000000000000..1bd28818b39a
+index 00000000..1bd28818
 --- /dev/null
 +++ b/yaml/xyz/openbmc_project/MCTP/Binding/PCIe.interface.yaml
 @@ -0,0 +1,29 @@
@@ -295,7 +295,7 @@ index 000000000000..1bd28818b39a
 +        - name: NotApplicable
 diff --git a/yaml/xyz/openbmc_project/MCTP/Binding/SMBus.interface.yaml b/yaml/xyz/openbmc_project/MCTP/Binding/SMBus.interface.yaml
 new file mode 100644
-index 000000000000..9219ad02af06
+index 00000000..9219ad02
 --- /dev/null
 +++ b/yaml/xyz/openbmc_project/MCTP/Binding/SMBus.interface.yaml
 @@ -0,0 +1,17 @@
@@ -318,7 +318,7 @@ index 000000000000..9219ad02af06
 +      description: Slave address to be used for this medium
 diff --git a/yaml/xyz/openbmc_project/MCTP/BusOwner.interface.yaml b/yaml/xyz/openbmc_project/MCTP/BusOwner.interface.yaml
 new file mode 100644
-index 000000000000..d46298ed35b4
+index 00000000..d46298ed
 --- /dev/null
 +++ b/yaml/xyz/openbmc_project/MCTP/BusOwner.interface.yaml
 @@ -0,0 +1,17 @@
@@ -340,10 +340,10 @@ index 000000000000..d46298ed35b4
 +      type: boolean
 +      description: Indicates Eid pool is managed by self
 diff --git a/yaml/xyz/openbmc_project/MCTP/Endpoint.interface.yaml b/yaml/xyz/openbmc_project/MCTP/Endpoint.interface.yaml
-index 119f1c673c2c..abb3ac930236 100644
+index 8cb0f133..abb3ac93 100644
 --- a/yaml/xyz/openbmc_project/MCTP/Endpoint.interface.yaml
 +++ b/yaml/xyz/openbmc_project/MCTP/Endpoint.interface.yaml
-@@ -6,6 +6,10 @@ description: >
+@@ -6,6 +6,11 @@ description: >
      MCTP-capable management controllers and managed devices.
  
  properties:
@@ -351,12 +351,13 @@ index 119f1c673c2c..abb3ac930236 100644
 +      type: enum[xyz.openbmc_project.MCTP.Base.BindingModeTypes]
 +      description: >
 +          Endpoint / BusOwner / Bridge
- 
++
      - name: NetworkId
        type: size
+       description: >
 diff --git a/yaml/xyz/openbmc_project/MCTP/SupportedMessageTypes.interface.yaml b/yaml/xyz/openbmc_project/MCTP/SupportedMessageTypes.interface.yaml
 new file mode 100644
-index 000000000000..fa447ee6a3bb
+index 00000000..fa447ee6
 --- /dev/null
 +++ b/yaml/xyz/openbmc_project/MCTP/SupportedMessageTypes.interface.yaml
 @@ -0,0 +1,36 @@

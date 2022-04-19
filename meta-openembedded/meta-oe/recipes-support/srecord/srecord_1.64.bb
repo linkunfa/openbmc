@@ -1,6 +1,6 @@
 SUMMARY = "A collection of powerful tools for manipulating EPROM load files."
 SECTION = "devel"
-LICENSE = "GPLv3+ & LGPLv3+"
+LICENSE = "GPL-3.0-or-later & LGPL-3.0-or-later"
 LIC_FILES_CHKSUM = "file://LICENSE;md5=8dfcbf2f0a144b97f0931b6394debea7"
 
 SRC_URI = " \
@@ -21,7 +21,7 @@ inherit autotools-brokensep
 do_configure:prepend() {
     # To autoreconf we need the script in ${S}, we can't tell autotools to use
     # etc/ because then it can't find the Makefile.in
-    ln -s ${S}/etc/configure.ac ${S}
+    ln -sf ${S}/etc/configure.ac ${S}
 }
 
 PACKAGECONFIG ??= "gcrypt"

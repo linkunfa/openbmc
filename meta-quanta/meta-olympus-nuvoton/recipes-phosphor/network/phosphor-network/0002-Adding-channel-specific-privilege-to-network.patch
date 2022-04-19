@@ -1,4 +1,4 @@
-From 3569a899ad14f78fb0cd9f8df5371b21df3ac8dd Mon Sep 17 00:00:00 2001
+From 970ba4738f30bc965c28a8fe4d01b6b359f412ea Mon Sep 17 00:00:00 2001
 From: Joseph Liu <kwliu@nuvoton.com>
 Date: Thu, 11 Nov 2021 16:03:31 +0800
 Subject: [PATCH 2/2] Adding channel specific privilege to network
@@ -27,7 +27,7 @@ Signed-off-by: Joseph Liu <kwliu@nuvoton.com>
  4 files changed, 270 insertions(+), 1 deletion(-)
 
 diff --git a/src/ethernet_interface.cpp b/src/ethernet_interface.cpp
-index 3da9a57..e3435d8 100644
+index 52f68d1..0173119 100644
 --- a/src/ethernet_interface.cpp
 +++ b/src/ethernet_interface.cpp
 @@ -45,6 +45,10 @@ constexpr auto PROPERTY_INTERFACE = "org.freedesktop.DBus.Properties";
@@ -41,7 +41,7 @@ index 3da9a57..e3435d8 100644
  std::map<EthernetInterface::DHCPConf, std::string> mapDHCPToSystemd = {
      {EthernetInterface::DHCPConf::both, "true"},
      {EthernetInterface::DHCPConf::v4, "ipv4"},
-@@ -115,6 +119,7 @@ EthernetInterface::EthernetInterface(sdbusplus::bus::bus& bus,
+@@ -117,6 +121,7 @@ EthernetInterface::EthernetInterface(sdbusplus::bus::bus& bus,
      EthernetInterfaceIntf::autoNeg(std::get<2>(ifInfo));
      EthernetInterfaceIntf::speed(std::get<0>(ifInfo));
  #endif
@@ -49,7 +49,7 @@ index 3da9a57..e3435d8 100644
  
      // Emit deferred signal.
      if (emitSignal)
-@@ -1269,5 +1274,124 @@ std::string EthernetInterface::defaultGateway6(std::string gateway)
+@@ -1271,5 +1276,124 @@ std::string EthernetInterface::defaultGateway6(std::string gateway)
  
      return gw;
  }
@@ -260,7 +260,7 @@ index 8928455..a3e33e3 100644
  
  } // namespace network
 diff --git a/src/network_manager.cpp b/src/network_manager.cpp
-index 19e4673..1c8bf3b 100644
+index b2ca45d..22997cb 100644
 --- a/src/network_manager.cpp
 +++ b/src/network_manager.cpp
 @@ -39,6 +39,13 @@ extern std::unique_ptr<Timer> reloadTimer;
@@ -276,8 +276,8 @@ index 19e4673..1c8bf3b 100644
 +
  Manager::Manager(sdbusplus::bus::bus& bus, const char* objPath,
                   const std::string& path) :
-     details::VLANCreateIface(bus, objPath, true),
-@@ -46,6 +53,101 @@ Manager::Manager(sdbusplus::bus::bus& bus, const char* objPath,
+     details::VLANCreateIface(bus, objPath,
+@@ -47,6 +54,101 @@ Manager::Manager(sdbusplus::bus::bus& bus, const char* objPath,
  {
      fs::path confDir(path);
      setConfDir(confDir);
