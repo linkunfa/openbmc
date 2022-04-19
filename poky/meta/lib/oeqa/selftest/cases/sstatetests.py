@@ -8,8 +8,7 @@ import glob
 import subprocess
 import tempfile
 
-from oeqa.selftest.case import OESelftestTestCase
-from oeqa.utils.commands import runCmd, bitbake, get_bb_var, get_test_layer, create_temp_layer
+from oeqa.utils.commands import runCmd, bitbake, get_bb_var, create_temp_layer
 from oeqa.selftest.cases.sstate import SStateBase
 import oe
 
@@ -177,7 +176,7 @@ class SStateTests(SStateBase):
         # QA checks for this test. It may report errors otherwise.
         self.append_config('ERROR_QA:remove = "version-going-backwards"')
 
-        # For not this only checks if random sstate tasks are handled correctly as a group.
+        # For now this only checks if random sstate tasks are handled correctly as a group.
         # In the future we should add control over what tasks we check for.
 
         sstate_archs_list = []

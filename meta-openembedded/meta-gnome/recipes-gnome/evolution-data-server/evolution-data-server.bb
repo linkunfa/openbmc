@@ -11,6 +11,7 @@ inherit pkgconfig gsettings gobject-introspection features_check cmake gtk-doc g
 REQUIRED_DISTRO_FEATURES = "x11"
 
 SRC_URI += " \
+    file://0001-cmake-Do-not-export-CC-into-gir-compiler.patch \
     file://0001-CMakeLists.txt-Remove-TRY_RUN-for-iconv.patch \
     file://0002-CMakeLists.txt-remove-CHECK_C_SOURCE_RUNS-check.patch \
     file://0003-contact-Replace-the-Novell-sample-contact-with-somet.patch \
@@ -24,16 +25,17 @@ LKSTRFTIME:libc-musl = "HAVE_LKSTRFTIME=OFF"
 EXTRA_OECMAKE = " \
     -DSYSCONF_INSTALL_DIR=${sysconfdir} \
     -DWITH_KRB5=OFF \
-    -DENABLE_UOA=OFF \
+    -DENABLE_GOA=OFF \
     -DENABLE_GOOGLE_AUTH=OFF \
     -DENABLE_WEATHER=OFF \
-    -DG_IR_COMPILER=${STAGING_BINDIR}/g-ir-compiler-wrapper \
-    -DG_IR_SCANNER=${STAGING_BINDIR}/g-ir-scanner-wrapper \
     -DVAPIGEN=${STAGING_BINDIR_NATIVE}/vapigen \
     ${@bb.utils.contains('GI_DATA_ENABLED', 'True', '-DENABLE_INTROSPECTION=ON -DENABLE_VALA_BINDINGS=ON', '-DENABLE_INTROSPECTION=OFF', d)} \
     -D${LKSTRFTIME} \
     -DLIB_SUFFIX=${@d.getVar('baselib').replace('lib', '')} \
 "
+
+EXTRA_OECMAKE:append:class-target = " -DG_IR_COMPILER=${STAGING_BINDIR}/g-ir-compiler-wrapper"
+EXTRA_OECMAKE:append:class-target = " -DG_IR_SCANNER=${STAGING_BINDIR}/g-ir-scanner-wrapper"
 
 PACKAGECONFIG[canberra] = "-DENABLE_CANBERRA=ON,-DENABLE_CANBERRA=OFF,libcanberra"
 PACKAGECONFIG[oauth]    = "-DENABLE_OAUTH2=ON,-DENABLE_OAUTH2=OFF,webkitgtk json-glib"
@@ -45,6 +47,9 @@ PACKAGECONFIG[openldap] = "-DWITH_OPENLDAP=ON,-DWITH_OPENLDAP=OFF,openldap"
 
 # -ldb needs this on some platforms
 LDFLAGS += "-lpthread -lgmodule-2.0 -lgthread-2.0"
+
+# invokes libraries from build host
+GI_DATA_ENABLED:libc-musl="False"
 
 do_configure:append () {
     cp ${WORKDIR}/iconv-detect.h ${S}/src

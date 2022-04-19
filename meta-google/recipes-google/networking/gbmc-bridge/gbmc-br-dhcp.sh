@@ -29,13 +29,17 @@ done
 gbmc_br_dhcp_run_hooks() {
   local hook
   for hook in "${GBMC_BR_DHCP_HOOKS[@]}"; do
-    "$hook" || continue
+    "$hook" || return
   done
 }
 
 # SC can't find this path during repotest
 # shellcheck disable=SC1091
 source /usr/share/network/lib.sh || exit
+
+# Write out the current PID and cleanup when complete
+trap 'rm -f /run/gbmc-br-dhcp.pid' EXIT
+echo "$$" >/run/gbmc-br-dhcp.pid
 
 if [ "$1" = bound ]; then
   # Variable is from the environment via udhcpc6
@@ -97,5 +101,9 @@ EOF
     hostnamectl set-hostname "$fqdn" || true
   fi
 
-  gbmc_br_dhcp_run_hooks
+  gbmc_br_dhcp_run_hooks || exit
+
+  # Ensure that the installer knows we have completed processing DHCP by
+  # running a service that reports completion
+  systemctl start dhcp-done --no-block
 fi

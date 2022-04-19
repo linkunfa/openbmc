@@ -16,6 +16,7 @@ RUST_PANIC_STRATEGY ?= "unwind"
 # Native builds are not effected by TCLIBC. Without this, rust-native
 # thinks it's "target" (i.e. x86_64-linux) is a musl target.
 RUST_LIBC = "${TCLIBC}"
+RUST_LIBC:class-crosssdk = "glibc"
 RUST_LIBC:class-native = "glibc"
 
 def determine_libc(d, thing):
@@ -65,7 +66,7 @@ def rust_base_triple(d, thing):
     if thing == "TARGET" and target_is_armv7(d):
         arch = "armv7"
     else:
-        arch = d.getVar('{}_ARCH'.format(thing))
+        arch = oe.rust.arch_to_rust_arch(d.getVar('{}_ARCH'.format(thing)))
 
     # All the Yocto targets are Linux and are 'unknown'
     vendor = "-unknown"
@@ -88,6 +89,10 @@ def rust_base_triple(d, thing):
     if os == "linux-gnueabi" or os == "linux-musleabi":
         libc = bb.utils.contains('TUNE_FEATURES', 'callconvention-hard', 'hf', '', d)
     return arch + vendor + '-' + os + libc
+
+
+# In some cases uname and the toolchain differ on their idea of the arch name
+RUST_BUILD_ARCH = "${@oe.rust.arch_to_rust_arch(d.getVar('BUILD_ARCH'))}"
 
 # Naming explanation
 # Yocto

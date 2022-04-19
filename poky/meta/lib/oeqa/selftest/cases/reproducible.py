@@ -9,8 +9,6 @@ import bb.utils
 import functools
 import multiprocessing
 import textwrap
-import json
-import unittest
 import tempfile
 import shutil
 import stat
@@ -206,7 +204,7 @@ class ReproducibleTests(OESelftestTestCase):
             PACKAGE_CLASSES = "{package_classes}"
             INHIBIT_PACKAGE_STRIP = "1"
             TMPDIR = "{tmpdir}"
-            LICENSE_FLAGS_WHITELIST = "commercial"
+            LICENSE_FLAGS_ACCEPTED = "commercial"
             DISTRO_FEATURES:append = ' systemd pam'
             USERADDEXTENSION = "useradd-staticids"
             USERADD_ERROR_DYNAMIC = "skip"

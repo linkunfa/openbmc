@@ -20,7 +20,7 @@ DEPENDS += "systemd"
 
 S = "${WORKDIR}/git"
 SRC_URI = "git://github.com/openbmc/phosphor-host-postd;branch=master;protocol=https"
-SRCREV = "a396c85ae81f8d310a43aa39ab611ae7d644eb9e"
+SRCREV = "80be5d8335f31c12edae7edd2fc32a0583d765f9"
 
 SNOOP_DEVICE ?= "aspeed-lpc-snoop0"
 POST_CODE_BYTES ?= "1"
@@ -33,6 +33,7 @@ EXTRA_OEMESON:append = " \
     -Dsnoop-device=${SNOOP_DEVICE} \
     -Dpost-code-bytes=${POST_CODE_BYTES} \
     -Dsystemd-target=multi-user.target \
+    -Dtests=disabled \
 "
 
 POSTCODE_SEVENSEG_DEVICE ?= "seven_seg_disp_val"
