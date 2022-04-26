@@ -205,7 +205,7 @@ Arbel_EVB_FlashProg.exe -open-desc "NPCM8mnx_Evaluation_Board B" -verify-on -pro
 * User can program images by u-boot command.
 * If you are using Red EVB board:
   - The flash 0 size is 4MB, you should program openbmc image to flash 1.
-* If you are using Blue EVB board:
+* If you are using Blue/Green EVB board:
   - The flash 0 size is 128MB, you can leave all images at flash 0.
 
 1. Setting up:
@@ -235,7 +235,7 @@ setenv stderr serial
 setenv stdin serial
 setenv stdout serial
 ```
-* Blue EVB, boot from flash 0
+* Blue/Green EVB, boot from flash 0
 ```ruby
 setenv uimage_flash_addr 0x80200000
 ```
@@ -256,7 +256,7 @@ saveenv
 ```ruby
 setenv ethact gmac2
 tftp 10000000 image-bmc
-/* Blue EVB */
+/* Blue/Green EVB */
 sf probe 0:0
 sf update 0x10000000 0x0 ${filesize}
 /* Red EVB */
@@ -268,7 +268,7 @@ sf update 0x10000000 0x0 ${filesize}
 ```ruby
 setenv ethact gmac2
 tftp 10000000 image-kernel
-/* Blue EVB */
+/* Blue/Green EVB */
 sf probe 0:0
 sf update 0x10000000 0x200000 ${filesize}
 /* Red EVB */
