@@ -16,8 +16,6 @@ SRC_URI = "${REPO};${BRANCHARG}"
 
 inherit image-artifact-names
 
-
-COMPATIBLE_MACHINE = "(evb-npcm845)"
 MACHINE_SOC ?= "npcm8xx"
 PLATFORM = "npcm845x"
 

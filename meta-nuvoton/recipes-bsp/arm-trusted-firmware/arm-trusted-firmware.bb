@@ -5,7 +5,7 @@ LIC_FILES_CHKSUM = "file://license.rst;md5=1dd070c98a281d18d9eefd938729b031"
 
 include arm-trusted-firmware.inc
 
-FILESEXTRAPATHS:prepend:evb-npcm845 := "${THISDIR}/${PN}:"
-SRC_URI:append:evb-npcm845 = " file://0001-plat-nuvoton-npcm845x-fix-build-warning.patch \
-			       file://0002-plat-nuvoton-npcm845x-fix-reboot-hang.patch \
-                     "
+FILESEXTRAPATHS:prepend:npcm8xx = "${THISDIR}/${PN}:"
+SRC_URI:append:npcm8xx= " file://0001-plat-nuvoton-npcm845x-fix-build-warning.patch \
+                   file://0002-plat-nuvoton-npcm845x-fix-reboot-hang.patch \
+                 "

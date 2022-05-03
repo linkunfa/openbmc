@@ -18,7 +18,6 @@ SRC_URI = "${REPO};${BRANCHARG} \
           "
 SRCREV = "6d2cdcf8e9c660751fc656b45ee631ade8d956e4"
 
-COMPATIBLE_MACHINE = "(evb-npcm845)"
 OPTEEMACHINE ?= "nuvoton"
 MACHINE_SOC ?= "npcm8xx"
 
