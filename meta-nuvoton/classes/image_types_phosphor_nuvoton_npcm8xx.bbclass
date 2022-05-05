@@ -15,7 +15,6 @@ KMT_TIPFW_BB_UBOOT_BINARY = "u-boot.bin.merged"
 FULL_SUFFIX = "full"
 MERGED_SUFFIX = "merged"
 UBOOT_SUFFIX:append = ".${MERGED_SUFFIX}"
-SECURED = "${SECURED_TIPFW}"
 
 IGPS_DIR = "${STAGING_DIR_NATIVE}/${datadir}/npcm8xx-igps"
 inherit logging
@@ -25,23 +24,27 @@ do_prepare_bootloaders() {
     local olddir="$(pwd)"
     cd ${DEPLOY_DIR_IMAGE}
 
-    bingo ${IGPS_DIR}/KmtAndHeader_${IGPS_MACHINE}.xml \
-            -o ${DEPLOY_DIR_IMAGE}/${KMT_BINARY}
+    if [ "${SECURED_TIPFW}" = "False" ]; then
+        bingo ${IGPS_DIR}/KmtAndHeader_${IGPS_MACHINE}.xml \
+                -o ${DEPLOY_DIR_IMAGE}/${KMT_BINARY}
 
-    bingo ${IGPS_DIR}/TipFwAndHeader_L0_${IGPS_MACHINE}.xml \
-            -o ${DEPLOY_DIR_IMAGE}/${TIPFWL0_BINARY}
+        bingo ${IGPS_DIR}/TipFwAndHeader_L0_${IGPS_MACHINE}.xml \
+                -o ${DEPLOY_DIR_IMAGE}/${TIPFWL0_BINARY}
 
-    bingo ${IGPS_DIR}/TipFwAndHeader_L1_${IGPS_MACHINE}.xml \
-            -o ${DEPLOY_DIR_IMAGE}/${TIPFWL1_BINARY}
+        bingo ${IGPS_DIR}/TipFwAndHeader_L1_${IGPS_MACHINE}.xml \
+                -o ${DEPLOY_DIR_IMAGE}/${TIPFWL1_BINARY}
+    fi
+
+    if [ "${SECURED_OS}" = "True" ]; then
+        bingo ${IGPS_DIR}/BL31_AndHeader_${IGPS_MACHINE}.xml \
+                -o ${DEPLOY_DIR_IMAGE}/${ATF_BINARY}
+
+        bingo ${IGPS_DIR}/OpTeeAndHeader_${IGPS_MACHINE}.xml \
+                -o ${DEPLOY_DIR_IMAGE}/${OPTEE_BINARY}
+    fi
 
     bingo ${IGPS_DIR}/BootBlockAndHeader_${IGPS_MACHINE}.xml \
             -o ${DEPLOY_DIR_IMAGE}/${BOOTBLOCK}
-
-    bingo ${IGPS_DIR}/BL31_AndHeader_${IGPS_MACHINE}.xml \
-            -o ${DEPLOY_DIR_IMAGE}/${ATF_BINARY}
-
-    bingo ${IGPS_DIR}/OpTeeAndHeader_${IGPS_MACHINE}.xml \
-            -o ${DEPLOY_DIR_IMAGE}/${OPTEE_BINARY}
 
     bingo ${IGPS_DIR}/UbootHeader_${IGPS_MACHINE}.xml \
             -o ${UBOOT_BINARY}.${FULL_SUFFIX}
@@ -132,7 +135,7 @@ python do_merge_bootloaders() {
         file2.close()
         file3.close()
 
-    if d.getVar('SECURED', True) == "True":
+    if d.getVar('SECURED_TIPFW', True) == "True":
         d.setVar('KMT_TIPFW_BINARY', "Kmt_TipFwL0_TipFwL1.bin")
 
         Merge_bin_files_and_pad(os.path.join(d.getVar('DEPLOY_DIR_IMAGE', True), '%s' % d.getVar('KMT_TIPFW_BINARY',True)),
@@ -169,21 +172,24 @@ python do_merge_bootloaders() {
             os.path.join(d.getVar('DEPLOY_DIR_IMAGE', True), '%s' % d.getVar('KMT_TIPFW_BB_BINARY',True)),
             0x1000, 0x20)
 
-    Merge_bin_files_and_pad(os.path.join(d.getVar('DEPLOY_DIR_IMAGE', True), '%s' % d.getVar('KMT_TIPFW_BB_BINARY',True)),
-        os.path.join(d.getVar('DEPLOY_DIR_IMAGE', True), '%s' % d.getVar('ATF_BINARY',True)),
-        os.path.join(d.getVar('DEPLOY_DIR_IMAGE', True), '%s' % d.getVar('KMT_TIPFW_BB_BL31_BINARY',True)),
-        0x1000, 0x20)
+    if d.getVar('SECURED_OS', True) == "True":
+        Merge_bin_files_and_pad(os.path.join(d.getVar('DEPLOY_DIR_IMAGE', True), '%s' % d.getVar('KMT_TIPFW_BB_BINARY',True)),
+            os.path.join(d.getVar('DEPLOY_DIR_IMAGE', True), '%s' % d.getVar('OPTEE_BINARY',True)),
+            os.path.join(d.getVar('DEPLOY_DIR_IMAGE', True), '%s' % d.getVar('KMT_TIPFW_BB_BL31_TEE_BINARY',True)),
+            0x1000, 0x20)
 
-    Merge_bin_files_and_pad(os.path.join(d.getVar('DEPLOY_DIR_IMAGE', True), '%s' % d.getVar('KMT_TIPFW_BB_BL31_BINARY',True)),
-        os.path.join(d.getVar('DEPLOY_DIR_IMAGE', True), '%s' % d.getVar('OPTEE_BINARY',True)),
-        os.path.join(d.getVar('DEPLOY_DIR_IMAGE', True), '%s' % d.getVar('KMT_TIPFW_BB_BL31_TEE_BINARY',True)),
-        0x1000, 0x20)
-
-    Merge_bin_files_and_pad(os.path.join(d.getVar('DEPLOY_DIR_IMAGE', True), '%s' % d.getVar('KMT_TIPFW_BB_BL31_TEE_BINARY',True)),
-        os.path.join(d.getVar('DEPLOY_DIR_IMAGE', True), '%s.full' % d.getVar('UBOOT_BINARY',True)),
-        os.path.join(d.getVar('DEPLOY_DIR_IMAGE', True), '%s' % d.getVar('KMT_TIPFW_BB_UBOOT_BINARY',True)),
-        0x1000, 0x20)
+        Merge_bin_files_and_pad(os.path.join(d.getVar('DEPLOY_DIR_IMAGE', True), '%s' % d.getVar('KMT_TIPFW_BB_BL31_TEE_BINARY',True)),
+            os.path.join(d.getVar('DEPLOY_DIR_IMAGE', True), '%s.full' % d.getVar('UBOOT_BINARY',True)),
+            os.path.join(d.getVar('DEPLOY_DIR_IMAGE', True), '%s' % d.getVar('KMT_TIPFW_BB_UBOOT_BINARY',True)),
+            0x1000, 0x20)
+    else:
+        Merge_bin_files_and_pad(os.path.join(d.getVar('DEPLOY_DIR_IMAGE', True), '%s' % d.getVar('KMT_TIPFW_BB_BINARY',True)),
+            os.path.join(d.getVar('DEPLOY_DIR_IMAGE', True), '%s.full' % d.getVar('UBOOT_BINARY',True)),
+            os.path.join(d.getVar('DEPLOY_DIR_IMAGE', True), '%s' % d.getVar('KMT_TIPFW_BB_UBOOT_BINARY',True)),
+            0x1000, 0x20)
 }
+
+prepare_secureos = "${@ "arm-trusted-firmware:do_deploy optee-os:do_deploy" if bb.utils.to_boolean(d.getVar('SECURED_OS')) else "" }"
 
 do_prepare_bootloaders[depends] += " \
     npcm8xx-kmt:do_deploy \
@@ -191,8 +197,7 @@ do_prepare_bootloaders[depends] += " \
     npcm8xx-tipfw-l0:do_deploy \
     npcm8xx-tipfw-l1:do_deploy \
     npcm8xx-bootblock:do_deploy \
-    arm-trusted-firmware:do_deploy \
-    optee-os:do_deploy \
+    ${prepare_secureos} \
     npcm7xx-bingo-native:do_populate_sysroot \
     npcm8xx-igps-native:do_populate_sysroot \
     "
