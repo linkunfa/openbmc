@@ -16,7 +16,7 @@ BRANCHARG = "${@['nobranch=1', 'branch=${BRANCH}'][d.getVar('BRANCH', True) != '
 SRC_URI = "${REPO};${BRANCHARG} \           
 	   file://0001-allow-sysroot-for-libgcc-lookup.patch \
           "
-SRCREV = "6d2cdcf8e9c660751fc656b45ee631ade8d956e4"
+SRCREV = "546d2cad3d4bd1bad686290380742ac515c1589c"
 
 COMPATIBLE_MACHINE = "(evb-npcm845)"
 OPTEEMACHINE ?= "nuvoton"
