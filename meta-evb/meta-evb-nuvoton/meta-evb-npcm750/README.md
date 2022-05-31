@@ -5,30 +5,24 @@ supports a large set of peripherals made by Nuvoton.
 More information about the NPCM7XX can be found
 [here](http://www.nuvoton.com/hq/products/cloud-computing/ibmc/?__locale=en).
 
-- Working with [openbmc master branch](https://github.com/openbmc/openbmc/tree/master "openbmc master branch")
-- Working with [NTIL linux 4.19.16 for Poleg](https://github.com/Nuvoton-Israel/linux/tree/Poleg-4.19.16-OpenBMC "NTIL")
-
 # Dependencies
-![](https://cdn.rawgit.com/maxdog988/icons/61485d57/label_openbmc_ver_master.svg)
-![](https://cdn.rawgit.com/maxdog988/icons/master/label_linux_ver_4.19.16.svg)
-
 This layer depends on:
 
 ```
   URI: git@github.com:Nuvoton-Israel/openbmc
-  branch: master
+  branch: npcm-master
 ```
 
 # Contacts for Patches
 
 Please submit any patches against the NPCM750 evaluation board layer to the maintainer of nuvoton:
 
-* Oshri Alkoby, <oshri.alkoby@nuvoton.com>
 * Joseph Liu, <KWLIU@nuvoton.com>
 * Medad CChien, <CTCCHIEN@nuvoton.com>
 * Tyrone Ting, <KFTING@nuvoton.com>
 * Stanley Chu, <YSCHU@nuvoton.com>
 * Tim Lee, <CHLI30@nuvoton.com>
+* Marvin Lin, <KFLIN@nuvoton.com>
 
 # Table of Contents
 
@@ -36,14 +30,11 @@ Please submit any patches against the NPCM750 evaluation board layer to the main
 - [Contacts for Patches](#contacts-for-patches)
 - [Features of NPCM750 Evaluation Board](#features-of-npcm750-evaluation-board)
   * [WebUI](#webui)
-    + [Remote KVM](#remote-kvm)
+    + [KVM](#kvm)
     + [Serial Over Lan](#serial-over-lan)
-    + [Remote Virtual Media](#remote-virtual-media)
+    + [Virtual Media](#virtual-media)
     + [BMC Firmware Update](#bmc-firmware-update)
-    + [Server Power Operations](#server-power-operations)
-  * [Chassis Buttons](#chassis-buttons)
   * [System](#system)
-    + [Time](#time)
     + [Sensor](#sensor)
     + [LED](#led)
     + [ADC](#adc)
@@ -68,115 +59,72 @@ Please submit any patches against the NPCM750 evaluation board layer to the main
 
 ## WebUI
 
-### Remote KVM
-<img align="right" width="30%" src="https://cdn.rawgit.com/NTC-CCBG/snapshots/e8178eef/openbmc/kvm.png">
+### KVM
+<img align="right" width="30%" src="https://raw.githubusercontent.com/NTC-CCBG/snapshots/master/openbmc/ipkvm.PNG">
 
 This is a Virtual Network Computing (VNC) server programm using [LibVNCServer](https://github.com/LibVNC/libvncserver).
-1. Support Video Capture and Differentiation(VCD), compares frame by hardware.
-2. Support Encoding Compression Engine(ECE), 16-bit hextile compression hardware encoding.
-3. Support USB HID, support Keyboard and Mouse.
-
-The VNC viewer also enabled in webui with below patches.
-1. [Implement KVM in webui using novnc module](https://github.com/Nuvoton-Israel/openbmc/tree/master/meta-evb/meta-evb-nuvoton/meta-evb-npcm750/recipes-phosphor/webui/files/0001-Implement-KVM-in-webui.patch)
-	* This patch is provided by [Ed tanous](ed@tanous.net).
-2. [Remove sending sec-websocket-protocol in novnc module](https://github.com/Nuvoton-Israel/openbmc/tree/master/meta-evb/meta-evb-nuvoton/meta-evb-npcm750/recipes-phosphor/webui)
+* Support Video Capture and Differentiation (VCD).
+* Support 16-bit Hextile Encoding Compression Engine (ECE).
+* Support USB HID (Keyboard and Mouse).
 
 **Source URL**
 
-* [https://github.com/Nuvoton-Israel/obmc-ikvm](https://github.com/Nuvoton-Israel/obmc-ikvm)
-* [https://github.com/Nuvoton-Israel/openbmc/blob/master/meta-evb/meta-evb-nuvoton/meta-evb-npcm750/recipes-phosphor/interfaces/phosphor-rest/0001-add-kvm-handler.patch](https://github.com/Nuvoton-Israel/openbmc/blob/master/meta-evb/meta-evb-nuvoton/meta-evb-npcm750/recipes-phosphor/interfaces/phosphor-rest/0001-add-kvm-handler.patch)
+* [https://github.com/Nuvoton-Israel/obmc-ikvm/tree/upstream-v4l2](https://github.com/Nuvoton-Israel/obmc-ikvm/tree/upstream-v4l2)
 
 **How to use**
 
-1. Prepare a motherboard with a PCI-E slot at least.
-2. Plug Poleg EVB into motherboard with PCI-E connection.
-3. Connect a micro usb cable from your workstation to J1 header of Poleg EVB.
-4. Connect an ethernet cable between your workstation and J12 header of Poleg EVB.
-5. Power up the Poleg EVB and motherboard.
-	* Noted the power on sequence to ensure the graphic of Poleg EVB is attached.
-      ```
-      Poleg EVB -> motherboard
-      ```
-6. Make sure the network is connected with your workstation.
-7. Launch a browser in your workstation and you will see the entry page.
+1. Prepare a motherboard and connect Poleg EVB through PCI-E.
+2. Connect a usb cable from motherboard to J1 header of Poleg EVB.
+3. Connect an ethernet cable between your workstation and J12 header of Poleg EVB.
+4. Power up the Poleg EVB and configure IP address.
+5. Launch a browser in your workstation and enter below URL.
     ```
-    /* Web Server */
-    https://<poelg ip>
+    https://<Poleg_EVB_IP>
     ```
-8. Login to OpenBMC home page
+6. Use below username/password to login OpenBMC home page, then navigate to the KVM page.
     ```
     Username: root
     Password: 0penBmc
     ```
-9. Navigate to noVNC viewer
+    
+    * You can use [Real VNC Viewer](https://www.realvnc.com/en/connect/download/viewer/) with below preferences instead of OpenBMC Web.
     ```
-    Server control -> KVM
+    /* Preference setting of Real VNC Viewer */
+    Quality: Custom
+    PreferredEncoding: Hextile
+    ColorLevel: rgb565
     ```
-**Performance**
-
-* Host OS: Windows Server 2012 R2
-
-
-|Playing video: [AQUAMAN](https://www.youtube.com/watch?v=2wcj6SrX4zw)|[Real VNC viewer](https://www.realvnc.com/en/connect/download/viewer/) | noVNC viewer
-:-------------|:--------|:-----------|
-Host Resolution    | FPS    | FPS |
-1024x768  |  25    | 8 |
-1280x1024   |  20  | 4 |
-1600x1200   |  14   | 3 |
-
-|Scrolling bar: [Demo video](https://drive.google.com/file/d/1H71_H6yjO8NU4Qu_ZL4F59FQ0PQmEo2n/view)|[Real VNC viewer](https://www.realvnc.com/en/connect/download/viewer/) | noVNC viewer
-:-------------|:--------|:-----------|
-Host Resolution    | FPS    | FPS |
-1024x768  |  31    | 15 |
-1280x1024   |  24  | 12 |
-1600x1200   |  20   | 7 |
-
-**The preferred settings of RealVNC Viewer**
-```
-Picture quality: Custom
-ColorLevel: rgb565
-PreferredEncoding: Hextile
-```
+7. Power up the motherboard and the video output will show on the WebUI (or Real VNC Viewer).
 
 **Maintainer**
 
-* Joseph Liu
+* Marvin Lin
 
 ### Serial Over Lan
-<img align="right" width="30%" src="https://cdn.rawgit.com/NTC-CCBG/snapshots/e8178eef/openbmc/sol-webui.png">
+<img align="right" width="30%" src="https://raw.githubusercontent.com/NTC-CCBG/snapshots/master/openbmc/SOL.PNG">
 
 The Serial over LAN (SoL) console redirects the output of the server’s serial port to a browser window on your workstation.
 
-This is a patch for enabling SOL in [phosphor-webui](https://github.com/openbmc/phosphor-webui) on Nuvoton's NPCM750.
-
-The patch provides the [obmc-console](https://github.com/openbmc/obmc-console) configuration.
-
-It's verified with Nuvoton's NPCM750 solution (which is referred as Poleg here) and Supermicro MBD-X9SCL-F-0.
-
 **Source URL**
 
-* [https://github.com/Nuvoton-Israel/openbmc/tree/master/meta-evb/meta-evb-nuvoton/meta-evb-npcm750/recipes-phosphor/console](https://github.com/Nuvoton-Israel/openbmc/tree/master/meta-evb/meta-evb-nuvoton/meta-evb-npcm750/recipes-phosphor/console)
-
-* [https://github.com/Nuvoton-Israel/openbmc-uefi-util/tree/npcm7xx_v2.1/sol_binary](https://github.com/Nuvoton-Israel/openbmc-uefi-util/tree/npcm7xx_v2.1/sol_binary)
+* [https://github.com/Nuvoton-Israel/openbmc/tree/npcm-master/meta-evb/meta-evb-nuvoton/meta-evb-npcm750/recipes-phosphor/console](https://github.com/Nuvoton-Israel/openbmc/tree/npcm-master/meta-evb/meta-evb-nuvoton/meta-evb-npcm750/recipes-phosphor/console)
 
 **How to use**
 
-1. Prepare a Poleg EVB with up-to-date boot block, Uboot and OpenBMC versions with this SOL patch applied.  Check with Nuvoton support for the most recent versions.
-
-2. Prepare a Supermicro MBD-X9SCL-F-0 motherboard and a LPC cable.
+1. Prepare a Supermicro MBD-X9SCL-F-0 motherboard and a LPC cable.
 
     > _The UEFI firmware version in Supermicro MBD-X9SCL-F-0 for verification is 2.15.1234._
 
-3. Connect pins of the **JTPM** header on **Supermicro MBD-X9SCL-F-0** to the **J10** header on **Poleg EVB** with the LPC cable:
+2. Connect pins of the **JTPM** header on **Supermicro MBD-X9SCL-F-0** to the **J10** header on **Poleg EVB** with the LPC cable:
 
     * Connect **pin 1-3, 5, 7-8, 10-12, 15-17** of JTPM with corresponding pins of J10, **one on one**.
 
-4. Steps to copy UEFI SOL related drivers to a USB drive.  
+3. Steps to copy UEFI SOL related drivers to a USB drive.  
 
     * Format the USB drive in FAT or FAT32.  
     * Download PolegSerialDxe.efi and TerminalDxe.efi from  [https://github.com/Nuvoton-Israel/openbmc-uefi-util/tree/npcm7xx_v2.1/sol_binary](https://github.com/Nuvoton-Israel/openbmc-uefi-util/tree/npcm7xx_v2.1/sol_binary) and copy them to the USB drive.
 
-5. Power up the Poleg EVB and steps to prepare a working terminal for Poleg:
+4. Power up the Poleg EVB and steps to prepare a working terminal for Poleg:
 
     * Download and install the USB-to-UART driver from: [http://www.ftdichip.com/Drivers/VCP.htm](http://www.ftdichip.com/Drivers/VCP.htm) according to the host OS in your workstation.  
     * Connect a micro usb cable from your workstation to J2 header of Poleg EVB.  
@@ -187,7 +135,7 @@ It's verified with Nuvoton's NPCM750 solution (which is referred as Poleg here) 
         * Login name: **root**  
         * Login password: **0penBmc**  
 
-6. Steps to configure Supermicro MBD-X9SCL-F-0 UEFI setting for SOL:
+5. Steps to configure Supermicro MBD-X9SCL-F-0 UEFI setting for SOL:
 
     * Do not plug any bootable device into Supermicro MBD-X9SCL-F-0.  
     * Power up Supermicro MBD-X9SCL-F-0 and boot into UEFI setting.  
@@ -224,7 +172,7 @@ It's verified with Nuvoton's NPCM750 solution (which is referred as Poleg here) 
       exit  
       ```
 
-7. Configure the ethernet communication between your workstation and Poleg EVB:
+6. Configure the ethernet communication between your workstation and Poleg EVB:
 
     * Connect an ethernet cable between your workstation and J7 header of Poleg EVB.  
     * Configure your workstation's ip address to 192.168.0.1 and the netmask to 255.255.255.0 as an example here.  
@@ -233,7 +181,7 @@ It's verified with Nuvoton's NPCM750 solution (which is referred as Poleg here) 
 	  ifconfig eth0 192.168.0.2 netmask 255.255.255.0
 	  ```
 
-8. Run SOL:
+7. Run SOL:
 
     * Please disable the proxy setting for this test if it's configured.
     * Launch a browser in your workstation and navigate to https://192.168.0.2.  
@@ -251,23 +199,19 @@ It's verified with Nuvoton's NPCM750 solution (which is referred as Poleg here) 
 
 * Tyrone Ting
 
-### Remote Virtual Media
-<img align="right" width="30%" src="https://cdn.rawgit.com/NTC-CCBG/snapshots/e0ebcf2/openbmc/vm-own.png">
+### Virtual Media
+<img align="right" width="20%" src="https://cdn.rawgit.com/NTC-CCBG/snapshots/3e65e7a/openbmc/vm_app_win.png">
+<img align="right" width="30%" src="https://cdn.rawgit.com/NTC-CCBG/snapshots/cab7306/openbmc/vm.png">
 
 Virtual Media (VM) is to emulate an USB drive on remote host PC via Network Block Device(NBD) and Mass Storage(MSTG).
 
 **Source URL**
 
-* [https://github.com/Nuvoton-Israel/openbmc/tree/master/meta-evb/meta-evb-nuvoton/meta-evb-npcm750/recipes-support/nbd](https://github.com/Nuvoton-Israel/openbmc/tree/master/meta-evb/meta-evb-nuvoton/meta-evb-npcm750/recipes-support/nbd)
-* [https://github.com/Nuvoton-Israel/openbmc/blob/master/meta-evb/meta-evb-nuvoton/meta-evb-npcm750/recipes-kernel/linux/linux-nuvoton/0002-nbd-fix-reconnect.patch](https://github.com/Nuvoton-Israel/openbmc/blob/master/meta-evb/meta-evb-nuvoton/meta-evb-npcm750/recipes-kernel/linux/linux-nuvoton/0002-nbd-fix-reconnect.patch)
-* [https://github.com/Nuvoton-Israel/openbmc/blob/master/meta-evb/meta-evb-nuvoton/meta-evb-npcm750/recipes-phosphor/interfaces/phosphor-rest/0002-add-vm-handler.patch](https://github.com/Nuvoton-Israel/openbmc/blob/master/meta-evb/meta-evb-nuvoton/meta-evb-npcm750/recipes-phosphor/interfaces/phosphor-rest/0002-add-vm-handler.patch)
-* [https://github.com/Nuvoton-Israel/openbmc/blob/master/meta-evb/meta-evb-nuvoton/meta-evb-npcm750/recipes-phosphor/webui/phosphor-webui/0002-Implement-VM-in-webui.patch](https://github.com/Nuvoton-Israel/openbmc/blob/master/meta-evb/meta-evb-nuvoton/meta-evb-npcm750/recipes-phosphor/webui/phosphor-webui/0002-Implement-VM-in-webui.patch)
+* [https://github.com/Nuvoton-Israel/openbmc/tree/npcm-master/meta-phosphor/recipes-connectivity/jsnbd](https://github.com/Nuvoton-Israel/openbmc/tree/npcm-master/meta-phosphor/recipes-connectivity/jsnbd)
 
 **How to use**
 
 1. Clone a physical usb drive to an image file
-    > _NOTICE : You can skip this step, if you enable VM via APP._
-
     * For Linux - use tool like **dd**
       ```
       dd if=/dev/sda of=usb.img bs=1M count=100
@@ -278,22 +222,26 @@ Virtual Media (VM) is to emulate an USB drive on remote host PC via Network Bloc
 
     * For Windows - use tool like **Win32DiskImager.exe**
 
-    > _NOTICE : A simple *.iso file cannot work for this._
+      > _NOTICE : A simple *.iso file cannot work for this._
+
+    * You can prepare an ISO file instead
 
 2. Enable Virtual Media
 
     2.1 VM-WEB
-    * Login to BMC and switch to webpage of VM on your browser
+    * Login and switch to webpage of VM on your browser
         ```
         https://XXX.XXX.XXX.XXX/#/server-control/vm
         ```
     *  Operations
-        * After `Chose an Image File`, click `Start VM` to start VM network service (still not hook USB disk to host platform)
-        * After `Start VM`, click `Mount USB` to hook the emulated usb disk to host platform, or click `Stop VM` to stop VM network service.
-        * After `Mount USB`, click `UnMount USB` to emulate unplugging the usb disk from host platform
-        * After `UnMount USB`, click `Stop VM` to stop VM network service, or click `Mount USB` to hook USB disk to host platform.
+        * After `Choose File`, click `Start` to start VM network service.
+        * After clicking `Start`, you will see a new USB device on HOST OS.
+        * If you want to stop this service, just click `Stop` to stop VM network service.
 
-    2.2 VM-APP
+    2.2 VM standalone application
+    * Download [application source code](https://github.com/Nuvoton-Israel/openbmc-util/tree/master/virtual_media_openbmc2.6)
+    * Follow the [readme](https://github.com/Nuvoton-Israel/openbmc-util/blob/master/virtual_media_openbmc2.6/NBDServerWSWindows/README) instructions install QT and Openssl
+    * Start QT creator, open project **VirtualMedia.pro**, then build all
     * Launch windows/linux application
         > _NOTICE : use `sudo` to launch app in linux and install `nmap` first_
 
@@ -328,444 +276,137 @@ windows/linux
 * Medad CChien
 
 ### BMC Firmware Update
-<img align="right" width="30%" src="https://cdn.rawgit.com/NTC-CCBG/snapshots/0f22742/openbmc/firmware-update.png">
+<img align="right" width="30%" src="https://cdn.rawgit.com/NTC-CCBG/snapshots/cab7306/openbmc/firmware-update.png">
 
 This is a secure flash update mechanism to update BMC firmware via WebUI.
 
 **Source URL**
 
-* [https://github.com/Nuvoton-Israel/openbmc/tree/master/meta-evb/meta-evb-nuvoton/meta-evb-npcm750/recipes-phosphor/images](https://github.com/Nuvoton-Israel/openbmc/tree/master/meta-evb/meta-evb-nuvoton/meta-evb-npcm750/recipes-phosphor/images)
+* [https://github.com/openbmc/phosphor-bmc-code-mgmt](https://github.com/openbmc/phosphor-bmc-code-mgmt)
+* [https://github.com/Nuvoton-Israel/openbmc/tree/npcm-master/meta-evb/meta-evb-nuvoton/meta-evb-npcm750/recipes-phosphor/flash/phosphor-software-manager](https://github.com/Nuvoton-Israel/openbmc/tree/npcm-master/meta-evb/meta-evb-nuvoton/meta-evb-npcm750/recipes-phosphor/flash/phosphor-software-manager)
 
 **How to use**
+* Update firmware via WebUI
+	1. Upload update package from webui, then you will see
+	    ```
+	    Activate   
+	    ```
+	    > if you select activate, then you will see activation dialog at item 2 
 
-1. Upload update package from webui, then you will see
-    ```
-    Activate   
-    ```
-    > if you select activate, then you will see activation dialog at item 2 
-    
-    ```
-    Delete
-    ```
-    > If you select delete, then the package will be deleted right now
+	    ```
+	    Delete
+	    ```
+	    > If you select delete, then the package will be deleted right now
 
-2. Confirm BMC firmware file activation
+	2. Confirm BMC firmware file activation
+	    ```
+	    ACTIVATE FIRMWARE FILE WITHOUT REBOOTING BMC
+	    ```
+	    > if you select this, you need to reboot BMC manually, and shutdown application will run update script to flash image into spi flash
+
+	    ```
+	    ACTIVATE FIRMWARE FILE AND AUTOMATICALLY REBOOT BMC
+	    ```
+	    > if you select this, BMC will shutdown right now, and shutdown application will run update script to flash image into spi flash
+
+* Update firmware via Redfish
+    * We can update BMC firmware via REST API provided by Redfish. The firmware will apply immediately after uploaded without any confirmation by default.
+    The following command shows how to using curl command upload BMC firmware.
     ```
-    ACTIVATE FIRMWARE FILE WITHOUT REBOOTING BMC
+    curl -X POST -H "x-auth-token: ${token}" --data-binary obmc-phosphor-image-buv-runbmc-20200814010351.static.mtd.tar https://${BMC_IP}/redfish/v1/UpdateService
     ```
-    > if you select this, you need to reboot BMC manually, and shutdown application will run update script to flash image into spi flash
-    
-    ```
-    ACTIVATE FIRMWARE FILE AND AUTOMATICALLY REBOOT BMC
-    ```
-    > if you select this, BMC will shutdown right now, and shutdown application will run update script to flash image into spi flash
+    >_${token} is the token value come from login API, read more information from [REST README](https://github.com/openbmc/docs/blob/master/REST-cheatsheet.md)_
 
 **Maintainer**
 * Medad CChien
 
-### Server Power Operations
-<img align="right" width="30%" src="https://cdn.rawgit.com/NTC-CCBG/snapshots/0f20d6b/openbmc/power.png">
-
-Server Power Operations are using to Power on/Warm reboot/Cold reboot/Orderly shutdown/Immediate shutdown remote host PC.
-
-**Source URL**
-
-* [https://github.com/Nuvoton-Israel/openbmc/tree/master/meta-phosphor/recipes-phosphor/chassis/obmc-op-control-power](https://github.com/Nuvoton-Israel/openbmc/tree/master/meta-phosphor/recipes-phosphor/chassis/obmc-op-control-power)
-
-**How to use**
-
-1. Connect pins of the **PWRON** header on generic motherboard to the **J13** header on Poleg EVB
-    * Depending on your motherboard, you need to find **PWRON** header and connect to **pin5-6** of **J13** header on Poleg EVB.
-
-      > _You can check the schematic of Poleg EVB about **J13** that **pin5-6** for **POWER_SW** and **pin3-4** for **RESET_SW**. However, according to `Server power operations` design on WebUI that only use **POWER_SW** pin for `Warm reboot`, `Cold reboot`, `Orderly shutdown` and `Immediate shutdown` function implementation. Thus, we didn't need to use **RESET_SW** pin for those power operations on WebUI._  
-
-2. Configure reaction of power button on generic motherboard's OS
-    * When motherboard's OS is running **Linux** and you press **PWRON** header on motherboard, you're prompted with a list of options - this is the **interactive** shutdown. The OS will go **Orderly shutdown** for a while if you didn't select any action from it. If you don't want this interactive shutdown pop up and hope OS go **Orderly shutdown** directly, you can enter below command in terminal before testing:  
-      ```
-      gsettings set org.gnome.settings-daemon.plugins.power button-power 'shutdown'  
-      ```
-    * When motherboard's OS is running **Windows** and you press **PWRON** header on motherboard, the default reaction is **Orderly shutdown**. Thus, you didn't need to configure reaction of power button in Windows. But, if you find the default reaction is not **Orderly shutdown**, please check `Control Panel`->`Power Options`->`System Settings` in Windows OS.  
-
-    * About Watchdog patch
-
-      There is a package **phosphor-watchdog** included in OpenBMC now. The watchdog daemon is started on host's power on, which is used to monitor if host is alive. In normal case, when host starts, it will send IPMI commands to kick watchdog and so everything would work fine. If host fails to start, the watchdog eventually timeout. However, the default watchdog timeout action is **HardReset** which is defined at [Watchdog.interface.yaml](https://github.com/openbmc/phosphor-dbus-interfaces/blob/master/xyz/openbmc_project/State/Watchdog.interface.yaml) in **phosphor-dbus-interfaces** that will cause host rebooted after power on.  
-
-      Currently, we just use Poleg EVB with generic motherboard that has some limitations, thus when we use Ubuntu or Windows as host OS, we didn't receive watchdog off IPMI commands sent from OS or BIOS side, so the default watchdog timeout action will be triggered and host will be rebooted after we pressed `Power on` button from `Server control` ->`Server power operations` of WebUI, and that is unexpected behavior. However, we've provided a patch to make `Power on` function work normally for demo purpose, if your host will send watchdog off IPMI command normally then you can remove this patch [0001-Set-Watchdog-ExpireAction-as-None.patch](https://github.com/Nuvoton-Israel/openbmc/blob/master/meta-evb/meta-evb-nuvoton/meta-evb-npcm750/recipes-phosphor/dbus/phosphor-dbus-interfaces/0001-Set-Watchdog-ExpireAction-as-None.patch) from [phosphor-dbus-interfaces_%.bbappend](https://github.com/Nuvoton-Israel/openbmc/blob/master/meta-evb/meta-evb-nuvoton/meta-evb-npcm750/recipes-phosphor/dbus/phosphor-dbus-interfaces_%25.bbappend).  
-
-3. Configure GPIO pin definitions for **POWER_SW**, **RESET_SW** and **PGOOD** on Poleg EVB
-
-    * Pin **POWER_SW** (GPIO219) is use to do all server power operations, pin **RESET_SW** (GPIO218) is reserve for reset operations, and **PGOOD** (GPIO126) is use to monitor DC real status that indicate `Server power` in WebUI.  
-
-    * If other GPIO pins are preferred, please modify the file [gpio_defs.json](https://github.com/Nuvoton-Israel/openbmc/blob/master/meta-evb/meta-evb-nuvoton/meta-evb-npcm750/recipes-phosphor/skeleton/obmc-libobmc-intf/gpio_defs.json) .  
-
-    * Content below is a part of **gpio_defs.json** for this sample:
-      ```
-      "power_config": {
-          "power_good_in": "PGOOD",
-          "power_up_outs": [
-              {"name": "POWER_UP_PIN", "polarity": false}
-          ],
-          "reset_outs": [
-              {"name": "RESET_UP_PIN", "polarity": false}
-          ]
-      }
-
-      "name": "PGOOD",
-      "num": 126,
-      "direction": "in"
-
-      "name": "RESET_UP_PIN",
-      "num": 218,
-      "direction": "out"
-
-      "name": "POWER_UP_PIN",
-      "num": 219,
-      "direction": "out"
-      ```
-      > _"name" here is referred in code and fixed, please don't modify it. "num"  means GPIO pin number and changeable here, "direction" should be set as "in" for **PGOOD**, "out" for **RESET_UP_PIN** and **POWER_UP_PIN**, and "polarity" should be set as "false" for **RESET_UP_PIN** and **POWER_UP_PIN** accordind Poleg EVB schematic._  
-
-4. Server Power on
-    * Press `Power on` button from `Server control` ->`Server power operations` of WebUI.  
-
-      > _[obmc-host-start@.target](https://github.com/Nuvoton-Israel/openbmc/blob/master/meta-phosphor/recipes-core/systemd/obmc-targets/obmc-host-start%40.target) is the one driving the boot of the system._  
-
-5. Server Power off (Soft)
-    * Press `Orderly shutdown` button from `Server control` ->`Server power operations` of WebUI.  
-
-      > _The soft server power off function is encapsulated in the [obmc-host-shutdown@.target](https://github.com/Nuvoton-Israel/openbmc/blob/master/meta-phosphor/recipes-core/systemd/obmc-targets/obmc-host-shutdown%40.target) that is soft in that it notifies the host of the power off request and gives it a certain amount of time to shut itself down._  
-
-6. Server Power off (Hard)
-    * Press `Immediate shutdown` button from `Server control` ->`Server power operations` of WebUI.  
-
-      > _The hard server power off is encapsulated in the [obmc-chassis-hard-poweroff@.target](https://github.com/Nuvoton-Israel/openbmc/blob/master/meta-phosphor/recipes-core/systemd/obmc-targets/obmc-chassis-hard-poweroff%40.target) that will force the stopping of the soft power off service if running, and immediately cut power to the system._  
-
-7. Server Reboot (Warm)
-    * Press `Warm reboot` button from `Server control` ->`Server power operations` of WebUI.  
-
-      > _The warm reboot of the server is encapsulated in the [obmc-host-reboot@.target](https://github.com/Nuvoton-Israel/openbmc/blob/master/meta-phosphor/recipes-core/systemd/obmc-targets/obmc-host-reboot%40.target) that will utilize the server power off (soft) target [obmc-host-shutdown@.target](https://github.com/Nuvoton-Israel/openbmc/blob/master/meta-phosphor/recipes-core/systemd/obmc-targets/obmc-host-shutdown%40.target) and then, once that completes, start the host power on target [obmc-host-start@.target](https://github.com/Nuvoton-Israel/openbmc/blob/master/meta-phosphor/recipes-core/systemd/obmc-targets/obmc-host-start%40.target)._  
-
-8. Server Reboot (Cold)
-    * Press `Cold reboot` button from `Server control` ->`Server power operations` of WebUI.  
-
-      > _The cold reboot of the server is shutdown server immediately, then restarts it. This target will utilize the Immediate shutdown target [obmc-chassis-hard-poweroff@.target](https://github.com/Nuvoton-Israel/openbmc/blob/master/meta-phosphor/recipes-core/systemd/obmc-targets/obmc-chassis-hard-poweroff%40.target) and then, start the host power on target [obmc-host-start@.target](https://github.com/Nuvoton-Israel/openbmc/blob/master/meta-phosphor/recipes-core/systemd/obmc-targets/obmc-host-start%40.target)._  
-
-**Maintainer**
-* Tim Lee
-
-
-### Chassis Buttons
-
-Chassis Buttons POWER/RESET/ID can be used to power on/off, reset host server and identify this server to IT people's management console.
-
-**Source URL**
-
-* [https://github.com/Nuvoton-Israel/openbmc/tree/master/meta-evb/meta-evb-nuvoton/meta-evb-npcm750/recipes-phosphor/chassis](https://github.com/Nuvoton-Israel/openbmc/tree/master/meta-evb/meta-evb-nuvoton/meta-evb-npcm750/recipes-phosphor/chassis)
-
-**How to use**
-
-1. Connect pins of the **PWRON** header on generic motherboard to the **J13** header on Poleg EVB.
-    * Depending on your motherboard, you need to find **PWRON** header and connect to **pin5-6** of **J13** header on Poleg EVB.
-      > _You can check the schematic of Poleg EVB about **J13** that **pin5-6** for **POWER_SW**._  
-
-2. Prepare 3 buttons with sensing pins pulled high when not pressed, and sensed low level when pressed. Connect sensing pins of them with the **J23** GPIOs header of Poleg EVB, one on one.
-    * Power button
-
-      Connect Power button sensing pin to **pin1** of header **J23** of Poleg EVB.  
-    * Reset button
-
-      Connect Reset button sensing pin to **pin2** of header **J23** of Poleg EVB.  
-    * ID button
-
-      Connect ID button sensing pin to **pin3** of header **J23** of Poleg EVB.  
-    * Alternative GPIO pins for buttons
-
-      On header **J23** of Poleg EVB are 10 available GPIO pins available for customer application. Here, GPIO120 (pin1) is use to sense Power button, GPIO122 (pin2) is use to sense Reset button, and GPIO124 (pin3) is use to sense ID button.  
-
-      If other GPIO pins are preferred, please modify the file [gpio_defs.json](https://github.com/Nuvoton-Israel/openbmc/blob/master/meta-evb/meta-evb-nuvoton/meta-evb-npcm750/recipes-phosphor/skeleton/obmc-libobmc-intf/gpio_defs.json) , and connect corresponding pins of header **J23** of Poleg EVB to button sensing pins, respectively.  
-
-      Content below is a part of **gpio_defs.json** for this sample:
-      ```
-      "name": "POWER_BUTTON",
-      "num": 120,
-      "direction": "both"
-
-      "name": "RESET_BUTTON",
-      "num": 122,
-      "direction": "both"
-
-      "name": "ID_BTN",
-      "num": 124,
-      "direction": "both"
-      ```
-      > _"name" here is referred in code and fixed, please don't modify it. "num"  means GPIO pin number and changeable here, "direction" should be set as "both" here because these pins will serve as input pins, with both rising and falling edge interrupt enabled._  
-
-**Maintainer**
-* Tim Lee
-
-
 ## System
 
-### Time
-  * **SNTP**  
-    	Network Time Protocol (NTP) is a networking protocol for clock synchronization between computer systems over packet-switched, variable-latency data networks.
-
-    **systemd-timesyncd** is a daemon that has been added for synchronizing the system clock across the network. It implements an **SNTP (Simple NTP)** client. This daemon runs with minimal privileges, and has been hooked up with **systemd-networkd** to only operate when network connectivity is available.
-        
-    The modification time of the file **/var/lib/systemd/timesync/clock** indicates the timestamp of the last successful synchronization (or at least the **systemd build date**, in case synchronization was not possible).
-    
-    **Source URL**
-    * [https://github.com/systemd/systemd/tree/master/src/timesync](https://github.com/systemd/systemd/tree/master/src/timesync)
-    
-    **How to use**  
-    <img align="right" width="30%" src="https://cdn.rawgit.com/NTC-CCBG/snapshots/f38b505/openbmc/ntp.png">
-    * Enable NTP by **Web-UI** `Server configuration`  
-      ->`Date and time settings`
-    * Enable NTP by command  
-      ```
-      timedatectl set-ntp true  
-      ```
-      >_timedatectl result will show **systemd-timesyncd.service active: yes**_ 
-    
-      If NTP is Enabled and network is Connected (Using **eth2** connect to router), we will see the item **systemd-timesyncd.service active** is **yes** and **System clock synchronized** is **yes**. Thus, system time will sync from NTP server to get current time.
-    * Get NTP status  
-      ```
-      timedatectl  
-      ```
-      >_Local time: Mon 2018-08-27 09:24:51 UTC  
-      >Universal time: Mon 2018-08-27 09:24:51 UTC  
-      >RTC time: n/a  
-      >Time zone: n/a (UTC, +0000)  
-      >**System clock synchronized: yes**  
-      >**systemd-timesyncd.service active: yes**  
-      >RTC in local TZ: no_  
-      
-    * Disable NTP  
-      ```
-      timedatectl set-ntp false  
-      ```
-      >_timedatectl result will show **systemd-timesyncd.service active: no**_  
-      
-    * Using Local NTP server Configuration  
-    When starting, systemd-timesyncd will read the configuration file from **/etc/systemd/timesyncd.conf**, which looks like as below: 
-        >_[Time]  
-        >\#NTP=  
-        >\#FallbackNTP=time1.google.com time2.google.com time3.google.com time4.google.com_  
-    
-    	By default, systemd-timesyncd uses the Google Public NTP servers **time[1-4].google.com**, if no other NTP configuration is available. To add time servers or change the provided ones, **uncomment** the relevant line and list their host name or IP separated by a space. For example, we setup NB windows 10 system as NTP server with IP **192.168.1.128**  
-        >_[Time]  
-        >**NTP=192.168.1.128**  
-    	>\#FallbackNTP=time1.google.com time2.google.com time3.google.com time4.google.com_
-    
-    * Poleg connect to local NTP server of windows 10 system  
-      Connect to NB through **eth0** EMAC interface, and set static IP **192.168.1.15**  
-    
-      ```
-      ifconfig eth0 up
-      ifconfig eth0 192.168.1.15
-      ```  
-      >_Note: Before that you need to setup your NTP server (192.168.1.128) on Windows 10 system first_  
-      
-      Modify **/etc/systemd/timesyncd.conf** file on Poleg as we mentioned
-        >_[Time]  
-        >**NTP=192.168.1.128**_  
-      
-      Re-start NTP to make effect about our configuration change  
-      ```
-      systemctl restart systemd-timesyncd.service
-      ```  
-      Check status of NTP that show already synced to our local time server 
-      ```
-      systemctl status systemd-timesyncd.service -l --no-pager
-      ```  
-      >_Status: "Synchronized to time server 192.168.1.128:123 (192.168.1.128)."_  
-      
-      Verify **Web-UI** `Server overview`->`BMC time` whether sync from NTP server as same as **timedatectl**. (Note: timedatectl time zone default is UTC, thus you will find the BMC time is UTC+8)
-      ```
-      timedatectl  
-      ```
-      >_Local time: Thu 2018-09-06 07:24:16 UTC  
-      >Universal time: Thu 2018-09-06 07:24:16 UTC  
-      >RTC time: n/a  
-      >Time zone: n/a (UTC, +0000)  
-      >System clock synchronized: yes  
-      >systemd-timesyncd.service active: yes  
-      >RTC in local TZ: no_  
-
-  * **Time settings**  
-    **Phosphor-time-manager** provides two objects on D-Bus
-      >_/xyz/openbmc_project/time/bmc  
-      >
-      > >/xyz/openbmc_project/time/host_  
-
-      **BMC time** is used by journal event log record, and **Host time** is used by Host do IPMI Set SEL Time command to sync BMC time from Host mechanism in an era of BMC without any network interface.  
-      Currently, we cannot set Host time no matter what we use **busctl**, **REST API** or **ipmitool set time set** command. Due to **phosphor-settingd** this daemon set default TimeOwner is BMC and TimeSyncMethod is NTP. Thus, when TimeOwner is BMC that is not allow to set Host time anyway.
-
-      A summary of which cases the time can be set on BMC or HOST
-
-      Mode      | Owner | Set BMC Time  | Set Host Time
-      --------- | ----- | ------------- | -------------------
-      NTP       | BMC   | Fail to set   | Not allowed (Default setting)
-      NTP       | HOST  | Not allowed   | Not allowed
-      NTP       | SPLIT | Fail to set   | OK
-      NTP       | BOTH  | Fail to set   | Not allowed
-      MANUAL    | BMC   | OK            | Not allowed
-      MANUAL    | HOST  | Not allowed   | OK
-      MANUAL    | SPLIT | OK            | OK
-      MANUAL    | BOTH  | OK            | OK
-
-      If user would like to set Host time that need to set Owner to SPLIT in NTP mode or set Owner to HOST/SPLIT/BOTH in MANUAL mode. However, change Host time will not effect BMC time and journal event log timestamp.
-
-    **Set Time Owner to Split**
-    ```
-    ### With busctl on BMC
-    busctl set-property xyz.openbmc_project.Settings \
-       /xyz/openbmc_project/time/owner xyz.openbmc_project.Time.Owner \
-       TimeOwner s xyz.openbmc_project.Time.Owner.Owners.Split
-    
-    ### With REST API on remote host
-    curl -c cjar -b cjar -k -H "Content-Type: application/json" -X  PUT  -d \
-       '{"data": "xyz.openbmc_project.Time.Owner.Owners.Split" }' \
-       https://${BMC_IP}/xyz/openbmc_project/time/owner/attr/TimeOwner
-    ```
-    **TimeZone**  
-    According OpenBMC current design that only support UTC TimeZone now, we can use below command to get current support TimeZone on Poleg
-    ```
-    timedatectl list-timezones
-    ```
-    **Maintainer**  
-* Tim Lee
-
 ### Sensor
-<img align="right" width="30%" src="https://raw.githubusercontent.com/NTC-CCBG/snapshots/e1d1733/openbmc/sensor.png">  
-
-[phosphor-hwmon](https://github.com/openbmc/phosphor-hwmon) daemon will periodically check the sensor reading to see if it exceeds lower bound or upper bound . If alarm condition is hit and event generating option is on, it calls [phosphor-logging](https://github.com/openbmc/phosphor-logging) API to generate a **Log entry**.  
-Later on, ipmi tool on host side can send IPMI command to BMC to get SEL events, [phosphor-host-ipmid](https://github.com/openbmc/phosphor-host-ipmid) will convert the **Log entries** to SEL record format and reply to host.  
+[phosphor-hwmon](https://github.com/openbmc/phosphor-hwmon) daemon will periodically check the sensor reading to see if it exceeds lower bound or upper bound . If alarm condition is hit, the [phosphor-sel-logger](https://github.com/openbmc/phosphor-sel-logger) handles all sensor events to add new IPMI SEL records to the journal, [phosphor-host-ipmid](https://github.com/Nuvoton-Israel/phosphor-host-ipmid) will convert the journal SEL records to IPMI SEL record format and reply to host.
 
 **Source URL**
-* [https://github.com/Nuvoton-Israel/openbmc/tree/master/meta-evb/meta-evb-nuvoton/meta-evb-npcm750/recipes-phosphor/dbus](https://github.com/Nuvoton-Israel/openbmc/tree/master/meta-evb/meta-evb-nuvoton/meta-evb-npcm750/recipes-phosphor/dbus)
-* [https://github.com/Nuvoton-Israel/openbmc/tree/master/meta-evb/meta-evb-nuvoton/meta-evb-npcm750/recipes-phosphor/ipmi](https://github.com/Nuvoton-Israel/openbmc/tree/master/meta-evb/meta-evb-nuvoton/meta-evb-npcm750/recipes-phosphor/ipmi)
-* [https://github.com/Nuvoton-Israel/openbmc/tree/master/meta-evb/meta-evb-nuvoton/meta-evb-npcm750/recipes-phosphor/sensors](https://github.com/Nuvoton-Israel/openbmc/tree/master/meta-evb/meta-evb-nuvoton/meta-evb-npcm750/recipes-phosphor/sensors)
+* [https://github.com/Nuvoton-Israel/openbmc/tree/npcm-master/meta-evb/meta-evb-nuvoton/meta-evb-npcm750/recipes-phosphor/configuration](https://github.com/Nuvoton-Israel/openbmc/tree/npcm-master/meta-evb/meta-evb-nuvoton/meta-evb-npcm750/recipes-phosphor/configuration)
+* [https://github.com/Nuvoton-Israel/openbmc/tree/npcm-master/meta-evb/meta-evb-nuvoton/meta-evb-npcm750/recipes-phosphor/ipmi](https://github.com/Nuvoton-Israel/openbmc/tree/npcm-master/meta-evb/meta-evb-nuvoton/meta-evb-npcm750/recipes-phosphor/ipmi)
+* [https://github.com/Nuvoton-Israel/openbmc/tree/npcm-master/meta-evb/meta-evb-nuvoton/meta-evb-npcm750/recipes-phosphor/sensors](https://github.com/Nuvoton-Israel/openbmc/tree/npcm-master/meta-evb/meta-evb-nuvoton/meta-evb-npcm750/recipes-phosphor/sensors)
 
 
 **How to use**
 
-* **Configure sensor and event generator**
-
-  * Add Inventory of Sensors
-
-     **Inventory of Sensors** is a map table that defines all types of SEL event BMC can generate. It is constructed from a yaml file, [recipes-phosphor/ipmi/phosphor-ipmi-inventory-sel/config.yaml](https://github.com/openbmc/meta-phosphor/blob/master/recipes-phosphor/ipmi/phosphor-ipmi-inventory-sel/config.yaml)  
-
-     Below is a sample **config.yaml** for Poleg EVB:
-       ```
-       /xyz/openbmc_project/inventory/system:
-         sensorID: 0x01
-         sensorType: 0x12
-         eventReadingType: 0x6F
-         offset: 0x02
-       /xyz/openbmc_project/sensors/temperature/temp1/critical_high:
-         sensorID: 0x02
-         sensorType: 0x01
-         eventReadingType: 0x01
-         offset: 0x09
-       /xyz/openbmc_project/sensors/temperature/temp1/critical_low:
-         sensorID: 0x02
-         sensorType: 0x01
-         eventReadingType: 0x01
-         offset: 0x02
-       /xyz/openbmc_project/sensors/temperature/temp2/critical_high:
-         sensorID: 0x03
-         sensorType: 0x01
-         eventReadingType: 0x01
-         offset: 0x09
-       /xyz/openbmc_project/sensors/temperature/temp2/critical_low:
-         sensorID: 0x03
-         sensorType: 0x01
-         eventReadingType: 0x01
-         offset: 0x02    
-       ```
-       > _Please refer to  **Sensor and Event Code Tables** in IPMI 2.0 spec for definition of sensorID, sensorType,  eventReadingType, and offset_  
-     
-     It defines 4 events which could be generated by 2 temperature sensors on Poleg EVB : 
-
-       Name    | SensorID | SensorType  | EventType | Event Description
-       ------- | ----- | ------------- | ------------------- | --------
-       temp1   | 2  | Temperature   | Threshold | Upper Critical - going high
-	   temp1   | 2  | Temperature   | Threshold | Lower Critical - going low
-       temp2   | 3  | Temperature   | Threshold | Upper Critical - going high
-	   temp2   | 3  | Temperature   | Threshold | Lower Critical - going low
-    
+* **Configure sensor**
+  
   * Add Sensor Configuration File
   
-    Each sensor has a [config file](https://github.com/Nuvoton-Israel/openbmc/tree/master/meta-evb/meta-evb-nuvoton/meta-evb-npcm750/recipes-phosphor/sensors/phosphor-hwmon%25/obmc/hwmon/ahb/apb) that defines the sensor name and its warning or critical thresholds. These files are located under **recipes-phosphor/sensors/phosphor-hwmon%/obmc/hwmon/apb/**.  
+    Each sensor **temperature**, **adc** and **fan** has a [hwmon config file](https://github.com/Nuvoton-Israel/openbmc/tree/npcm-master/meta-evb/meta-evb-nuvoton/meta-evb-npcm750/recipes-phosphor/sensors/phosphor-hwmon/obmc/hwmon/ahb/apb) and [ipmi sdr config file](https://github.com/Nuvoton-Israel/openbmc/blob/npcm-master/meta-evb/meta-evb-nuvoton/meta-evb-npcm750/recipes-phosphor/configuration/evb-npcm750-yaml-config/evb-npcm750-ipmi-sensors.yaml) that defines the sensor name and its warning or critical thresholds.  
 
-    Below is config for a LM75 sensor on Poleg EVB. The sensor type is **temperature** and its name is **temp2**. It has warning thresholds for **upper** and **lower** bound. The event generating option is also enabled for **WARNHI** and **WARNLO** threshold that forcing the sensor alarm to be recorded in a D-Bus object.
+    Below is hwmon config for a LM75 sensor on BMC. It has warning and critical thresholds for **upper** and **lower** bound.
       ```
-      LABEL_temp1=temp2
-      WARNLO_temp1=28500
-      WARNHI_temp1=31000
+      LABEL_temp1=lm75
+      WARNLO_temp1=10000
+      WARNHI_temp1=40000
+      CRITHI_temp1=70000
+      CRITLO_temp1=0
       EVENT_temp1=WARNHI,WARNLO
       ```
-
-  * Modify D-Bus Sensor Error Metadata interface  
-  
-    Modify the file [Threshold.metadata.yaml](https://github.com/openbmc/phosphor-dbus-interfaces/blob/master/xyz/openbmc_project/Sensor/Threshold.metadata.yaml) to determine how to format the meta data of event records, like below : 
-
+    Below is ipmi sdr config for a temperature sensor on BMC.
       ```
-      - name: CriticalHigh
-         level: ERR
-         meta:
-           - str: "SENSOR_DATA=%s"
-             type: string
-         inherits:
-           - xyz.openbmc_project.Common.Callout.Inventory
-      - name: CriticalLow
-        level: ERR
-        meta:
-          - str: "SENSOR_DATA=%s"
-            type: string
-        inherits:
-          - xyz.openbmc_project.Common.Callout.Inventory
+        1: &temperature
+        entityID: 0x07
+        entityInstance: 1
+        sensorType: 0x01
+        path: /xyz/openbmc_project/sensors/temperature/lm75
+        sensorReadingType: 0x01
+        multiplierM: 1
+        offsetB: 0
+        bExp: 0
+        rExp: 0
+        unit: xyz.openbmc_project.Sensor.Value.Unit.DegreesC
+        mutability: Mutability::Write|Mutability::Read
+        serviceInterface: org.freedesktop.DBus.Properties
+        readingType: readingData
+        sensorNamePattern: nameLeaf
+        interfaces:
+            xyz.openbmc_project.Sensor.Value:
+            Value:
+              Offsets:
+                0xFF:
+                  type: double
       ```
-    **xyz.openbmc_project.Common.Callout.Inventory** is inherited here in order to include **CALLOUT_INVENTORY_PATH** into phosphor-logging Log entry.
 
-* **Dump events**
+* **Monitor sensor and events**
 
   * Using WebUI  
-  
-    In `Event log` page of **WebUI**, the event may contain a related item like below.
-    * **CALLOUT_INVENTORY_PATH** means it has association info in **Inventory of Sensors** table and **/xyz/openbmc_project/sensors/temperature/temp2/critical_high** is the key to this map table.  
-    * **SENSOR_DATA** is the sensor reading while the event is recorded.  
 
-      ```
-       CALLOUT_INVENTORY_PATH=/xyz/openbmc_project/sensors/temperature/temp2/critical_high SENSOR_DATA=31000 _PID=2531
-      ```
+    In `Sensors` page of **WebUI**, the sensors reading data will show on the page.
 
-  * Using IPMI
+    In `System log` page of **WebUI**, the sensors event data will show on the page.
     
+  * Using IPMI
+
+    Use IPMI utilities like **ipmitool** to send command for getting SDR records.  
+    ```
+    root@evb-npcm750:~# ipmitool sdr list
+    lm75             | 37 degrees C    | ok
+    tmp100           | 37 degrees C    | ok
+    adc1             | 0 Volts         | ok
+    adc2             | 0 Volts         | ok
+    adc3             | 0 Volts         | ok
+    adc4             | 0 Volts         | ok
+    adc5             | 0 Volts         | ok
+    adc6             | 0 Volts         | ok
+    adc7             | 0 Volts         | ok
+    adc8             | 0 Volts         | ok
+    fan0             | 0 RPM           | ok
+    fan1             | 0 RPM           | ok
+    fan2             | 0 RPM           | ok
+    fan3             | 0 RPM           | ok
+
+    ```
     Use IPMI utilities like **ipmitool** to send command for getting SEL records.  
     ```
-    $ sudo ipmitool sel list
-    
-       1 | 10/04/2018 | 07:08:54 | Temperature #0x03 | Lower Critical going low  | Asserted
-       2 | 10/04/2018 | 07:10:39 | Temperature #0x03 | Lower Critical going low  | Asserted
-       3 | 10/04/2018 | 07:28:04 | Temperature #0x03 | Upper Critical going high | Asserted
-       4 | 10/04/2018 | 07:28:11 | Temperature #0x03 | Upper Critical going high | Asserted
-       5 | 10/04/2018 | 07:28:13 | Temperature #0x03 | Upper Critical going high | Asserted
-       6 | 10/04/2018 | 07:46:34 | Temperature #0x03 | Upper Critical going high | Asserted
-       7 | 10/04/2018 | 07:46:38 | Temperature #0x03 | Upper Critical going high | Asserted
-       8 | 10/04/2018 | 07:46:43 | Temperature #0x03 | Upper Critical going high | Asserted
-       9 | 10/04/2018 | 07:46:59 | Temperature #0x03 | Upper Critical going high | Asserted
-       a | 10/04/2018 | 07:47:24 | Temperature #0x03 | Upper Critical going high | Asserted
-       b | 10/04/2018 | 07:47:29 | Temperature #0x03 | Upper Critical going high | Asserted
-       c | 10/04/2018 | 07:47:42 | Temperature #0x03 | Upper Critical going high | Asserted
-       d | 10/04/2018 | 07:48:37 | Temperature #0x03 | Upper Critical going high | Asserted
-       e | 10/04/2018 | 07:48:39 | Temperature #0x03 | Upper Critical going high | Asserted
-       f | 10/04/2018 | 07:48:53 | Temperature #0x03 | Upper Critical going high | Asserted
-      10 | 10/04/2018 | 09:19:11 | Temperature #0x03 | Lower Critical going low  | Asserted
-      11 | 10/04/2018 | 09:20:22 | Temperature #0x03 | Lower Critical going low  | Asserted
-      12 | 10/04/2018 | 09:20:24 | Temperature #0x03 | Lower Critical going low  | Asserted
-      13 | 10/04/2018 | 09:33:24 | Temperature #0x03 | Upper Critical going high | Asserted
-      14 | 10/04/2018 | 09:33:31 | Temperature #0x03 | Upper Critical going high | Asserted
+    root@evb-npcm750:~# ipmitool sel list
+    1 |  Pre-Init  |0000000089| Temperature #0x02 | Upper Non-critical going high | Asserted
+    2 |  Pre-Init  |0000000247| Temperature #0x01 | Lower Non-critical going low  | Deasserted
     ```
 
 **Maintainer**
@@ -778,31 +419,41 @@ Later on, ipmi tool on host side can send IPMI command to BMC to get SEL events,
 Turning on ServerLED will make **hearbeat** and **identify** leds on EVB start blinking
 
 **Source URL**
-* [https://github.com/Nuvoton-Israel/openbmc/tree/master/meta-evb/meta-evb-nuvoton/meta-evb-npcm750/recipes-phosphor/leds](https://github.com/Nuvoton-Israel/openbmc/tree/master/meta-evb/meta-evb-nuvoton/meta-evb-npcm750/recipes-phosphor/leds)
+* [https://github.com/Nuvoton-Israel/openbmc/tree/npcm-master/meta-evb/meta-evb-nuvoton/meta-evb-npcm750/recipes-phosphor/leds](https://github.com/Nuvoton-Israel/openbmc/tree/npcm-master/meta-evb/meta-evb-nuvoton/meta-evb-npcm750/recipes-phosphor/leds)
 
 **How to use**
-* Add enclosure_identify in LED [config file](https://github.com/Nuvoton-Israel/openbmc/blob/master/meta-evb/meta-evb-nuvoton/meta-evb-npcm750/recipes-phosphor/leds/npcm750-led-manager-config/led.yaml)
+* Add enclosure_identify in LED [config file](https://github.com/Nuvoton-Israel/openbmc/blob/npcm-master/meta-evb/meta-evb-nuvoton/meta-evb-npcm750/recipes-phosphor/leds/evb-npcm750-led-manager-config/led.yaml)
   ```
-  enclosure_identify:
-    heartbeat:
-        Action: 'Blink'
-        DutyOn: 50
-        Period: 1000
-    identify:
-        Action: 'Blink'
-        DutyOn: 50
-        Period: 1000
+	bmc_booted:
+	    heartbeat:
+		Action: 'Blink'
+		DutyOn: 50
+		Period: 1000
+	power_on:
+	    identify:
+		Action: 'On'
+		DutyOn: 50
+		Period: 0
+	EnclosureFault:
+	    identify:
+		Action: 'On'
+		DutyOn: 50
+		Period: 0
+	EnclosureIdentify:
+	    identify:
+		Action: 'Blink'
+		DutyOn: 10
+		Period: 1000
 
   ```
 
-* Modify BSP layer [config](https://github.com/Nuvoton-Israel/openbmc/blob/master/meta-evb/meta-evb-nuvoton/meta-evb-npcm750/conf/machine/evb-npcm750.conf) to select npcm750 LED config file
+* Modify BSP layer [config](https://github.com/Nuvoton-Israel/openbmc/blob/npcm-master/meta-evb/meta-evb-nuvoton/meta-evb-npcm750/conf/machine/evb-npcm750.conf) to select npcm750 LED config file
   ```
-  PREFERRED_PROVIDER_virtual/phosphor-led-manager-config-native = "npcm750-led-manager-config-native"
+  PREFERRED_PROVIDER_virtual/phosphor-led-manager-config-native = "evb-npcm750-led-manager-config-native"
   ```
 
 **Maintainer**
 
-* Oshri Alkoby
 * Stanley Chu
 
 ### ADC
@@ -811,7 +462,7 @@ The NPCM750 contains an Analog-to-Digital Converter (ADC) interface that support
 The ADC output value can be showed in Sensors page.  
 
 **Source URL**
-* [https://github.com/Nuvoton-Israel/openbmc/blob/master/meta-evb/meta-evb-nuvoton/meta-evb-npcm750/recipes-phosphor/sensors/phosphor-hwmon/obmc/hwmon/ahb/apb/adc%40c000.conf](https://github.com/Nuvoton-Israel/openbmc/blob/master/meta-evb/meta-evb-nuvoton/meta-evb-npcm750/recipes-phosphor/sensors/phosphor-hwmon/obmc/hwmon/ahb/apb/adc%40c000.conf)  
+* [https://github.com/Nuvoton-Israel/openbmc/blob/npcm-master/meta-evb/meta-evb-nuvoton/meta-evb-npcm750/recipes-phosphor/sensors/phosphor-hwmon/obmc/hwmon/ahb/apb/adc%40c000.conf](https://github.com/Nuvoton-Israel/openbmc/blob/npcm-master/meta-evb/meta-evb-nuvoton/meta-evb-npcm750/recipes-phosphor/sensors/phosphor-hwmon/obmc/hwmon/ahb/apb/adc%40c000.conf)  
 
 **How to use**  
  * Add ADC configuration file(adc@c000.conf)  
@@ -825,7 +476,7 @@ The ADC output value can be showed in Sensors page.
    LABEL_in7 = "adc7"
    LABEL_in8 = "adc8"
    ```  
-   NOTE: For the LABEL assignment like LABEL_$(key) = $(value), the $(key) must have corresponding hwmon sysfs file in /sys/class/hwmon/hwmonN/$(key)_input
+   NOTE: For the LABEL assignment like `LABEL_in1 = "adc1"`, it must have corresponding hwmon sysfs file in `/sys/class/hwmon/hwmonN/in1_input`
 
  * Add configuration file to rootfs, modify phosphor-hwmon_%.bbappend
    ```
@@ -833,7 +484,7 @@ The ADC output value can be showed in Sensors page.
    ADC_ITEMS = "adc@c000.conf"
    SYSTEMD_ENVIRONMENT_FILE_${PN} += "${@compose_list(d, 'FENVS', 'ADC_ITEMS')}"
    ```
- * output 1.15v to ADC channel3 input in Poleg EVB(pin 1 of J25) 
+ * output 1.15v to ADC channel3 input in Poleg EVB (pin 1 of J25) 
  * check ADC3 Voltage value in Web Sensors page  
    This value should be closed to 1.15   
    
