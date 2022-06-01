@@ -15,14 +15,10 @@ This layer depends on:
 
 # Contacts for Patches
 
-Please submit any patches against the NPCM750 evaluation board layer to the maintainer of nuvoton:
+Please submit any patches against the NPCM750 evaluation board layer to the maintainers of nuvoton:
 
-* Joseph Liu, <KWLIU@nuvoton.com>
-* Medad CChien, <CTCCHIEN@nuvoton.com>
-* Tyrone Ting, <KFTING@nuvoton.com>
-* Stanley Chu, <YSCHU@nuvoton.com>
-* Tim Lee, <CHLI30@nuvoton.com>
 * Marvin Lin, <KFLIN@nuvoton.com>
+* Joseph Liu, <KWLIU@nuvoton.com>
 
 # Table of Contents
 
@@ -38,7 +34,7 @@ Please submit any patches against the NPCM750 evaluation board layer to the main
     + [Sensor](#sensor)
     + [LED](#led)
     + [ADC](#adc)
-    + [FAN](#fan)
+    + [Fan PID Control](#fan-pid-control)
     + [BIOS POST Code](#bios-post-code)
 	+ [FRU](#fru)
   * [IPMI / DCMI](#ipmi--dcmi)
@@ -60,7 +56,7 @@ Please submit any patches against the NPCM750 evaluation board layer to the main
 ## WebUI
 
 ### KVM
-<img align="right" width="30%" src="https://raw.githubusercontent.com/NTC-CCBG/snapshots/master/openbmc/ipkvm.PNG">
+<img align="right" width="30%" src="https://user-images.githubusercontent.com/81551963/171312575-5a4f15b7-393b-4177-aab0-e87de539923b.png">
 
 This is a Virtual Network Computing (VNC) server programm using [LibVNCServer](https://github.com/LibVNC/libvncserver).
 * Support Video Capture and Differentiation (VCD).
@@ -74,26 +70,29 @@ This is a Virtual Network Computing (VNC) server programm using [LibVNCServer](h
 **How to use**
 
 1. Prepare a motherboard and connect Poleg EVB through PCI-E.
-2. Connect a usb cable from motherboard to J1 header of Poleg EVB.
-3. Connect an ethernet cable between your workstation and J12 header of Poleg EVB.
+2. Connect a usb cable from motherboard to **J1 header** of Poleg EVB.
+3. Connect an ethernet cable between your workstation and **J12 header** of Poleg EVB.
 4. Power up the Poleg EVB and configure IP address.
 5. Launch a browser in your workstation and enter below URL.
     ```
     https://<Poleg_EVB_IP>
     ```
-6. Use below username/password to login OpenBMC home page, then navigate to the KVM page.
+6. Use below username/password to login OpenBMC home page, then navigate to the `KVM` page.
     ```
     Username: root
     Password: 0penBmc
     ```
     
-    * You can use [Real VNC Viewer](https://www.realvnc.com/en/connect/download/viewer/) with below preferences instead of OpenBMC Web.
+    > _NOTE: You can use [Real VNC Viewer](https://www.realvnc.com/en/connect/download/viewer/) with below preferences instead of OpenBMC Web._
+
+
     ```
     /* Preference setting of Real VNC Viewer */
     Quality: Custom
     PreferredEncoding: Hextile
     ColorLevel: rgb565
     ```
+
 7. Power up the motherboard and the video output will show on the WebUI (or Real VNC Viewer).
 
 **Maintainer**
@@ -101,9 +100,9 @@ This is a Virtual Network Computing (VNC) server programm using [LibVNCServer](h
 * Marvin Lin
 
 ### Serial Over Lan
-<img align="right" width="30%" src="https://raw.githubusercontent.com/NTC-CCBG/snapshots/master/openbmc/SOL.PNG">
+<img align="right" width="30%" src="https://user-images.githubusercontent.com/81551963/171312997-07b78ba5-269f-424a-b5bd-1f4db871c7c9.png">
 
-The Serial over LAN (SoL) console redirects the output of the server’s serial port to a browser window on your workstation.
+The Serial over LAN (SOL) console redirects the output of the server’s serial port to WebUI.
 
 **Source URL**
 
@@ -111,97 +110,38 @@ The Serial over LAN (SoL) console redirects the output of the server’s serial 
 
 **How to use**
 
-1. Prepare a Supermicro MBD-X9SCL-F-0 motherboard and a LPC cable.
+1. Prepare a motherboard (take Supermicro MBD-X9SCL-F-0 as example) and connect **pin 1-3, 5, 7-8, 10-12, 15-17 of JTPM** to **J10 header** of Poleg EVB with a LPC cable.
 
-    > _The UEFI firmware version in Supermicro MBD-X9SCL-F-0 for verification is 2.15.1234._
-
-2. Connect pins of the **JTPM** header on **Supermicro MBD-X9SCL-F-0** to the **J10** header on **Poleg EVB** with the LPC cable:
-
-    * Connect **pin 1-3, 5, 7-8, 10-12, 15-17** of JTPM with corresponding pins of J10, **one on one**.
-
-3. Steps to copy UEFI SOL related drivers to a USB drive.  
+2. Download UEFI drivers and copy to the USB drive:
 
     * Format the USB drive in FAT or FAT32.  
-    * Download PolegSerialDxe.efi and TerminalDxe.efi from  [https://github.com/Nuvoton-Israel/openbmc-uefi-util/tree/npcm7xx_v2.1/sol_binary](https://github.com/Nuvoton-Israel/openbmc-uefi-util/tree/npcm7xx_v2.1/sol_binary) and copy them to the USB drive.
+    * Download **PolegSerialDxe.efi** and **TerminalDxe.efi** from  [https://github.com/Nuvoton-Israel/openbmc-uefi-util/tree/npcm7xx_v2.1/sol_binary](https://github.com/Nuvoton-Israel/openbmc-uefi-util/tree/npcm7xx_v2.1/sol_binary) and copy them to the USB drive.
 
-4. Power up the Poleg EVB and steps to prepare a working terminal for Poleg:
+3. Connect an ethernet cable between your workstation and **J12 header** of Poleg EVB.
 
-    * Download and install the USB-to-UART driver from: [http://www.ftdichip.com/Drivers/VCP.htm](http://www.ftdichip.com/Drivers/VCP.htm) according to the host OS in your workstation.  
-    * Connect a micro usb cable from your workstation to J2 header of Poleg EVB.  
-    * Wait for the FTDI driver to be installed automatically. The COM port number is assigned automatically.  
-    * Open a terminal (e.g., Tera Term version 4.87) and set the correct COM port number assigned by the FTDI driver (in previous step).  
-    * The COM port should be configured as follows: **115200, 8 bit, 1 stop-bit, no parity, no flow control**.  
-    * Press and release the **PWR-ON-RST (SW3)** button to issue a Power-On-reset.  It's expected to see messages output by Poleg on the terminal. Use the following login name/password to login into Poleg.
-        * Login name: **root**  
-        * Login password: **0penBmc**  
+4. Power up the Poleg EVB and configure IP address.
 
-5. Steps to configure Supermicro MBD-X9SCL-F-0 UEFI setting for SOL:
-
-    * Do not plug any bootable device into Supermicro MBD-X9SCL-F-0.  
+5. Configure Supermicro MBD-X9SCL-F-0 UEFI setting for SOL:
     * Power up Supermicro MBD-X9SCL-F-0 and boot into UEFI setting.  
-    * Navigate to `Super IO Concifugration` in `Advanced` menu option and enter into `Super IO Concifugration`.  
-    * Configure serial port 1 to **IO=3E8h; IRQ=5**, and then disable it.  
-    * Go back to the main UEFI setting.  
-    * Navigate to `Boot` menu option and select `UEFI: Built-in EFI Shell` as Boot Option #1.  
+    * Navigate to `Super IO Concifugration` in `Advanced` menu.  
+    * Configure serial port 1 to **IO=3E8h; IRQ=5** then set to **disabled**.  
+    * Navigate to `Boot` menu and select `UEFI: Built-in EFI Shell` as Boot Option #1.  
+    * Navigate to `Exit` menu and select `Save changes and Reset`.  
+    * When boot into UEFI shell, plug the USB drive (prepared in step-2).  
+    * Type `exit` to route to UEFI shell again.
+    * Type `fs0` and it will show **fs0:\>** from now.
+    * Type `load PolegSerialDxe.efi` and `load TerminalDxe.efi` to load UEFI drivers.  
+    * Unplug the USB drive and type `exit` to route to the UEFI setting.
 
-      + Make sure that the rest boot options are set to **Disabled**.  
-    * Navigate to `Exit` menu option and select `Save changes and Reset`.  
-    * Press `Yes` in the prompt window and it will reboot then.  
-    * Wait for Supermicro MBD-X9SCL-F-0 to boot into UEFI shell.  
-    * Plug the USB drive prepared in step-4 into Supermicro MBD-X9SCL-F-0's usb slot.  
-    * Input the following command at UEFI shell prompt, press enter key and it will route to UEFI shell again.  
-      ```
-      exit  
-      ```
-    * Check the device mapping table of the USB drive in UEFI shell. It is **fs0:** here for example.  
-    * Input the following command at UEFI shell prompt, press enter key and the prompt will show **fs0:\>** from now.  
-      ```
-      fs0:  
-      ```
-    * Input the following command at UEFI shell prompt and press the enter key.  
-      ```
-      load PolegSerialDxe.efi  
-      ```
-    * Input the following command at UEFI shell prompt and press the enter key.  
-      ```
-      load TerminalDxe.efi  
-      ```
-    * Unplug the usb drive.  
-    * Input the following command at UEFI shell prompt, press the enter key and it will route to the UEFI setting. 
-      ```
-      exit  
-      ```
-
-6. Configure the ethernet communication between your workstation and Poleg EVB:
-
-    * Connect an ethernet cable between your workstation and J7 header of Poleg EVB.  
-    * Configure your workstation's ip address to 192.168.0.1 and the netmask to 255.255.255.0 as an example here.  
-    * Configure Poleg EVB ip address to 192.168.0.2 and the netmask to 255.255.255.0. For example, input the following command in the terminal connected to Poleg EVB on your workstation and press enter key.  
-      ```
-	  ifconfig eth0 192.168.0.2 netmask 255.255.255.0
-	  ```
-
-7. Run SOL:
-
-    * Please disable the proxy setting for this test if it's configured.
-    * Launch a browser in your workstation and navigate to https://192.168.0.2.  
-    * Bypass the secure warning and continue to the website.  
-    * Enter the BMC Username and Password (defaults: **root/0penBmc**).  
-    * You will see the OpenBMC management screen.  
-    * Click `Server control` at the left side of the OpenBMC management screen.  
-    * A `Serial over LAN console` menu item prompts then and click it.  
-    * A specific area will display the UEFI setting of Supermicro MBD-X9SCL-F-0.  
-    * (Optional) If the area doesn't display the UEFI setting clearly, use the mouse pointer to click in the area and press the **Esc** key.  
-      + It shows a prompt window named `Exit Without Saving`, choose `No` and press enter key to refresh the area for showing UEFI setting entirely.  
-    * Please enable the proxy setting if it's just disabled for the test.
+6. Launch a browser in your workstation and enter URL `https://<Poleg_EVB_IP>`, then navigate to the `SOL console` page. The output of serial port will show on the page.
 
 **Maintainer**
 
-* Tyrone Ting
+* Marvin Lin
 
 ### Virtual Media
 <img align="right" width="20%" src="https://cdn.rawgit.com/NTC-CCBG/snapshots/3e65e7a/openbmc/vm_app_win.png">
-<img align="right" width="30%" src="https://cdn.rawgit.com/NTC-CCBG/snapshots/cab7306/openbmc/vm.png">
+<img align="right" width="30%" src="https://user-images.githubusercontent.com/81551963/171313708-13b8074f-5559-4f91-83d5-a61fb992077e.png">
 
 Virtual Media (VM) is to emulate an USB drive on remote host PC via Network Block Device(NBD) and Mass Storage(MSTG).
 
@@ -211,72 +151,42 @@ Virtual Media (VM) is to emulate an USB drive on remote host PC via Network Bloc
 
 **How to use**
 
-1. Clone a physical usb drive to an image file
-    * For Linux - use tool like **dd**
+1. Clone a physical usb drive to an image file.
+    * For Linux, use tool like **dd** command.
       ```
       dd if=/dev/sda of=usb.img bs=1M count=100
       ```
-      > _**bs** here is block size and **count** is block count._
+      > _**bs**: block size, **count**: block count._
       > 
-      > _For example, if the size of your usb drive is 1GB, then you could set "bs=1M" and "count=1024"_
+      > _If the size of the USB drive is 1GB, then you could set "bs=1M" and "count=1024"_
 
-    * For Windows - use tool like **Win32DiskImager.exe**
+    * For Windows, use tool like **Win32DiskImager.exe** to generate the image file.
 
-      > _NOTICE : A simple *.iso file cannot work for this._
+2. Connect an ethernet cable between your workstation and **J12 header** of Poleg EVB. Then, power up the Poleg EVB and configure IP address.
 
-    * You can prepare an ISO file instead
+3. Enable Virtual Media:
 
-2. Enable Virtual Media
+    * Through OpenBMC WebUI
+        * Launch a browser and enter URL `https://<Poleg_EVB_IP>`, then navigate to the `VM` page.
+        * Click `Add File` to add image file, then click `Start` to start VM network service. You will see a new USB device on HOST OS.
 
-    2.1 VM-WEB
-    * Login and switch to webpage of VM on your browser
-        ```
-        https://XXX.XXX.XXX.XXX/#/server-control/vm
-        ```
-    *  Operations
-        * After `Choose File`, click `Start` to start VM network service.
-        * After clicking `Start`, you will see a new USB device on HOST OS.
-        * If you want to stop this service, just click `Stop` to stop VM network service.
-
-    2.2 VM standalone application
-    * Download [application source code](https://github.com/Nuvoton-Israel/openbmc-util/tree/master/virtual_media_openbmc2.6)
-    * Follow the [readme](https://github.com/Nuvoton-Israel/openbmc-util/blob/master/virtual_media_openbmc2.6/NBDServerWSWindows/README) instructions install QT and Openssl
-    * Start QT creator, open project **VirtualMedia.pro**, then build all
-    * Launch windows/linux application
-        > _NOTICE : use `sudo` to launch app in linux and install `nmap` first_
-
-    *  Operations
-        * After `Chose an Image File` or `Select an USB Drive`, click `Search` to check which BMCs are on line
-        * Select any on line BMC and key in `Account/Password` and click `Start VM` to start VM network service (still not hook USB disk to host platform)
-        * After `Start VM`, click `Mount USB` to hook the emulated usb disk to host platform, or click `Stop VM` to stop VM network service.
-        * After `Mount USB`, click `UnMount USB` to emulate unplugging the usb disk from host platform
-        * After `UnMount USB`, click `Stop VM` to stop VM network service, or click `Mount USB` to hook USB disk to host platform.
-
-**Performance**
-
-* **APP** stands for QT application runs on
-windows/linux
-* **Web** stands for JavaScript NBD Server runs on browser
-* Support functions
-
-    Image Source\OP| Read      | Write   |
-    :--------------|:--------- |:------- |
-    USB Drive      |  APP only |APP only |
-    Image          |  APP/Web  |APP only |
-* Speed
-
-    Server\OP| Read     | Write |
-    :--------|:-------- |:------|
-    APP      |  512KB/s |2MB/s  |
-    Web      |  512KB/s |NULL   |
-    > _Note:
-    Every read request should get data from NBD Server via network, but each write request just pass data to filesystem, and filesystem will deals with passing data to NBD Server, so read takes more time than write._
+    * Through VM standalone application
+        * Download [application source code](https://github.com/Nuvoton-Israel/openbmc-util/tree/master/virtual_media_openbmc2.6).
+        * Follow [instruction](https://github.com/Nuvoton-Israel/openbmc-util/blob/master/virtual_media_openbmc2.6/NBDServerWSWindows/README) to install QT and Openssl.
+        * Start QT creator and open project **VirtualMedia.pro**, then build all of them.
+        * Launch windows/linux application.
+            > _NOTICE: use `sudo` to launch app in linux and install `nmap` first_
+        *  Operations
+            * Add image file and search On-Line Poleg.
+            * Click `Start VM` to start VM network service.
+            * Click `Mount USB` to mount the image file on HOST OS.
+            * If you want to stop this service, just click `UnMount USB` and `Stop VM`.
 
 **Maintainer**
-* Medad CChien
+* Marvin Lin
 
 ### BMC Firmware Update
-<img align="right" width="30%" src="https://cdn.rawgit.com/NTC-CCBG/snapshots/cab7306/openbmc/firmware-update.png">
+<img align="right" width="30%" src="https://user-images.githubusercontent.com/81551963/171317350-a56b92e8-f71e-4697-a32b-cdd338723426.png">
 
 This is a secure flash update mechanism to update BMC firmware via WebUI.
 
@@ -286,44 +196,28 @@ This is a secure flash update mechanism to update BMC firmware via WebUI.
 * [https://github.com/Nuvoton-Israel/openbmc/tree/npcm-master/meta-evb/meta-evb-nuvoton/meta-evb-npcm750/recipes-phosphor/flash/phosphor-software-manager](https://github.com/Nuvoton-Israel/openbmc/tree/npcm-master/meta-evb/meta-evb-nuvoton/meta-evb-npcm750/recipes-phosphor/flash/phosphor-software-manager)
 
 **How to use**
-* Update firmware via WebUI
-	1. Upload update package from webui, then you will see
-	    ```
-	    Activate   
-	    ```
-	    > if you select activate, then you will see activation dialog at item 2 
+1. Connect an ethernet cable between your workstation and **J12 header** of Poleg EVB. Then, power up the Poleg EVB and configure IP address.
 
-	    ```
-	    Delete
-	    ```
-	    > If you select delete, then the package will be deleted right now
+2. Upload firmware image and start firmware update:
+    * Through OpenBMC webUI
+        * Launch a browser and enter URL `https://<Poleg_EVB_IP>`, then navigate to the `Firmware` page.
+        * Click `Add file` to add firmware image tar file.
+        * Click `Start update` to start firmware update.
+            > _Poleg EVB will reboot once firmware update completed._
 
-	2. Confirm BMC firmware file activation
-	    ```
-	    ACTIVATE FIRMWARE FILE WITHOUT REBOOTING BMC
-	    ```
-	    > if you select this, you need to reboot BMC manually, and shutdown application will run update script to flash image into spi flash
-
-	    ```
-	    ACTIVATE FIRMWARE FILE AND AUTOMATICALLY REBOOT BMC
-	    ```
-	    > if you select this, BMC will shutdown right now, and shutdown application will run update script to flash image into spi flash
-
-* Update firmware via Redfish
-    * We can update BMC firmware via REST API provided by Redfish. The firmware will apply immediately after uploaded without any confirmation by default.
-    The following command shows how to using curl command upload BMC firmware.
-    ```
-    curl -X POST -H "x-auth-token: ${token}" --data-binary obmc-phosphor-image-buv-runbmc-20200814010351.static.mtd.tar https://${BMC_IP}/redfish/v1/UpdateService
-    ```
-    >_${token} is the token value come from login API, read more information from [REST README](https://github.com/openbmc/docs/blob/master/REST-cheatsheet.md)_
+    * Through Redfish API
+        ```
+        curl -k -H "X-Auth-Token: $token" -H "Content-Type: application/octet-stream" -X POST https://${Poleg_IP}/redfish/v1/UpdateService -T {Path_of_Tar_File}
+        ```
+        >_${token} is the token value come from login API, refer to [here](https://github.com/openbmc/docs/blob/master/REST-cheatsheet.md) for more information._
 
 **Maintainer**
-* Medad CChien
+* Marvin Lin
 
 ## System
 
 ### Sensor
-[phosphor-hwmon](https://github.com/openbmc/phosphor-hwmon) daemon will periodically check the sensor reading to see if it exceeds lower bound or upper bound . If alarm condition is hit, the [phosphor-sel-logger](https://github.com/openbmc/phosphor-sel-logger) handles all sensor events to add new IPMI SEL records to the journal, [phosphor-host-ipmid](https://github.com/Nuvoton-Israel/phosphor-host-ipmid) will convert the journal SEL records to IPMI SEL record format and reply to host.
+[phosphor-hwmon](https://github.com/openbmc/phosphor-hwmon) daemon will periodically check the sensor reading to see if it exceeds lower bound or upper bound. If alarm condition is hit, the [phosphor-sel-logger](https://github.com/openbmc/phosphor-sel-logger) will handle all events and add IPMI SEL records to the journal log, then [phosphor-host-ipmid](https://github.com/Nuvoton-Israel/phosphor-host-ipmid) will convert journal SEL records to IPMI SEL record format and reply to host.
 
 **Source URL**
 * [https://github.com/Nuvoton-Israel/openbmc/tree/npcm-master/meta-evb/meta-evb-nuvoton/meta-evb-npcm750/recipes-phosphor/configuration](https://github.com/Nuvoton-Israel/openbmc/tree/npcm-master/meta-evb/meta-evb-nuvoton/meta-evb-npcm750/recipes-phosphor/configuration)
@@ -333,57 +227,56 @@ This is a secure flash update mechanism to update BMC firmware via WebUI.
 
 **How to use**
 
-* **Configure sensor**
-  
-  * Add Sensor Configuration File
-  
-    Each sensor **temperature**, **adc** and **fan** has a [hwmon config file](https://github.com/Nuvoton-Israel/openbmc/tree/npcm-master/meta-evb/meta-evb-nuvoton/meta-evb-npcm750/recipes-phosphor/sensors/phosphor-hwmon/obmc/hwmon/ahb/apb) and [ipmi sdr config file](https://github.com/Nuvoton-Israel/openbmc/blob/npcm-master/meta-evb/meta-evb-nuvoton/meta-evb-npcm750/recipes-phosphor/configuration/evb-npcm750-yaml-config/evb-npcm750-ipmi-sensors.yaml) that defines the sensor name and its warning or critical thresholds.  
+* Add Sensor Configuration File:
 
-    Below is hwmon config for a LM75 sensor on BMC. It has warning and critical thresholds for **upper** and **lower** bound.
-      ```
+    Each sensor has a [hwmon config file](https://github.com/Nuvoton-Israel/openbmc/tree/npcm-master/meta-evb/meta-evb-nuvoton/meta-evb-npcm750/recipes-phosphor/sensors/phosphor-hwmon/obmc/hwmon/ahb/apb) and [ipmi sensor config file](https://github.com/Nuvoton-Israel/openbmc/blob/npcm-master/meta-evb/meta-evb-nuvoton/meta-evb-npcm750/recipes-phosphor/configuration/evb-npcm750-yaml-config/evb-npcm750-ipmi-sensors.yaml) that defines the sensor name, thresholds and IPMI information.
+
+    ```
+      /* hwmon config file for LM75 temperature sensor on Poleg EVB. */
       LABEL_temp1=lm75
       WARNLO_temp1=10000
       WARNHI_temp1=40000
       CRITHI_temp1=70000
       CRITLO_temp1=0
       EVENT_temp1=WARNHI,WARNLO
-      ```
-    Below is ipmi sdr config for a temperature sensor on BMC.
-      ```
-        1: &temperature
-        entityID: 0x07
-        entityInstance: 1
-        sensorType: 0x01
-        path: /xyz/openbmc_project/sensors/temperature/lm75
-        sensorReadingType: 0x01
-        multiplierM: 1
-        offsetB: 0
-        bExp: 0
-        rExp: 0
-        unit: xyz.openbmc_project.Sensor.Value.Unit.DegreesC
-        mutability: Mutability::Write|Mutability::Read
-        serviceInterface: org.freedesktop.DBus.Properties
-        readingType: readingData
-        sensorNamePattern: nameLeaf
-        interfaces:
-            xyz.openbmc_project.Sensor.Value:
-            Value:
-              Offsets:
-                0xFF:
-                  type: double
-      ```
+    ```
 
-* **Monitor sensor and events**
+    ```
+      /* ipmi sensor config file for LM75 temperature sensor on Poleg EVB. */
+      1: &temperature
+      entityID: 0x07
+      entityInstance: 1
+      sensorType: 0x01
+      path: /xyz/openbmc_project/sensors/temperature/lm75
+      sensorReadingType: 0x01
+      multiplierM: 1
+      offsetB: 0
+      bExp: 0
+      rExp: 0
+      unit: xyz.openbmc_project.Sensor.Value.Unit.DegreesC
+      mutability: Mutability::Write|Mutability::Read
+      serviceInterface: org.freedesktop.DBus.Properties
+      readingType: readingData
+      sensorNamePattern: nameLeaf
+      interfaces:
+          xyz.openbmc_project.Sensor.Value:
+          Value:
+            Offsets:
+              0xFF:
+                type: double
+    ```
 
-  * Using WebUI  
+* Monitor sensors and events:
 
-    In `Sensors` page of **WebUI**, the sensors reading data will show on the page.
+  * Through OpenBMC WebUI  
+    <img align="bottom" width="30%" src="https://user-images.githubusercontent.com/81551963/171321413-25f8eec8-2f7c-413f-9ae2-a29caab59f11.png">
+    <img align="bottom" width="30%" src="https://user-images.githubusercontent.com/81551963/171321532-8e533e45-80ad-46e2-b29a-f01e98cb373d.png">
 
-    In `System log` page of **WebUI**, the sensors event data will show on the page.
+    Launch a browser and enter URL `https://<Poleg_EVB_IP>`, then navigate to the `Sensors` or `Event logs` page. Reading data of sensors will show on the page.
     
-  * Using IPMI
+  * Through IPMI command
 
-    Use IPMI utilities like **ipmitool** to send command for getting SDR records.  
+    Use IPMI utilities like **ipmitool** to send commands for getting SDR or SEL records.  
     ```
     root@evb-npcm750:~# ipmitool sdr list
     lm75             | 37 degrees C    | ok
@@ -400,10 +293,7 @@ This is a secure flash update mechanism to update BMC firmware via WebUI.
     fan1             | 0 RPM           | ok
     fan2             | 0 RPM           | ok
     fan3             | 0 RPM           | ok
-
-    ```
-    Use IPMI utilities like **ipmitool** to send command for getting SEL records.  
-    ```
+    
     root@evb-npcm750:~# ipmitool sel list
     1 |  Pre-Init  |0000000089| Temperature #0x02 | Upper Non-critical going high | Asserted
     2 |  Pre-Init  |0000000247| Temperature #0x01 | Lower Non-critical going low  | Deasserted
@@ -411,19 +301,19 @@ This is a secure flash update mechanism to update BMC firmware via WebUI.
 
 **Maintainer**
 
-* Stanley Chu 
+* Marvin Lin
 
 ### LED
-<img align="right" width="30%" src="https://raw.githubusercontent.com/NTC-CCBG/snapshots/db6eec1/openbmc/led.png">  
+<img align="right" width="30%" src="https://user-images.githubusercontent.com/81551963/171322034-a87212c4-6415-498e-b274-8d4926b472fd.png">  
 
-Turning on ServerLED will make **hearbeat** and **identify** leds on EVB start blinking
+Turn on system identify LED.
 
 **Source URL**
 * [https://github.com/Nuvoton-Israel/openbmc/tree/npcm-master/meta-evb/meta-evb-nuvoton/meta-evb-npcm750/recipes-phosphor/leds](https://github.com/Nuvoton-Israel/openbmc/tree/npcm-master/meta-evb/meta-evb-nuvoton/meta-evb-npcm750/recipes-phosphor/leds)
 
 **How to use**
-* Add enclosure_identify in LED [config file](https://github.com/Nuvoton-Israel/openbmc/blob/npcm-master/meta-evb/meta-evb-nuvoton/meta-evb-npcm750/recipes-phosphor/leds/evb-npcm750-led-manager-config/led.yaml)
-  ```
+1. Add EnclosureIdentify in LED [config file](https://github.com/Nuvoton-Israel/openbmc/blob/npcm-master/meta-evb/meta-evb-nuvoton/meta-evb-npcm750/recipes-phosphor/leds/evb-npcm750-led-manager-config/led.yaml).
+    ```
 	bmc_booted:
 	    heartbeat:
 		Action: 'Blink'
@@ -444,56 +334,55 @@ Turning on ServerLED will make **hearbeat** and **identify** leds on EVB start b
 		Action: 'Blink'
 		DutyOn: 10
 		Period: 1000
+    ```
 
-  ```
+2. Modify BSP layer [config](https://github.com/Nuvoton-Israel/openbmc/blob/npcm-master/meta-evb/meta-evb-nuvoton/meta-evb-npcm750/conf/machine/evb-npcm750.conf) to select npcm750 LED config file.
+    ```
+    PREFERRED_PROVIDER_virtual/phosphor-led-manager-config-native = "evb-npcm750-led-manager-config-native"
+    ```
 
-* Modify BSP layer [config](https://github.com/Nuvoton-Israel/openbmc/blob/npcm-master/meta-evb/meta-evb-nuvoton/meta-evb-npcm750/conf/machine/evb-npcm750.conf) to select npcm750 LED config file
-  ```
-  PREFERRED_PROVIDER_virtual/phosphor-led-manager-config-native = "evb-npcm750-led-manager-config-native"
-  ```
+3. Launch a browser and enter URL `https://<Poleg_EVB_IP>`, then navigate to the `Inventory and LEDs` page. Click `System identify LED` switch button, it will turn on the identify LED on Poleg EVB.
 
 **Maintainer**
 
-* Stanley Chu
+* Marvin Lin
 
 ### ADC
-<img align="right" width="30%" src="https://raw.githubusercontent.com/NTC-CCBG/snapshots/7710feb/openbmc/adc.png">  
-The NPCM750 contains an Analog-to-Digital Converter (ADC) interface that supports eight-channel inputs.  
-The ADC output value can be showed in Sensors page.  
+NPCM750 contains an Analog-to-Digital Converter (ADC) interface that supports eight-channel inputs.    
 
 **Source URL**
 * [https://github.com/Nuvoton-Israel/openbmc/blob/npcm-master/meta-evb/meta-evb-nuvoton/meta-evb-npcm750/recipes-phosphor/sensors/phosphor-hwmon/obmc/hwmon/ahb/apb/adc%40c000.conf](https://github.com/Nuvoton-Israel/openbmc/blob/npcm-master/meta-evb/meta-evb-nuvoton/meta-evb-npcm750/recipes-phosphor/sensors/phosphor-hwmon/obmc/hwmon/ahb/apb/adc%40c000.conf)  
 
 **How to use**  
- * Add ADC configuration file(adc@c000.conf)  
-   ```
-   LABEL_in1 = "adc1"
-   LABEL_in2 = "adc2"
-   LABEL_in3 = "adc3"
-   LABEL_in4 = "adc4"
-   LABEL_in5 = "adc5"
-   LABEL_in6 = "adc6"
-   LABEL_in7 = "adc7"
-   LABEL_in8 = "adc8"
-   ```  
-   NOTE: For the LABEL assignment like `LABEL_in1 = "adc1"`, it must have corresponding hwmon sysfs file in `/sys/class/hwmon/hwmonN/in1_input`
+ 1. Prepare ADC configuration file (adc@c000.conf).
+    ```
+    LABEL_in1 = "adc1"
+    LABEL_in2 = "adc2"
+    LABEL_in3 = "adc3"
+    LABEL_in4 = "adc4"
+    LABEL_in5 = "adc5"
+    LABEL_in6 = "adc6"
+    LABEL_in7 = "adc7"
+    LABEL_in8 = "adc8"
+    ```  
+    > _NOTE: For the LABEL assignment like `LABEL_in1 = "adc1"`, it must have corresponding hwmon sysfs file in `/sys/class/hwmon/hwmonN/in1_input`._
 
- * Add configuration file to rootfs, modify phosphor-hwmon_%.bbappend
-   ```
-   FENVS = "obmc/hwmon/ahb/apb/{0}"
-   ADC_ITEMS = "adc@c000.conf"
-   SYSTEMD_ENVIRONMENT_FILE_${PN} += "${@compose_list(d, 'FENVS', 'ADC_ITEMS')}"
-   ```
- * output 1.15v to ADC channel3 input in Poleg EVB (pin 1 of J25) 
- * check ADC3 Voltage value in Web Sensors page  
-   This value should be closed to 1.15   
-   
+ 2. Add ADC configuration file to rootfs in **phosphor-hwmon_%.bbappend**.
+    ```
+    FENVS = "obmc/hwmon/ahb/apb/{0}"
+    ADC_ITEMS = "adc@c000.conf"
+    SYSTEMD_ENVIRONMENT_FILE_${PN} += "${@compose_list(d, 'FENVS', 'ADC_ITEMS')}"
+    ```
+ 
+ 3. Output 1.15v to **J25 header pin 1** (that is ADC channel3 input) on Poleg EVB.
+ 4. Launch a browser and enter URL `https://<Poleg_EVB_IP>`, then navigate to the `Sensors` page. The ADC value will show on the page.
+
 **Maintainer**
 
-* Stanley Chu  
+* Marvin Lin  
 
 
-### FAN
+### Fan PID Control
 In Poleg, we support four FAN slots and FAN RPMS will dynamic adjustment according temperature variation. However, before using FAN function, you need to provide 12V external power into FLOPPY PWR on Poleg, 12V connect to PIN 4 and GND connect to PIN 2 of FLOPPY PWR.
 
 **Source URL**
