@@ -95,6 +95,17 @@ This is a Virtual Network Computing (VNC) server programm using [LibVNCServer](h
 
 7. Power up the motherboard and the video output will show on the WebUI (or Real VNC Viewer).
 
+**Performance**
+
+* Host OS: Windows Server 2016
+
+|Playing video: [AQUAMAN](https://www.youtube.com/watch?v=2wcj6SrX4zw)|[Real VNC Viewer](https://www.realvnc.com/en/connect/download/viewer/) | WebUI (noVNC Viewer)
+:-------------|:--------|:-----------|
+Host Resolution | Average FPS | Average FPS|
+1024 x 768      |  41         | 18         |
+1280 x 1024     |  34         | 14         |
+1600 x 1200     |  21         |      8     |
+
 **Maintainer**
 
 * Marvin Lin
