@@ -69,13 +69,13 @@ This is a Virtual Network Computing (VNC) server programm using [LibVNCServer](h
 
 **How to use**
 
-1. Prepare a motherboard and connect Poleg EVB through PCI-E.
-2. Connect a usb cable from motherboard to **J1 header** of Poleg EVB.
-3. Connect an ethernet cable between your workstation and **J12 header** of Poleg EVB.
-4. Power up the Poleg EVB and configure IP address.
+1. Prepare a motherboard and connect NPCM750 EVB through PCI-E.
+2. Connect a USB cable from motherboard to **J1 header** of NPCM750 EVB.
+3. Connect an ethernet cable between your workstation and **J12 header** of NPCM750 EVB.
+4. Power up the NPCM750 EVB and configure IP address.
 5. Launch a browser in your workstation and enter below URL.
     ```
-    https://<Poleg_EVB_IP>
+    https://<NPCM750_EVB_IP>
     ```
 6. Use below username/password to login OpenBMC home page, then navigate to the `KVM` page.
     ```
@@ -121,16 +121,16 @@ The Serial over LAN (SOL) console redirects the output of the server’s serial 
 
 **How to use**
 
-1. Prepare a motherboard (take Supermicro MBD-X9SCL-F-0 as example) and connect **pin 1-3, 5, 7-8, 10-12, 15-17 of JTPM** to **J10 header** of Poleg EVB with a LPC cable.
+1. Prepare a motherboard (take Supermicro MBD-X9SCL-F-0 as example) and connect **pin 1-3, 5, 7-8, 10-12, 15-17 of JTPM** to **J10 header** of NPCM750 EVB with a LPC cable.
 
 2. Download UEFI drivers and copy to the USB drive:
 
     * Format the USB drive in FAT or FAT32.  
     * Download **PolegSerialDxe.efi** and **TerminalDxe.efi** from  [https://github.com/Nuvoton-Israel/openbmc-uefi-util/tree/npcm7xx_v2.1/sol_binary](https://github.com/Nuvoton-Israel/openbmc-uefi-util/tree/npcm7xx_v2.1/sol_binary) and copy them to the USB drive.
 
-3. Connect an ethernet cable between your workstation and **J12 header** of Poleg EVB.
+3. Connect an ethernet cable between your workstation and **J12 header** of NPCM750 EVB.
 
-4. Power up the Poleg EVB and configure IP address.
+4. Power up the NPCM750 EVB and configure IP address.
 
 5. Configure Supermicro MBD-X9SCL-F-0 UEFI setting for SOL:
     * Power up Supermicro MBD-X9SCL-F-0 and boot into UEFI setting.  
@@ -144,7 +144,7 @@ The Serial over LAN (SOL) console redirects the output of the server’s serial 
     * Type `load PolegSerialDxe.efi` and `load TerminalDxe.efi` to load UEFI drivers.  
     * Unplug the USB drive and type `exit` to route to the UEFI setting.
 
-6. Launch a browser in your workstation and enter URL `https://<Poleg_EVB_IP>`, then navigate to the `SOL console` page. The output of serial port will show on the page.
+6. Launch a browser in your workstation and enter URL `https://<NPCM750_EVB_IP>`, then navigate to the `SOL console` page. The output of serial port will show on the page.
 
 **Maintainer**
 
@@ -162,7 +162,7 @@ Virtual Media (VM) is to emulate an USB drive on remote host PC via Network Bloc
 
 **How to use**
 
-1. Clone a physical usb drive to an image file.
+1. Clone a physical USB drive to an image file.
     * For Linux, use tool like **dd** command.
       ```
       dd if=/dev/sda of=usb.img bs=1M count=100
@@ -173,12 +173,12 @@ Virtual Media (VM) is to emulate an USB drive on remote host PC via Network Bloc
 
     * For Windows, use tool like **Win32DiskImager.exe** to generate the image file.
 
-2. Connect an ethernet cable between your workstation and **J12 header** of Poleg EVB. Then, power up the Poleg EVB and configure IP address.
+2. Connect an ethernet cable between your workstation and **J12 header** of NPCM750 EVB. Then, power up the NPCM750 EVB and configure IP address.
 
 3. Enable Virtual Media:
 
     * Through OpenBMC WebUI
-        * Launch a browser and enter URL `https://<Poleg_EVB_IP>`, then navigate to the `VM` page.
+        * Launch a browser and enter URL `https://<NPCM750_EVB_IP>`, then navigate to the `VM` page.
         * Click `Add File` to add image file, then click `Start` to start VM network service. You will see a new USB device on HOST OS.
 
     * Through VM standalone application
@@ -188,7 +188,7 @@ Virtual Media (VM) is to emulate an USB drive on remote host PC via Network Bloc
         * Launch windows/linux application.
             > _NOTICE: use `sudo` to launch app in linux and install `nmap` first_
         *  Operations
-            * Add image file and search On-Line Poleg.
+            * Add image file and search On-Line NPCM750.
             * Click `Start VM` to start VM network service.
             * Click `Mount USB` to mount the image file on HOST OS.
             * If you want to stop this service, just click `UnMount USB` and `Stop VM`.
@@ -207,18 +207,18 @@ This is a secure flash update mechanism to update BMC firmware via WebUI.
 * [https://github.com/Nuvoton-Israel/openbmc/tree/npcm-master/meta-evb/meta-evb-nuvoton/meta-evb-npcm750/recipes-phosphor/flash/phosphor-software-manager](https://github.com/Nuvoton-Israel/openbmc/tree/npcm-master/meta-evb/meta-evb-nuvoton/meta-evb-npcm750/recipes-phosphor/flash/phosphor-software-manager)
 
 **How to use**
-1. Connect an ethernet cable between your workstation and **J12 header** of Poleg EVB. Then, power up the Poleg EVB and configure IP address.
+1. Connect an ethernet cable between your workstation and **J12 header** of NPCM750 EVB. Then, power up the NPCM750 EVB and configure IP address.
 
 2. Upload firmware image and start firmware update:
     * Through OpenBMC webUI
-        * Launch a browser and enter URL `https://<Poleg_EVB_IP>`, then navigate to the `Firmware` page.
+        * Launch a browser and enter URL `https://<NPCM750_EVB_IP>`, then navigate to the `Firmware` page.
         * Click `Add file` to add firmware image tar file.
         * Click `Start update` to start firmware update.
-            > _Poleg EVB will reboot once firmware update completed._
+            > _NPCM750 EVB will reboot once firmware update completed._
 
     * Through Redfish API
         ```
-        curl -k -H "X-Auth-Token: $token" -H "Content-Type: application/octet-stream" -X POST https://${Poleg_IP}/redfish/v1/UpdateService -T {Path_of_Tar_File}
+        curl -k -H "X-Auth-Token: $token" -H "Content-Type: application/octet-stream" -X POST https://${NPCM750_EVB_IP}/redfish/v1/UpdateService -T {Path_of_Tar_File}
         ```
         >_${token} is the token value come from login API, refer to [here](https://github.com/openbmc/docs/blob/master/REST-cheatsheet.md) for more information._
 
@@ -243,7 +243,7 @@ This is a secure flash update mechanism to update BMC firmware via WebUI.
     Each sensor has a [hwmon config file](https://github.com/Nuvoton-Israel/openbmc/tree/npcm-master/meta-evb/meta-evb-nuvoton/meta-evb-npcm750/recipes-phosphor/sensors/phosphor-hwmon/obmc/hwmon/ahb/apb) and [ipmi sensor config file](https://github.com/Nuvoton-Israel/openbmc/blob/npcm-master/meta-evb/meta-evb-nuvoton/meta-evb-npcm750/recipes-phosphor/configuration/evb-npcm750-yaml-config/evb-npcm750-ipmi-sensors.yaml) that defines the sensor name, thresholds and IPMI information.
 
     ```
-      /* hwmon config file for LM75 temperature sensor on Poleg EVB. */
+      /* hwmon config file for LM75 temperature sensor on NPCM750 EVB. */
       LABEL_temp1=lm75
       WARNLO_temp1=10000
       WARNHI_temp1=40000
@@ -253,7 +253,7 @@ This is a secure flash update mechanism to update BMC firmware via WebUI.
     ```
 
     ```
-      /* ipmi sensor config file for LM75 temperature sensor on Poleg EVB. */
+      /* ipmi sensor config file for LM75 temperature sensor on NPCM750 EVB. */
       1: &temperature
       entityID: 0x07
       entityInstance: 1
@@ -283,7 +283,7 @@ This is a secure flash update mechanism to update BMC firmware via WebUI.
     <img align="bottom" width="30%" src="https://user-images.githubusercontent.com/81551963/171321413-25f8eec8-2f7c-413f-9ae2-a29caab59f11.png">
     <img align="bottom" width="30%" src="https://user-images.githubusercontent.com/81551963/171321532-8e533e45-80ad-46e2-b29a-f01e98cb373d.png">
 
-    Launch a browser and enter URL `https://<Poleg_EVB_IP>`, then navigate to the `Sensors` or `Event logs` page. Reading data of sensors will show on the page.
+    Launch a browser and enter URL `https://<NPCM750_EVB_IP>`, then navigate to the `Sensors` or `Event logs` page. Reading data of sensors will show on the page.
     
   * Through IPMI command
 
@@ -352,7 +352,7 @@ Turn on system identify LED.
     PREFERRED_PROVIDER_virtual/phosphor-led-manager-config-native = "evb-npcm750-led-manager-config-native"
     ```
 
-3. Launch a browser and enter URL `https://<Poleg_EVB_IP>`, then navigate to the `Inventory and LEDs` page. Click `System identify LED` switch button, it will turn on the identify LED on Poleg EVB.
+3. Launch a browser and enter URL `https://<NPCM750_EVB_IP>`, then navigate to the `Inventory and LEDs` page. Click `System identify LED` switch button, it will turn on the identify LED on NPCM750 EVB.
 
 **Maintainer**
 
@@ -385,8 +385,8 @@ NPCM750 contains an Analog-to-Digital Converter (ADC) interface that supports ei
     SYSTEMD_ENVIRONMENT_FILE_${PN} += "${@compose_list(d, 'FENVS', 'ADC_ITEMS')}"
     ```
  
- 3. Output 1.15v to **J25 header pin 1** (that is ADC channel3 input) on Poleg EVB.
- 4. Launch a browser and enter URL `https://<Poleg_EVB_IP>`, then navigate to the `Sensors` page. The ADC value will show on the page.
+ 3. Output 1.15v to **J25 header pin 1** (that is ADC channel3 input) on NPCM750 EVB.
+ 4. Launch a browser and enter URL `https://<NPCM750_EVB_IP>`, then navigate to the `Sensors` page. The ADC value will show on the page.
 
 **Maintainer**
 
@@ -394,80 +394,159 @@ NPCM750 contains an Analog-to-Digital Converter (ADC) interface that supports ei
 
 
 ### Fan PID Control
-In Poleg, we support four FAN slots and FAN RPMS will dynamic adjustment according temperature variation. However, before using FAN function, you need to provide 12V external power into FLOPPY PWR on Poleg, 12V connect to PIN 4 and GND connect to PIN 2 of FLOPPY PWR.
+<img align="right" width="30%" src="https://cdn.rawgit.com/NTC-CCBG/snapshots/e12e9dd/openbmc/fan_stepwise_pwm.png">
+
+NPCM750 contains two PWM modules and supports eight PWM signals to control fans for dynamic adjustment according temperature variation.
 
 **Source URL**
 
-Default Web-UI only show one Fan Tach Fan1, and Poleg support four Fan Tach. Thus, we modify this file to support four Fan Tach.
-* [https://github.com/Nuvoton-Israel/openbmc/blob/master/meta-evb/meta-evb-nuvoton/meta-evb-npcm750/recipes-phosphor/sensors/phosphor-hwmon%25/obmc/hwmon/ahb/apb/pwm-fan-controller%40103000.conf](https://github.com/Nuvoton-Israel/openbmc/blob/master/meta-evb/meta-evb-nuvoton/meta-evb-npcm750/recipes-phosphor/sensors/phosphor-hwmon%25/obmc/hwmon/ahb/apb/pwm-fan-controller%40103000.conf)
-  
-    **How to use**  
-    <img align="right" width="30%" src="https://cdn.rawgit.com/NTC-CCBG/snapshots/5745760/openbmc/fan.png">
-    * Monitor FAN RPMS by **Web-UI** `Server health`  
-      ->`Sensors`
-    * Enable FAN dynamic adjustment with temperature variation by command  
-      ```
-      systemctl start obmc-chassis-poweron@0.target  
-      ```
-      
-      This command will trigger systemd to execute chassis poweron target this unit. Due to FAN control function related to Host control, if you didn't connect to Host with your Poleg EVB, you can use this command to slmulate FAN control function.
-    * Test FAN RPMS by command
-      ```
-      echo 25 > /sys/class/hwmon/hwmon2/pwm1
-      echo 50 > /sys/class/hwmon/hwmon2/pwm2
-      echo 100 > /sys/class/hwmon/hwmon2/pwm3
-      echo 255 > /sys/class/hwmon/hwmon2/pwm6
-      ```
-      We can set pwm value (0-255) for pwm1-3, and 6 to control FAN1-4 RPMS value by echo command and the result will show on Web-UI
+* [https://github.com/openbmc/phosphor-pid-control](https://github.com/openbmc/phosphor-pid-control)
+* [https://github.com/Nuvoton-Israel/openbmc/tree/npcm-master/meta-evb/meta-evb-nuvoton/meta-evb-npcm750/recipes-phosphor/fans/phosphor-pid-control](https://github.com/Nuvoton-Israel/openbmc/tree/npcm-master/meta-evb/meta-evb-nuvoton/meta-evb-npcm750/recipes-phosphor/fans/phosphor-pid-control)
 
-**Maintainer**  
-* Oshri Alkoby
-* Tim Lee
+**How to use**  
+
+In order to automatically apply accurate and responsive correction to a fan control function, we use the `swampd` (PID control daemon) to handle output PWM signal. To enable this daemon, we need to prepare the swampd configuration file and deploy a system service to start this daemon.
+
+* The `swampd` configuration file (refer to [configure.md](https://github.com/openbmc/phosphor-pid-control/blob/master/configure.md) for more details)
+
+    ```
+    {
+    "sensors" : [
+           {
+            "name": "fan0",
+            "type": "fan",
+            "readPath": "/xyz/openbmc_project/sensors/fan_tach/fan0",
+            "writePath": "/sys/devices/platform/ahb/ahb:apb/f0103000.pwm-fan-controller/hwmon/**/pwm1",
+            "min": 0,
+            "max": 255
+        },
+        {
+            "name": "lm75",
+            "type": "temp",
+            "readPath": "/xyz/openbmc_project/sensors/temperature/lm75",
+            "writePath": "",
+            "min": 0,
+            "max": 0,
+            "ignoreDbusMinMax": true,
+            "timeout": 0
+        }
+    ],
+    "zones" : [
+        {
+            "id": 0,
+            "minThermalOutput": 0.0,
+            "failsafePercent": 100.0,
+            "pids": [
+                {
+                    "name": "Fan0",
+                    "type": "fan",
+                    "inputs": ["fan0"],
+                    "setpoint": 40.0,
+                    "pid": {
+                        "samplePeriod": 1.0,
+                        "proportionalCoeff": 0.0,
+                        "integralCoeff": 0.0,
+                        "feedFwdOffsetCoeff": 0.0,
+                        "feedFwdGainCoeff": 1.0,
+                        "integralLimit_min": 0.0,
+                        "integralLimit_max": 0.0,
+                        "outLim_min": 10.0,
+                        "outLim_max": 100.0,
+                        "slewNeg": 0.0,
+                        "slewPos": 0.0
+                    }
+                },
+                {
+                    "name": "lm75",
+                    "type": "stepwise",
+                    "inputs": ["lm75"],
+                    "setpoint": 30.0,
+                    "pid": {
+                        "samplePeriod": 1.0,
+                        "positiveHysteresis": 0.0,
+                        "negativeHysteresis": 0.0,
+                        "isCeiling": false,
+                        "reading": {
+                            "0": 25,
+                            "1": 28,
+                            "2": 31,
+                            "3": 34,
+                            "4": 37,
+                            "5": 40,
+                            "6": 43,
+                            "7": 46,
+                            "8": 49,
+                            "9": 52,
+                            "10": 55,
+                            "11": 58,
+                            "12": 61,
+                            "13": 64,
+                            "14": 67,
+                            "15": 70
+                        },
+                        "output": {
+                            "0": 10,
+                            "1": 14,
+                            "2": 21,
+                            "3": 23,
+                            "4": 25,
+                            "5": 30,
+                            "6": 33,
+                            "7": 36,
+                            "8": 40,
+                            "9": 50,
+                            "10": 60,
+                            "11": 70,
+                            "12": 80,
+                            "13": 90,
+                            "14": 95,
+                            "15": 100
+                        }
+                    }
+                }
+            ]
+        }
+    ]
+    }
+    ```
+* Deploy [phosphor-pid-control.service](https://github.com/Nuvoton-Israel/openbmc/blob/runbmc/meta-evb/meta-evb-nuvoton/meta-buv-runbmc/recipes-phosphor/fans/phosphor-pid-control/phosphor-pid-control.service) to start the `swampd` in **phosphor-pid-control_%.bbappend**.
+    ```
+    [Service]
+    Type=simple
+    ExecStart=/usr/bin/swampd
+    Restart=always
+    RestartSec=5
+    StartLimitInterval=0
+    ExecStopPost=/usr/bin/fan-default-speed.sh
+    ```
+
+**Maintainer**
+* Marvin Lin
 
 
 ### BIOS POST Code
-In Poleg, we support a FIFO for monitoring BIOS POST Code. Typically, this feature is used by the BMC to "watch" host boot progress via port 0x80 writes made by the BIOS during the boot process.
+NPCM750 supports a FIFO for monitoring BIOS POST Code.
 
 **Source URL**
 
-This is a patch for enabling BIOS POST Code feature in [phosphor-host-postd](https://github.com/openbmc/phosphor-host-postd) on Nuvoton's NPCM750.
-It's verified with Nuvoton's NPCM750 solution (which is referred as Poleg here) and Supermicro MBD-X9SCL-F-0.
+* [https://github.com/openbmc/phosphor-host-postd](https://github.com/openbmc/phosphor-host-postd)
 
-* [https://github.com/Nuvoton-Israel/openbmc/tree/master/meta-evb/meta-evb-nuvoton/meta-evb-npcm750/recipes-phosphor/host/phosphor-host-postd](https://github.com/Nuvoton-Israel/openbmc/tree/master/meta-evb/meta-evb-nuvoton/meta-evb-npcm750/recipes-phosphor/host/phosphor-host-postd)
-  
-    **How to use**  
-    * Prepare a Poleg EVB with up-to-date boot block, Uboot and OpenBMC versions with this BIOS POST Code patch applied.  Check with Nuvoton support for the most recent versions.
+**How to use**  
+1. Prepare a motherboard (take Supermicro MBD-X9SCL-F-0 as example) and connect **pin 1-3, 5, 7-8, 10-12, 15-17 of JTPM** to **J10 header** of NPCM750 EVB with a LPC cable.
 
-    * Prepare a Supermicro MBD-X9SCL-F-0 motherboard and a LPC cable.
-
-    * Connect pins of the **JTPM** header on **Supermicro MBD-X9SCL-F-0** to the **J10** header on **Poleg EVB** with the LPC cable:
-
-      Connect **pin 1-3, 5, 7-8, 10-12, 15-17** of JTPM with corresponding pins of J10, **one on one**.
-
-    * Execute BIOS POST Code test program by command in Poleg  
+2. Execute `snooper` test program to record BIOS POST code from HOST port 0x80  
       ```
-      snooper  
+      root@evb-npcm750:~# snooper
+      recv: 0x19
+      recv: 0x15
+      recv: 0x20
+      recv: 0x20
+      recv: 0x20
+      recv: 0x23
       ```
-      
-      This command will trigger snooper test program to record BIOS POST Code from port 0x80 of host and save to file with timestamp filename in Poleg for each host power on or reset.
-      > _Saved filename format example: 2019_4_30_11_52_35_ON_  
-
-    * Server Power on
-
-      Press `Power on` button from `Server control` ->`Server power operations` of WebUI.  
-      During server power on, snooper test program will print received BIOS POST Code on screen and record to file in Poleg at the same time.
-      > _Snooper test program print received BIOS POST Code example:_  
-        > _recv: 0x3  
-           recv: 0x2  
-           recv: 0x7_  
-
-      > _AMI BIOS POST Code for Supermicro MBD-X9SCL-F-0:  
-         0x3: North Bridge initialization before microcode loading  
-         0x2: AP initialization before microcode loading  
-         0x7: AP initialization after microcode loading_  
 
 **Maintainer**  
-* Tim Lee
+* Marvin Lin
 
 ### FRU
 <img align="right" width="30%" src="https://cdn.rawgit.com/NTC-CCBG/snapshots/d95b6d0/openbmc/fru.png">
