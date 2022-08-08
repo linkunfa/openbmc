@@ -22,13 +22,13 @@ index b5b21c06ae43..cc9919c8c994 100644
 +		phy_write(phydev, RTL821x_PAGE_SELECT, 0xd04);
 +
 +		if (phydev->speed == SPEED_1000) {
-+			phy_write(phydev, 0x10, 0x6008);
++			phy_write(phydev, 0x10, 0x6000);
 +			phy_write(phydev, 0x11, 0x6008);
 +		} else if (phydev->speed == SPEED_100) {
-+			phy_write(phydev, 0x10, 0x4840);
++			phy_write(phydev, 0x10, 0x4842);
 +			phy_write(phydev, 0x11, 0x6008);
 +		} else if (phydev->speed == SPEED_10) {
-+			phy_write(phydev, 0x10, 0x4400);
++			phy_write(phydev, 0x10, 0x4401);
 +			phy_write(phydev, 0x11, 0x600f);
 +		}
 +
