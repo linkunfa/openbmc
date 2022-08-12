@@ -1,0 +1,52 @@
+From 62f7411032d02070b552d4f6fe036154ea019e88 Mon Sep 17 00:00:00 2001
+From: Stanley Chu <yschu@nuvoton.com>
+Date: Tue, 14 Jun 2022 15:11:44 +0800
+Subject: [PATCH] skip POWER BUTTON
+
+Signed-off-by: Stanley Chu <yschu@nuvoton.com>
+---
+ src/power_control.cpp | 7 ++++---
+ 1 file changed, 4 insertions(+), 3 deletions(-)
+
+diff --git a/src/power_control.cpp b/src/power_control.cpp
+index e8a8958..2e594f8 100644
+--- a/src/power_control.cpp
++++ b/src/power_control.cpp
+@@ -2666,7 +2666,7 @@ int main(int argc, char* argv[])
+             return -1;
+         }
+     }
+-
++#if 0
+     // Request POWER_BUTTON GPIO events
+     if (powerButtonConfig.type == ConfigType::GPIO)
+     {
+@@ -2682,7 +2682,7 @@ int main(int argc, char* argv[])
+             power_control::dbusGPIOMatcher(powerButtonConfig,
+                                            powerButtonHandler);
+     }
+-
++#endif
+     // Request RESET_BUTTON GPIO events
+     if (resetButtonConfig.type == ConfigType::GPIO)
+     {
+@@ -3123,6 +3123,7 @@ int main(int argc, char* argv[])
+     sdbusplus::asio::object_server buttonsServer =
+         sdbusplus::asio::object_server(conn);
+ 
++#if 0
+     if (!powerButtonConfig.lineName.empty())
+     {
+         // Power Button Interface
+@@ -3179,7 +3180,7 @@ int main(int argc, char* argv[])
+ 
+         powerButtonIface->initialize();
+     }
+-
++#endif
+     if (!resetButtonConfig.lineName.empty())
+     {
+         // Reset Button Interface
+-- 
+2.17.1
+
