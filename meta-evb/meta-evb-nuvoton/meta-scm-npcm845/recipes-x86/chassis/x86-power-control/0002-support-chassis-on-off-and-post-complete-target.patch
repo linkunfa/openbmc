@@ -1,18 +1,18 @@
-From fa33d7d0473e4a1f89b63ecaf8719e7bdedbccac Mon Sep 17 00:00:00 2001
-From: Joseph Liu <kwliu@nuvoton.com>
-Date: Tue, 21 Jun 2022 17:48:54 +0800
-Subject: [PATCH] add support chassis on/off target files
+From 19c26508001f1f4c0dff7afdd3587cc5ad5562c6 Mon Sep 17 00:00:00 2001
+From: Stanley Chu <yschu@nuvoton.com>
+Date: Mon, 15 Aug 2022 10:54:09 +0800
+Subject: [PATCH 2/2] support chassis on/off and post complete target
 
-Signed-off-by: Joseph Liu <kwliu@nuvoton.com>
+Signed-off-by: Stanley Chu <yschu@nuvoton.com>
 ---
- src/power_control.cpp | 57 ++++++++++++++++++++++++++++++++++++++++++-
- 1 file changed, 56 insertions(+), 1 deletion(-)
+ src/power_control.cpp | 66 +++++++++++++++++++++++++++++++++++++++++++
+ 1 file changed, 66 insertions(+)
 
 diff --git a/src/power_control.cpp b/src/power_control.cpp
-index 2e594f8..bada386 100644
+index 680603e..962eaff 100644
 --- a/src/power_control.cpp
 +++ b/src/power_control.cpp
-@@ -395,6 +395,47 @@ static void powerStateTransitionToCycleOff(const Event event);
+@@ -419,6 +419,56 @@ static void powerStateTransitionToCycleOff(const Event event);
  static void powerStateGracefulTransitionToCycleOff(const Event event);
  static void powerStateCheckForWarmReset(const Event event);
  
@@ -21,6 +21,21 @@ index 2e594f8..bada386 100644
 +static constexpr auto systemdInterface = "org.freedesktop.systemd1.Manager";
 +static constexpr auto chassisOnTargetName = "obmc-chassis-poweron.target";
 +static constexpr auto chassisOffTargetName = "obmc-chassis-poweroff.target";
++static constexpr auto postCompleteTargetName = "obmc-post-complete.target";
++
++void HostPostCompleted()
++{
++    conn->async_method_call(
++        [](boost::system::error_code ec) {
++            if (ec)
++            {
++                lg2::error("Failed to call HostPostCompleted: {MSG}", "MSG", ec.message());
++            }
++        },
++        systemdBusname, systemdPath, systemdInterface, "StartUnit",
++        postCompleteTargetName, "replace");
++    return;
++}
 +
 +void chassisPowerOn()
 +{
@@ -28,10 +43,7 @@ index 2e594f8..bada386 100644
 +        [](boost::system::error_code ec) {
 +            if (ec)
 +            {
-+                std::string errMsg =
-+                    "Failed to call chassisPowerOn: " + ec.message();
-+                phosphor::logging::log<phosphor::logging::level::ERR>(
-+                    errMsg.c_str());
++                lg2::error("Failed to call chassisPowerOn: {MSG}", "MSG", ec.message());
 +            }
 +        },
 +        systemdBusname, systemdPath, systemdInterface, "StartUnit",
@@ -45,10 +57,7 @@ index 2e594f8..bada386 100644
 +        [](boost::system::error_code ec) {
 +            if (ec)
 +            {
-+                std::string errMsg =
-+                    "Failed to call chassisPowerOff: " + ec.message();
-+                phosphor::logging::log<phosphor::logging::level::ERR>(
-+                    errMsg.c_str());
++                lg2::error("Failed to call chassisPowerOff: {MSG}", "MSG", ec.message());
 +            }
 +        },
 +        systemdBusname, systemdPath, systemdInterface, "StartUnit",
@@ -60,7 +69,7 @@ index 2e594f8..bada386 100644
  static std::function<void(const Event)> getPowerStateHandler(PowerState state)
  {
      switch (state)
-@@ -574,6 +615,11 @@ static void setPowerState(const PowerState state)
+@@ -595,6 +645,11 @@ static void setPowerState(const PowerState state)
  
      // Save the power state for the restore policy
      savePowerState(state);
@@ -72,15 +81,15 @@ index 2e594f8..bada386 100644
  }
  
  enum class RestartCause
-@@ -1620,7 +1666,6 @@ static void currentHostStateMonitor()
-                 // if HostState is trurned to OFF.
-                 osIface->set_property("OperatingSystemState",
-                                       std::string("Inactive"));
--
-                 // Set the restart cause set for this restart
-                 setRestartCause();
-                 resetACBootProperty();
-@@ -2810,6 +2855,11 @@ int main(int argc, char* argv[])
+@@ -2242,6 +2297,7 @@ static void postCompleteHandler(bool state)
+     {
+         sendPowerControlEvent(Event::postCompleteAssert);
+         setOperatingSystemState(OperatingSystemStateStage::Standby);
++        HostPostCompleted();
+     }
+     else
+     {
+@@ -2767,6 +2823,11 @@ int main(int argc, char* argv[])
               (sioPowerGoodLine.get_value() == sioPwrGoodConfig.polarity)))
          {
              powerState = PowerState::on;
@@ -92,7 +101,7 @@ index 2e594f8..bada386 100644
          }
      }
      else
-@@ -2817,6 +2867,11 @@ int main(int argc, char* argv[])
+@@ -2774,6 +2835,11 @@ int main(int argc, char* argv[])
          if (getProperty(powerOkConfig))
          {
              powerState = PowerState::on;
@@ -103,7 +112,7 @@ index 2e594f8..bada386 100644
 +            power_control::chassisPowerOff();
          }
      }
-     // Initialize the power state storage
+     // Check if we need to start the Power Restore policy
 -- 
-2.34.1
+2.17.1
 

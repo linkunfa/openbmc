@@ -1,18 +1,49 @@
-From 62f7411032d02070b552d4f6fe036154ea019e88 Mon Sep 17 00:00:00 2001
+From 64ea5f75050cfbbfac96ddbbbe28ebdd9f71677b Mon Sep 17 00:00:00 2001
 From: Stanley Chu <yschu@nuvoton.com>
-Date: Tue, 14 Jun 2022 15:11:44 +0800
+Date: Mon, 15 Aug 2022 10:52:31 +0800
 Subject: [PATCH] skip POWER BUTTON
 
 Signed-off-by: Stanley Chu <yschu@nuvoton.com>
 ---
- src/power_control.cpp | 7 ++++---
- 1 file changed, 4 insertions(+), 3 deletions(-)
+ src/power_control.cpp | 11 ++++++++---
+ 1 file changed, 8 insertions(+), 3 deletions(-)
 
 diff --git a/src/power_control.cpp b/src/power_control.cpp
-index e8a8958..2e594f8 100644
+index 05aa45c..680603e 100644
 --- a/src/power_control.cpp
 +++ b/src/power_control.cpp
-@@ -2666,7 +2666,7 @@ int main(int argc, char* argv[])
+@@ -738,12 +738,14 @@ static void powerRestorePolicyLog()
+                     "OpenBMC.0.1.PowerRestorePolicyApplied", NULL);
+ }
+ 
++#if 0
+ static void powerButtonPressLog()
+ {
+     sd_journal_send("MESSAGE=PowerControl: power button pressed", "PRIORITY=%i",
+                     LOG_INFO, "REDFISH_MESSAGE_ID=%s",
+                     "OpenBMC.0.1.PowerButtonPressed", NULL);
+ }
++#endif
+ 
+ static void resetButtonPressLog()
+ {
+@@ -1995,6 +1997,7 @@ static void sioS5Handler(bool state)
+     sendPowerControlEvent(powerControlEvent);
+ }
+ 
++#if 0
+ static void powerButtonHandler(bool state)
+ {
+     powerButtonIface->set_property("ButtonPressed", !state);
+@@ -2012,6 +2015,7 @@ static void powerButtonHandler(bool state)
+         }
+     }
+ }
++#endif
+ 
+ static void resetButtonHandler(bool state)
+ {
+@@ -2621,7 +2625,7 @@ int main(int argc, char* argv[])
              return -1;
          }
      }
@@ -21,7 +52,7 @@ index e8a8958..2e594f8 100644
      // Request POWER_BUTTON GPIO events
      if (powerButtonConfig.type == ConfigType::GPIO)
      {
-@@ -2682,7 +2682,7 @@ int main(int argc, char* argv[])
+@@ -2637,7 +2641,7 @@ int main(int argc, char* argv[])
              power_control::dbusGPIOMatcher(powerButtonConfig,
                                             powerButtonHandler);
      }
@@ -30,7 +61,7 @@ index e8a8958..2e594f8 100644
      // Request RESET_BUTTON GPIO events
      if (resetButtonConfig.type == ConfigType::GPIO)
      {
-@@ -3123,6 +3123,7 @@ int main(int argc, char* argv[])
+@@ -3062,6 +3066,7 @@ int main(int argc, char* argv[])
      sdbusplus::asio::object_server buttonsServer =
          sdbusplus::asio::object_server(conn);
  
@@ -38,7 +69,7 @@ index e8a8958..2e594f8 100644
      if (!powerButtonConfig.lineName.empty())
      {
          // Power Button Interface
-@@ -3179,7 +3180,7 @@ int main(int argc, char* argv[])
+@@ -3116,7 +3121,7 @@ int main(int argc, char* argv[])
  
          powerButtonIface->initialize();
      }
