@@ -1,6 +1,6 @@
-From 299ff83b94ee97d2a768d208290df82df6ad0f6c Mon Sep 17 00:00:00 2001
+From 396c827e00e6a2224f191e855bf34d4540710aa3 Mon Sep 17 00:00:00 2001
 From: Stanley Chu <yschu@nuvoton.com>
-Date: Mon, 11 Jul 2022 17:29:30 +0800
+Date: Mon, 15 Aug 2022 13:57:01 +0800
 Subject: [PATCH] suuport sync mac from eeprom
 
 Signed-off-by: Stanley Chu <yschu@nuvoton.com>
@@ -13,29 +13,29 @@ Signed-off-by: Stanley Chu <yschu@nuvoton.com>
  5 files changed, 102 insertions(+)
 
 diff --git a/meson.build b/meson.build
-index 5112562..1e85967 100644
+index f227b1a..88ce723 100644
 --- a/meson.build
 +++ b/meson.build
-@@ -21,6 +21,7 @@ conf_data.set(
-   get_option('default-ipv6-accept-ra'))
+@@ -22,6 +22,7 @@ conf_data.set(
  conf_data.set('NIC_SUPPORTS_ETHTOOL', get_option('nic-ethtool'))
  conf_data.set('SYNC_MAC_FROM_INVENTORY', get_option('sync-mac'))
+ conf_data.set('PERSIST_MAC', get_option('persist-mac'))
 +conf_data.set('SYNC_MAC_FROM_EEPROM', get_option('sync-mac-eeprom'))
  
- sdbusplus_dep = dependency('sdbusplus', required: false)
- if sdbusplus_dep.found() and sdbusplus_dep.type_name() != 'internal'
+ sdbusplus_dep = dependency('sdbusplus')
+ sdbusplusplus_prog = find_program('sdbus++', native: true)
 diff --git a/meson_options.txt b/meson_options.txt
-index d351fea..1b9f131 100644
+index 59d20f4..5d38f64 100644
 --- a/meson_options.txt
 +++ b/meson_options.txt
-@@ -10,3 +10,5 @@ option('nic-ethtool', type: 'boolean',
-        description: 'Enable ethtool information lookup')
- option('sync-mac', type: 'boolean',
-        description: 'Sync mac address with phosphor-inventory-manager')
+@@ -14,3 +14,5 @@ option('hyp-nw-config', type : 'boolean',
+        description : 'ibm-oem: Enable the hypervisor network manager')
+ option('persist-mac', type: 'boolean',
+        description: 'Permit the MAC address to be written to the systemd.network config')
 +option('sync-mac-eeprom', type: 'boolean',
 +       description: 'Sync mac address from fru eeprom')
 diff --git a/src/ethernet_interface.cpp b/src/ethernet_interface.cpp
-index 44f46f6..96649a5 100644
+index 1e63a48..ec6a4a4 100644
 --- a/src/ethernet_interface.cpp
 +++ b/src/ethernet_interface.cpp
 @@ -6,6 +6,7 @@
@@ -46,7 +46,7 @@ index 44f46f6..96649a5 100644
  
  #include <arpa/inet.h>
  #include <fmt/format.h>
-@@ -1262,6 +1263,10 @@ std::string EthernetInterface::macAddress(std::string value)
+@@ -1215,6 +1216,10 @@ std::string EthernetInterface::macAddress(std::string value)
      }
  #endif // HAVE_UBOOT_ENV
  
