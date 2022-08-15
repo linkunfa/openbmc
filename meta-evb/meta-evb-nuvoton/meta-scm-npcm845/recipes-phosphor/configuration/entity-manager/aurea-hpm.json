@@ -1613,7 +1613,7 @@
                     "Value": 95.000
                 }
             ],
-            "Type": "STBSI"
+            "Type": "SBTSI"
         },
         {
             "Address": "0x6a",
