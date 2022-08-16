@@ -1,8 +1,18 @@
+From a35489fe5dc2ebbe92fdc230345e82f643ea307c Mon Sep 17 00:00:00 2001
+From: Stanley Chu <yschu@nuvoton.com>
+Date: Tue, 16 Aug 2022 16:22:58 +0800
+Subject: [PATCH 15/21] fix percentage type show
+
+Signed-off-by: Stanley Chu <yschu@nuvoton.com>
+---
+ dbus-sdr/sensorcommands.cpp | 21 ++++++++++++++++++++-
+ 1 file changed, 20 insertions(+), 1 deletion(-)
+
 diff --git a/dbus-sdr/sensorcommands.cpp b/dbus-sdr/sensorcommands.cpp
-index 9cb3bf0..9075966 100644
+index ab45ecf9..018120fa 100644
 --- a/dbus-sdr/sensorcommands.cpp
 +++ b/dbus-sdr/sensorcommands.cpp
-@@ -1489,6 +1489,18 @@ void constructSensorSdrHeaderKey(uint16_t sensorNum, uint16_t recordID,
+@@ -1603,6 +1603,18 @@ void constructSensorSdrHeaderKey(uint16_t sensorNum, uint16_t recordID,
      record.key.owner_lun = lun;
      record.key.sensor_number = sensornumber;
  }
@@ -21,7 +31,7 @@ index 9cb3bf0..9075966 100644
  bool constructSensorSdr(ipmi::Context::ptr ctx, uint16_t sensorNum,
                          uint16_t recordID, const std::string& service,
                          const std::string& path,
-@@ -1599,7 +1611,14 @@ bool constructSensorSdr(ipmi::Context::ptr ctx, uint16_t sensorNum,
+@@ -1713,7 +1725,14 @@ bool constructSensorSdr(ipmi::Context::ptr ctx, uint16_t sensorNum,
          (rExpSign << 7) | (rExpBits << 4) | (bExpSign << 3) | bExpBits;
  
      // Set the analog reading byte interpretation accordingly
@@ -37,10 +47,6 @@ index 9cb3bf0..9075966 100644
  
      // TODO(): Perhaps care about Tolerance, Accuracy, and so on
      // These seem redundant, but derivable from the above 5 attributes
-@@ -2331,6 +2350,5 @@ void registerSensorFunctions()
-     ipmi::registerHandler(ipmi::prioOpenBmcBase, ipmi::netFnSensor,
-                           ipmi::sensor_event::cmdGetSensorType,
-                           ipmi::Privilege::User, ipmiSenGetSensorType);
--
- }
- } // namespace ipmi
+-- 
+2.17.1
+

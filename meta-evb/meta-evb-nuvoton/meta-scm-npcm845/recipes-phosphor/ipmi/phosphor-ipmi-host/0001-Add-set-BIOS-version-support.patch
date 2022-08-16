@@ -1,14 +1,15 @@
-From 1ff24df3b9517f1f28ff282e7230b4ef82b89e78 Mon Sep 17 00:00:00 2001
-From: Brian Ma <chma0@nuvoton.com>
-Date: Fri, 13 May 2022 10:30:14 +0800
-Subject: [PATCH] Add set BIOS version support
+From 76b9ac687622f9c52f6379b47ae971f4050c1bb3 Mon Sep 17 00:00:00 2001
+From: Stanley Chu <yschu@nuvoton.com>
+Date: Mon, 15 Aug 2022 16:46:21 +0800
+Subject: [PATCH 01/21] Add-set-BIOS-version-support
 
+Signed-off-by: Stanley Chu <yschu@nuvoton.com>
 ---
  apphandler.cpp | 45 +++++++++++++++++++++++++++++++++++++++++++++
  1 file changed, 45 insertions(+)
 
 diff --git a/apphandler.cpp b/apphandler.cpp
-index 0577c07..615c329 100644
+index 6cdd78f2..f10f29e7 100644
 --- a/apphandler.cpp
 +++ b/apphandler.cpp
 @@ -50,6 +50,8 @@ static constexpr auto versionIntf = "xyz.openbmc_project.Software.Version";

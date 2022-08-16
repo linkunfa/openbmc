@@ -1,7 +1,7 @@
-From 7f5065c7c15a909cd44193729c8fd9511c4efd03 Mon Sep 17 00:00:00 2001
+From f0f001b8836cd736f752b2b1a37e865365899394 Mon Sep 17 00:00:00 2001
 From: Stanley Chu <yschu@nuvoton.com>
 Date: Thu, 28 Jul 2022 09:59:17 +0800
-Subject: [PATCH] set channel security keys
+Subject: [PATCH 21/21] set channel security keys
 
 Signed-off-by: Stanley Chu <yschu@nuvoton.com>
 ---
@@ -37,7 +37,7 @@ index 8e5accbc..aca02bd9 100644
 +}__attribute__((packed));
 +
 diff --git a/apphandler.cpp b/apphandler.cpp
-index 338122b5..5c219ea4 100644
+index 61de0559..833a99e3 100644
 --- a/apphandler.cpp
 +++ b/apphandler.cpp
 @@ -63,7 +63,21 @@ using Activation =
@@ -62,7 +62,7 @@ index 338122b5..5c219ea4 100644
  typedef struct
  {
      uint8_t busId;
-@@ -1763,6 +1777,144 @@ ipmi::RspType<std::vector<uint8_t>>
+@@ -1766,6 +1780,144 @@ ipmi::RspType<std::vector<uint8_t>>
      return ipmi::responseSuccess(readBuf);
  }
  
@@ -207,7 +207,7 @@ index 338122b5..5c219ea4 100644
  void register_netfn_app_functions()
  {
      // <Get Device ID>
-@@ -1847,5 +1999,9 @@ void register_netfn_app_functions()
+@@ -1850,5 +2002,9 @@ void register_netfn_app_functions()
      ipmi::registerHandler(ipmi::prioOpenBmcBase, ipmi::netFnApp,
                            ipmi::app::cmdSetSystemInfoParameters,
                            ipmi::Privilege::Admin, ipmiAppSetSystemInfo);

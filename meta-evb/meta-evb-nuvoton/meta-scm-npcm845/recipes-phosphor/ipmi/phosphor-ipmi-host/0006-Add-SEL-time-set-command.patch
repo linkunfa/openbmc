@@ -1,5 +1,15 @@
+From a562a0d7de97470bbe3299bbc7c3896337698fee Mon Sep 17 00:00:00 2001
+From: Stanley Chu <yschu@nuvoton.com>
+Date: Tue, 16 Aug 2022 15:39:00 +0800
+Subject: [PATCH 06/21] Add SEL time set command
+
+Signed-off-by: Stanley Chu <yschu@nuvoton.com>
+---
+ dbus-sdr/storagecommands.cpp | 55 ++++++++++++++++++++++++++++++++++--
+ 1 file changed, 52 insertions(+), 3 deletions(-)
+
 diff --git a/dbus-sdr/storagecommands.cpp b/dbus-sdr/storagecommands.cpp
-index 8f1577e..07e504b 100644
+index 174cf12c..09150824 100644
 --- a/dbus-sdr/storagecommands.cpp
 +++ b/dbus-sdr/storagecommands.cpp
 @@ -28,6 +28,7 @@
@@ -10,7 +20,7 @@ index 8f1577e..07e504b 100644
  #include <phosphor-logging/log.hpp>
  #include <sdbusplus/message/types.hpp>
  #include <sdbusplus/timer.hpp>
-@@ -108,6 +109,15 @@ constexpr static const char* chassisTypeMainServer = "17";
+@@ -110,6 +111,14 @@ constexpr static const char* chassisTypeMainServer = "17";
  // event direction is bit[7] of eventType where 1b = Deassertion event
  constexpr static const uint8_t deassertionEvent = 0x80;
  
@@ -22,11 +32,10 @@ index 8f1577e..07e504b 100644
 +constexpr auto TIME_SYNC_PROPERTIE = "TimeSyncMethod";
 +constexpr auto TIME_SYNC_MANUAL =
 +    "xyz.openbmc_project.Time.Synchronization.Method.Manual";
-+
- static std::vector<uint8_t> fruCache;
- static uint8_t cacheBus = 0xFF;
- static uint8_t cacheAddr = 0XFF;
-@@ -1300,10 +1310,50 @@ ipmi::RspType<uint32_t> ipmiStorageGetSELTime()
+ static constexpr char const* ipmiSELObject = "xyz.openbmc_project.Logging.IPMI";
+ static constexpr char const* ipmiSELPath = "/xyz/openbmc_project/Logging/IPMI";
+ static constexpr char const* ipmiSELAddInterface =
+@@ -1260,10 +1269,50 @@ ipmi::RspType<uint32_t> ipmiStorageGetSELTime()
      return ipmi::responseSuccess(selTime.tv_sec);
  }
  
@@ -79,4 +88,7 @@ index 8f1577e..07e504b 100644
 +    return ipmi::responseSuccess();
  }
  
- std::vector<uint8_t> getType12SDRs(uint16_t index, uint16_t recordId)
+ std::vector<uint8_t>
+-- 
+2.17.1
+

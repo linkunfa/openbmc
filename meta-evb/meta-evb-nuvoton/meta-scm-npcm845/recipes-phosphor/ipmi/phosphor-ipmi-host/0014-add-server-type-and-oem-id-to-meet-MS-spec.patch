@@ -1,7 +1,7 @@
-From 52078f52509b7cf6fc33c089eef5e6806792e204 Mon Sep 17 00:00:00 2001
+From fe979ff80f771e74edc486cfe5fa4f4ea3d99860 Mon Sep 17 00:00:00 2001
 From: Stanley Chu <yschu@nuvoton.com>
 Date: Wed, 13 Jul 2022 11:57:10 +0800
-Subject: [PATCH] add server type and oem id to meet MS spec
+Subject: [PATCH 14/21] add server type and oem id to meet MS spec
 
 Signed-off-by: Stanley Chu <yschu@nuvoton.com>
 ---

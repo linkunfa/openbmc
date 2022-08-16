@@ -1,6 +1,6 @@
-From 97d446b887dae3731ce609ada419243485c3586e Mon Sep 17 00:00:00 2001
+From d126dcc68ea6b1c1681db2986ecb2bd1a3d8fcdc Mon Sep 17 00:00:00 2001
 From: Stanley Chu <yschu@nuvoton.com>
-Date: Thu, 28 Jul 2022 12:38:08 +0800
+Date: Tue, 16 Aug 2022 16:58:12 +0800
 Subject: [PATCH] set channel security keys
 
 Signed-off-by: Stanley Chu <yschu@nuvoton.com>
@@ -9,7 +9,7 @@ Signed-off-by: Stanley Chu <yschu@nuvoton.com>
  1 file changed, 11 insertions(+), 1 deletion(-)
 
 diff --git a/command/rakp34.cpp b/command/rakp34.cpp
-index cfa2363..ee3c7a4 100644
+index cfa2363..b4eaab1 100644
 --- a/command/rakp34.cpp
 +++ b/command/rakp34.cpp
 @@ -9,7 +9,9 @@
@@ -30,9 +30,9 @@ index cfa2363..ee3c7a4 100644
 +    std::string chsecuritykeys = ipmi::ipmiGetChannelSecurityKeys(ID_KG);
 +    if(strncmp(chsecuritykeys.c_str(),NULLSTR,KEYSIZE))
 +    {
-+    	std::fill(authAlgo->userKey.data(),
++        std::fill(authAlgo->userKey.data(),
 +              authAlgo->userKey.data() + authAlgo->userKey.size(), 0);
-+    	std::copy_n(chsecuritykeys.c_str(), chsecuritykeys.size() , authAlgo->userKey.data());
++        std::copy_n(chsecuritykeys.c_str(), chsecuritykeys.size() , authAlgo->userKey.data());
 +    }
 +
      // Generate Session Integrity Key

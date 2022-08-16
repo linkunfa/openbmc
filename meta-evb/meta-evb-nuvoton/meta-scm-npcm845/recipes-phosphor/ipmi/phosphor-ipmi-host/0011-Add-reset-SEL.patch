@@ -1,5 +1,17 @@
+From 521f0fb42085e6f11d98f7256182e9b1cbb9c04f Mon Sep 17 00:00:00 2001
+From: Stanley Chu <yschu@nuvoton.com>
+Date: Tue, 16 Aug 2022 16:00:00 +0800
+Subject: [PATCH 11/21] Add reset SEL
+
+Signed-off-by: Stanley Chu <yschu@nuvoton.com>
+---
+ dbus-sdr/sdrutils.cpp         |  4 ++++
+ globalhandler.cpp             | 36 +++++++++++++++++++++++++++++++++++
+ include/dbus-sdr/sdrutils.hpp |  8 ++++++--
+ 3 files changed, 46 insertions(+), 2 deletions(-)
+
 diff --git a/dbus-sdr/sdrutils.cpp b/dbus-sdr/sdrutils.cpp
-index 3df0dc1..d6b469d 100644
+index 3df0dc1d..1c296507 100644
 --- a/dbus-sdr/sdrutils.cpp
 +++ b/dbus-sdr/sdrutils.cpp
 @@ -261,6 +261,10 @@ uint16_t getSensorNumberFromPath(const std::string& path)
@@ -14,7 +26,7 @@ index 3df0dc1..d6b469d 100644
      try
      {
 diff --git a/globalhandler.cpp b/globalhandler.cpp
-index 394274f..028a7d3 100644
+index 394274f6..6d753e95 100644
 --- a/globalhandler.cpp
 +++ b/globalhandler.cpp
 @@ -27,9 +27,44 @@ constexpr auto SYSTEMD_SERVICE = "org.freedesktop.systemd1";
@@ -62,7 +74,7 @@ index 394274f..028a7d3 100644
      sdbusplus::bus::bus bus{ipmid_get_sd_bus_connection()};
  
      auto bmcStateObj =
-@@ -44,17 +79,21 @@ void resetBMC()
+@@ -44,6 +79,7 @@ void resetBMC()
  
  void warmResetBMC()
  {
@@ -70,51 +82,12 @@ index 394274f..028a7d3 100644
      try
      {
          std::this_thread::sleep_for(std::chrono::milliseconds(100));
--        //sdbusplus::bus::bus bus{ipmid_get_sd_bus_connection()};
-+        // sdbusplus::bus::bus bus{ipmid_get_sd_bus_connection()};
-         auto bus = sdbusplus::bus::new_default();
--        // Reset the failed units so we don't end up having systemd not properly restart if the command is spammed.
--        auto reset = bus.new_method_call(SYSTEMD_SERVICE, SYSTEMD_OBJ_PATH, SYSTEMD_INTERFACE, "ResetFailed");
-+        // Reset the failed units so we don't end up having systemd not properly
-+        // restart if the command is spammed.
-+        auto reset = bus.new_method_call(SYSTEMD_SERVICE, SYSTEMD_OBJ_PATH,
-+                                         SYSTEMD_INTERFACE, "ResetFailed");
-         bus.call_noreply(reset);
-         std::this_thread::sleep_for(std::chrono::milliseconds(100));
-         // Restart the target (restart will propagate to units).
--        auto restart = bus.new_method_call(SYSTEMD_SERVICE, SYSTEMD_OBJ_PATH, SYSTEMD_INTERFACE, "RestartUnit");
-+        auto restart = bus.new_method_call(SYSTEMD_SERVICE, SYSTEMD_OBJ_PATH,
-+                                           SYSTEMD_INTERFACE, "RestartUnit");
-         restart.append(SYSTEMD_WARM_RESET_TARGET, "replace");
-         bus.call_noreply(restart);
-     }
-@@ -85,7 +124,6 @@ ipmi::RspType<> ipmiGlobalReset()
-     return ipmi::responseSuccess();
- }
- 
--
- /** @brief implements warm reset command
-  *  @param - None
-  *  @returns IPMI completion code.
-@@ -94,8 +132,10 @@ ipmi::RspType<> ipmiWarmReset()
- {
-     try
-     {
--        if (!reset_queued.test_and_set()) {
--            // Do this asynchronously so that we can properly return this command.
-+        if (!reset_queued.test_and_set())
-+        {
-+            // Do this asynchronously so that we can properly return this
-+            // command.
-             std::thread t(warmResetBMC);
-             t.detach();
-         }
 diff --git a/include/dbus-sdr/sdrutils.hpp b/include/dbus-sdr/sdrutils.hpp
-index cfd76b3..c099419 100644
+index 1af65bcb..bb3e7306 100644
 --- a/include/dbus-sdr/sdrutils.hpp
 +++ b/include/dbus-sdr/sdrutils.hpp
-@@ -311,13 +311,15 @@ enum class SensorTypeCodes : uint8_t
-     power_unit = 0x09,
+@@ -313,13 +313,15 @@ enum class SensorTypeCodes : uint8_t
+     memory = 0x0c,
      buttons = 0x14,
      watchdog2 = 0x23,
 +    subsystem_health = 0xE0,
@@ -130,7 +103,7 @@ index cfd76b3..c099419 100644
  };
  
  const static boost::container::flat_map<
-@@ -342,7 +344,9 @@ const static boost::container::flat_map<
+@@ -348,7 +350,9 @@ const static boost::container::flat_map<
           {"buttons", std::make_pair(SensorTypeCodes::buttons,
                                      SensorEventTypeCodes::sensorSpecified)},
           {"watchdog", std::make_pair(SensorTypeCodes::watchdog2,
@@ -141,3 +114,6 @@ index cfd76b3..c099419 100644
  
  std::string getSensorTypeStringFromPath(const std::string& path);
  
+-- 
+2.17.1
+
