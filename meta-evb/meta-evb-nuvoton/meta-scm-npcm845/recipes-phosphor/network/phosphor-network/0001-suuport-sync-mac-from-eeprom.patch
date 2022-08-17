@@ -1,6 +1,6 @@
-From 396c827e00e6a2224f191e855bf34d4540710aa3 Mon Sep 17 00:00:00 2001
+From fd72d6f47fc7d342cdc5957b5240a59ce752b98f Mon Sep 17 00:00:00 2001
 From: Stanley Chu <yschu@nuvoton.com>
-Date: Mon, 15 Aug 2022 13:57:01 +0800
+Date: Wed, 17 Aug 2022 10:48:40 +0800
 Subject: [PATCH] suuport sync mac from eeprom
 
 Signed-off-by: Stanley Chu <yschu@nuvoton.com>
@@ -8,9 +8,9 @@ Signed-off-by: Stanley Chu <yschu@nuvoton.com>
  meson.build                |  1 +
  meson_options.txt          |  2 +
  src/ethernet_interface.cpp |  5 ++
- src/network_config.cpp     | 93 ++++++++++++++++++++++++++++++++++++++
+ src/network_config.cpp     | 98 ++++++++++++++++++++++++++++++++++++++
  src/network_config.hpp     |  1 +
- 5 files changed, 102 insertions(+)
+ 5 files changed, 107 insertions(+)
 
 diff --git a/meson.build b/meson.build
 index f227b1a..88ce723 100644
@@ -58,7 +58,7 @@ index 1e63a48..ec6a4a4 100644
  }
  
 diff --git a/src/network_config.cpp b/src/network_config.cpp
-index 94c8eae..ad159cf 100644
+index 94c8eae..7012321 100644
 --- a/src/network_config.cpp
 +++ b/src/network_config.cpp
 @@ -1,9 +1,19 @@
@@ -81,7 +81,7 @@ index 94c8eae..ad159cf 100644
  
  namespace phosphor
  {
-@@ -12,6 +22,86 @@ namespace network
+@@ -12,6 +22,87 @@ namespace network
  
  namespace bmc
  {
@@ -122,9 +122,9 @@ index 94c8eae..ad159cf 100644
 +    in.close();
 +}
 +
-+std::string getMACfromEEPROM(void)
++ether_addr getMACfromEEPROM(void)
 +{
-+    std::string MACaddr = "000000000000";
++    ether_addr addr = {0};
 +
 +    std::ifstream in(configFile);
 +    nlohmann::json configJson;
@@ -135,49 +135,54 @@ index 94c8eae..ad159cf 100644
 +    if (eeprom_entry != configJson.end() && offset_entry != configJson.end())
 +    {
 +        auto eeprom_path = (*eeprom_entry).get<std::string>();
-+	auto mac_offset = (*offset_entry).get<std::string>();
-+	ether_addr mac;
++        auto mac_offset = (*offset_entry).get<std::string>();
 +        std::ifstream eeprom(eeprom_path);
 +        eeprom.seekg(std::stoul(mac_offset, nullptr, 16));
-+	if (eeprom.fail())
-+	{
++        if (eeprom.fail())
++        {
 +            log<level::ERR>("Invalid offset in EEPROM");
 +            eeprom.close();
 +            in.close();
-+            return MACaddr;
-+	}
-+        eeprom.read((char *)&mac, 6);
-+	if (eeprom.gcount() == 6)
-+	{
-+           MACaddr = phosphor::network::mac_address::toString(mac);
-+	   if (!phosphor::network::mac_address::isUnicast(mac)) {
-+               log<level::ERR>("MACAddress in EEPROM is not valid",
++            return addr;
++        }
++        eeprom.read((char *)&addr, 6);
++        if (eeprom.gcount() == 6)
++        {
++            if (!phosphor::network::mac_address::isUnicast(addr)) {
++                std::string MACaddr = phosphor::network::mac_address::toString(addr);
++                log<level::ERR>("MACAddress in EEPROM is not valid",
 +                        entry("MAC=%s", MACaddr.c_str()));
-+           }
-+	}
++                memset(&addr, 0, sizeof(addr));
++            }
++        }
 +        else {
 +            log<level::ERR>("No MACAddress in EEPROM");
++            memset(&addr, 0, sizeof(addr));
 +        }
 +        eeprom.close();
 +    }
 +    in.close();
 +
-+    return MACaddr;
++    return addr;
 +}
 +
  void writeDHCPDefault(const std::string& filename, const std::string& interface)
  {
      std::ofstream filestream;
-@@ -26,6 +116,9 @@ void writeDHCPDefault(const std::string& filename, const std::string& interface)
-     // file is not present, or after the default file has been
-     // manually removed.
-     filestream << "[Match]\nName=" << interface <<
+@@ -39,6 +130,13 @@ void writeDHCPDefault(const std::string& filename, const std::string& interface)
+ 
+ #endif
+                 "[DHCP]\nClientIdentifier=mac\n";
 +#ifdef SYNC_MAC_FROM_EEPROM
-+                "\n[Link]\nMACAddress=" << getMACfromEEPROM() <<
++    ether_addr mac_addr = getMACfromEEPROM();
++    if (phosphor::network::mac_address::isUnicast(mac_addr)) {
++        std::string MACAddrStr = phosphor::network::mac_address::toString(mac_addr);
++        filestream << "[Link]\nMACAddress=" << MACAddrStr << "\n";
++    }
 +#endif
-                 "\n[Network]\nDHCP=true\n"
- #ifdef LINK_LOCAL_AUTOCONFIGURATION
-                 "LinkLocalAddressing=yes\n"
+     filestream.close();
+ }
+ } // namespace bmc
 diff --git a/src/network_config.hpp b/src/network_config.hpp
 index 7260ca2..2ce6352 100644
 --- a/src/network_config.hpp
