@@ -30,6 +30,7 @@ SRC_URI:append:scm-npcm845 = " file://0018-add-oem-sel-support.patch"
 SRC_URI:append:scm-npcm845 = " file://0019-update-chassishandler-from-intel-oem-ipmi.patch"
 SRC_URI:append:scm-npcm845 = " file://0020-save-no-supported-boot-options.patch"
 SRC_URI:append:scm-npcm845 = " file://0021-set-channel-security-keys.patch"
+SRC_URI:append:scm-npcm845 = " file://0027-implement-chassis-acfail-status.patch"
 
 PACKAGECONFIG:append:scm-npcm845 = " ${@entity_enabled(d, 'dynamic-sensors', '')}"
 
