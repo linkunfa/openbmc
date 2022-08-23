@@ -352,17 +352,11 @@ run mmcboot
 
 ## GPIO
 
-The NPCM8XX has eight GPIO modules with 256 pins(total). 
+The NPCM8XX has eight GPIO modules with total 256 pins (each GPIO module contains a port of 32 GPIO pins). 
 Most of them are multiplexed with other system functions.
 You can program MFSEL registers to configure a pin as GPIO.
 
-- Physical connection
-
-Connect gpio0 to gpio1 on GPIOs header J4.
-```
-J4.3 (GPIO0)
-J4.4 (GPIO1)
-```
+- Connect pin GPIO0 (**J4.3**) to pin GPIO1 (**J4.4**) on GPIOs header **J4** for the following tests.
 
 ### Linux Test
 
@@ -437,7 +431,7 @@ CONFIG_GPIO_CDEV_V1=y
 CONFIG_GPIO_GENERIC=y
 CONFIG_GPIO_GENERIC_PLATFORM=y
 ```
-- Boot to Openbmc, there is a sysfs interface that allow to operate GPIO
+- Boot to Openbmc, there is a sysfs interface that allows to operate GPIOs
 ```
 echo 0 > /sys/class/gpio/export
 echo out > /sys/class/gpio/gpio0/direction
@@ -446,7 +440,7 @@ echo 1 > /sys/class/gpio/export
 echo in > /sys/class/gpio/gpio1/direction
 cat /sys/class/gpio/gpio1/value
 ```
-- Example for verify GPIO status from GPIO Registers
+- Example for verifying GPIO status by GPIO Registers
 ```
 First, you need to check spec for GPIO Port Registers.
 
@@ -456,27 +450,24 @@ GPnOE:   offset   = 0x10
 GPnDOUT: offset   = 0x0c
 GPnDIN:  offset   = 0x04
 
-Get GPIO0 pin direction by GPnOE register
+Get GPIO0 pin direction by GPnOE register:
 devmem 0xf0010010 32
-0x30008000
-Bit 0 is 0 that means GPIO0 is Input
-Bit 0 is 1 that means GPIO0 is Output
+0x30009101
+(Bit 0 represents for pin GPIO0, and the value 1 means pin direction is Output)
 
-Get GPIO0 Output pin value by GPnDOUT register
+Get GPIO0 Output pin value by GPnDOUT register:
 devmem 0xf001000c 32
-0x00008000
-Bit 0 is 0 that means GPIO0 value is 0
-Bit 0 is 1 that means GPIO0 value is 1
+0x30008101
+(Bit 0 represents for pin GPIO0, and the value 1 means pin value is 1)
 
-Get GPIO0 Input pin value by GPnDIN register
+Get GPIO1 Input pin value by GPnDIN register:
 devmem 0xf0010004 32
-0x00000001
-Bit 0 is 0 that means GPIO0 value is 0
-Bit 0 is 1 that means GPIO0 value is 1
+0x00006002
+(Bit 1 represents for pin GPIO1, and the value 1 means pin value is 1)
 ```
 
 ### U-boot test
-- dts
+- DTS
 ```
     gpio0: gpio0@f0010000 {
         compatible = "nuvoton,npcm845-gpio";
@@ -567,7 +558,7 @@ CONFIG_CMD_GPIO=y
 CONFIG_NPCM_GPIO=y
 ```
 
-- use gpio command to operate GPIO.
+- Use gpio command to operate GPIOs.
 ```
 U-Boot>gpio set 0
 gpio: pin 0 (gpio 0) value is 1
@@ -581,33 +572,29 @@ gpio: pin 1 (gpio 1) value is 0
 
 ## UART
 
-The EVB has FTDI USB_TO_UART and UART Headers, the user can select the UART route through the dip switch.
+The EVB has FTDI **J_USB_TO_UART** and **J_SI2_BU0** UART headers, the user can select the UART route through the DIP switch.
 
 1. Strap Settings
 
-- Strap 5 of the SW_STRAP1_8 dip switch
-  * Turn on strap 5 that BMC UART can rout via SI2 pins.
-  * Also, all logs can be rout to the same UART port.
+    - Strap 5 of the **SW_STRAP1_8** DIP switch
+      * Turn on strap 5 to connect BMC debug port to SI2 interface.
 
-- Strap 7 of the SW1 dip switch
-  * Turn on strap 7 to isolate USB FTDI.
-  * UART headers can be used when FTDI is isolated.
+    - Strap 7 of the **SW1** DIP switch
+      * Turn on strap 7 to isolate USB FTDI so that **J_SI2_BU0** UART headers can be used.
 
-2. FTDI USB_TO_UART
+2. FTDI **J_USB_TO_UART**
 
-- Connects a Mini-USB cable to J_USB_TO_UART
-  * You will get 4 serial port options from your terminal settings.
-  * Please select second serial port and set baud rate to 115200.
+    - Connect a Mini-USB cable to **J_USB_TO_UART**
+      * You will get 4 serial port options from your terminal settings, select the second one and set baud rate to 115200.
 
-3. UART Headers
+3. **J_SI2_BU0** UART Headers
 
-- Connects a USB FTDI cable to J_SI2_BU0
-  * Turn on strap 7 of the SW1 dip switch
-  * Set baud rate to 115200.
+    - Connect a USB FTDI cable to **J_SI2_BU0**
+      * Turn on strap 7 of the SW1 DIP switch and set baud rate to 115200.
 
 ## FIU
 
-The Arbel EVB has 4 Nor-flash mounted
+The Arbel EVB has mounted 4 Nor Flash:
 - FIU0 - SPI0CS0 and SPI0CS2
 - FIU1 - SPI1CS0
 - FIU3 - SPI3CS0
@@ -617,16 +604,16 @@ The Arbel EVB has 4 Nor-flash mounted
 **FIU3 test**
 
 1. Probe flash
-- In nuvoton-npcm845-evb.dts, we have enabled fiu3 and defined partition.
+- In nuvoton-npcm845-evb.dts, we have enabled FIU3 and defined the partition.
 ```ruby
-#kernel message
+# kernel message
 spi-nor spi3.0: w25q256 (32768 Kbytes)
 1 fixed-partitions partitions found on MTD device spi3.0
 Creating 1 MTD partitions on "spi3.0":
 0x000000000000-0x000002000000 : "spi3-system1
 ```
 ```ruby
-#MTD number for fiu3 is mtd7
+#MTD number for FIU3 is mtd7
 root@evb-npcm845:~# cat /proc/mtd
 dev:    size   erasesize  name
 mtd0: 02000000 00001000 "bmc"
@@ -672,8 +659,8 @@ SF: 4096 bytes @ 0x0 Written: OK
 
 4. Read flash
 
-- The SPI3 cs0 is mapped to A000_0000h to A7FF_FFFFh, you can use md command to direct read flash.
-- Still, you can use sf read command to read flash.
+- The SPI3 CS0 is mapped to A000_0000h ~ A7FF_FFFFh, you can use `md` command to direct read flash.
+- Or you can use `sf` command to read flash.
 
 ```ruby
 U-Boot>md 0xa0000000
@@ -699,21 +686,21 @@ a00000f0: 14000624 d65f03c0 10003840 d5384241    $....._.@8..AB8.
 
 The EVB has 3 RJ45 headers and 1 NCSI header
 
-- J_SGMII: 1000/100/10Mbps SGMII, eth0
-- J_RGMII: 1000/100/10Mbps RGMII, eth1
-- J_RMII:  100/10Mbps RMII, eth3
-- J_EMC: NCSI header, eth2
+- **J_SGMII**: 1000/100/10Mbps SGMII, eth0
+- **J_RGMII**: 1000/100/10Mbps RGMII, eth1
+- **J_RMII**:  100/10Mbps RMII, eth3
+- **J_EMC**: NCSI header, eth2
 
 ### Linux Test
 
 **SGMII test**
 
-1. Connect a network cable with J_SGMII 
+1. Connect a network cable with **J_SGMII** 
 ```ruby
 # make sure the link is up
 stmmaceth f0802000.eth eth0: Link is Up - 1Gbps/Full - flow control off
 ```
-2.  Configure static ip or from DHCP server
+2.  Configure static IP or get from DHCP server
 ```ruby
 eth0: <BROADCAST,MULTICAST,UP,LOWER_UP> mtu 1500 qdisc mq qlen 1000
     link/ether 00:00:f7:a0:00:fc brd ff:ff:ff:ff:ff:ff
@@ -750,13 +737,11 @@ Reverse mode, remote host 192.168.0.128 is sending
 
 **RGMII test**
 
-- eth0: sgmii
-- eth1: rgmii
-- eth3: rmii
 ```
-Found phy_id=0x600d8595 addr=0x00 eth0: gmac1
-Found phy_id=0x600d84a2 addr=0x00 , eth1: gmac2
-Found phy_id=0x004061e4 addr=0x00 , eth3: gmac4
+# u-boot message
+Found phy_id=0x600d8595 addr=0x00 eth0: eth@f0802000
+Found phy_id=0x600d84a2 addr=0x00 , eth1: eth@f0804000
+Found phy_id=0x004061e4 addr=0x00 , eth3: eth@f0808000
 ```
 1. Connect a network cable with J_SGMII   
 
