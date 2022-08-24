@@ -743,9 +743,9 @@ Found phy_id=0x600d8595 addr=0x00 eth0: eth@f0802000
 Found phy_id=0x600d84a2 addr=0x00 , eth1: eth@f0804000
 Found phy_id=0x004061e4 addr=0x00 , eth3: eth@f0808000
 ```
-1. Connect a network cable with J_SGMII   
+1. Connect a network cable with **J_SGMII**   
 
-2. Make sure the mac address has been assigned to eth0
+2. Make sure the MAC address has been assigned
 ```
 setenv ethact gmac2
 setenv eth1addr 00:00:F7:A0:00:FD
@@ -754,7 +754,7 @@ setenv eth3addr 00:00:F7:A0:00:FF
 setenv ethaddr 00:00:F7:A0:00:FC
 ```
 
-2. configure ip address
+2. configure IP address
 ```
 setenv gatewayip            192.168.0.254
 setenv serverip             192.168.0.128
@@ -811,15 +811,15 @@ Bytes transferred = 33554432 (2000000 hex)
 
 ## I3C
 
-The EVB has I3C0~I3C5 interfaces on the J_I3C header.
+The EVB has I3C0~I3C5 interfaces on the **J_I3C** header.
 
 ### Linux Test
 
 **SPD5118 device**
 - Connect a Renesas SPD5118 module to EVB I3C2 interface
-  * connect J_I3C.5 to device SCL
-  * connect J_I3C.6 to device SDA
-  * connect J3.1 (VCC_3.3V) to device 3V3
+  * connect **J_I3C.5** to device SCL
+  * connect **J_I3C.6** to device SDA
+  * connect **J3.1** (VCC_3.3V) to device 3V3
   * Wire GND between EVB and DIMM
 - Edit nuvoton-npcm845-evb.dts. (The slave static address of SPD Hub depends on HSA pin of DIMM)
 ```
@@ -869,7 +869,7 @@ Success on message 0
     0x51
     0x18
 ```
-- read 10 bytes from SPD5118 NVM addr 0x0
+- Read 10 bytes from SPD5118 NVM addr 0x0
 ```
 i3ctransfer -d /dev/i3c-2-4cc51180000 -w "0x80,0x00"
 i3ctransfer -d /dev/i3c-2-4cc51180000 -r 10
@@ -903,7 +903,7 @@ Success on message 0
 ```
 ## JTAG Master
 
-The EVB has JTAG Master 1 interface on the J_JTAGM header.
+The EVB has JTAG Master 1 interface on the **J_JTAGM** header.
 
 ### Linux Test
 
@@ -923,7 +923,7 @@ loading time is 0 ms
 ```
 loadsvf -d /dev/jtag0 -s arbelevb_cpld.svf
 ```
-- After CPLD is programmed, three LEDs (blue/yellow/red, near to SW1) are turned on.
+- After CPLD is programmed, three LEDs (blue/yellow/red, near to **SW1**) are turned on.
 
 - The CPLD SVF can be downloaded from here:
 [arbelevb_cpld.svf](https://github.com/Nuvoton-Israel/openbmc/tree/npcm-v2.12/meta-evb/meta-evb-nuvoton/meta-evb-npcm845/recipes-evb-npcm845/loadsvf/files/arbelevb_cpld.svf ), [arbelevb_readid.svf](https://github.com/Nuvoton-Israel/openbmc/tree/npcm-v2.12/meta-evb/meta-evb-nuvoton/meta-evb-npcm845/recipes-evb-npcm845/loadsvf/files/arbelevb_readid.svf )
