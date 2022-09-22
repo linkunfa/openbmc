@@ -26,6 +26,9 @@ do_prepare_bootloaders() {
                 -o ${DEPLOY_DIR_IMAGE}/${OPTEE_BINARY}
     fi
 
+    bingo ${IGPS_DIR}/BootBlockAndHeader_${DEVICE_GEN}_${IGPS_MACHINE}.xml \
+            -o ${DEPLOY_DIR_IMAGE}/${BOOTBLOCK}
+
     bingo ${IGPS_DIR}/UbootHeader_${DEVICE_GEN}.xml \
             -o ${UBOOT_BINARY}.${FULL_SUFFIX}
              
