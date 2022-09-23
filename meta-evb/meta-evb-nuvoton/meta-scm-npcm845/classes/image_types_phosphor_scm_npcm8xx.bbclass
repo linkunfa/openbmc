@@ -9,7 +9,7 @@ KMT_TIPFW_BINARY := "Kmt_TipFwL0_Skmt_TipFwL1.bin"
 KMT_TIPFW_BB_BINARY := "Kmt_TipFw_BootBlock.bin"
 KMT_TIPFW_BB_BL31_BINARY := "Kmt_TipFw_BootBlock_BL31.bin"
 KMT_TIPFW_BB_BL31_TEE_BINARY := "Kmt_TipFw_BootBlock_BL31_Tee.bin"
-KMT_TIPFW_BB_UBOOT_BINARY := "${UBOOT_BINARY}"
+KMT_TIPFW_BB_UBOOT_BINARY := "u-boot.bin.merged"
 
 
 IGPS_DIR = "${STAGING_DIR_NATIVE}/${datadir}/npcm8xx-igps"
@@ -164,7 +164,7 @@ do_prepare_bootloaders[depends] += " \
 # link images for we only need to flash partial image with idea name
 do_generate_ext4_tar:append() {
     cd ${DEPLOY_DIR_IMAGE}
-    ln -sf ${UBOOT_BINARY} image-u-boot
+    ln -sf ${KMT_TIPFW_BB_UBOOT_BINARY} image-u-boot
     ln -sf ${DEPLOY_DIR_IMAGE}/${FLASH_KERNEL_IMAGE} image-kernel
     ln -sf ${S}/ext4/${IMAGE_LINK_NAME}.${FLASH_EXT4_BASETYPE}.zst image-rofs
     ln -sf ${IMGDEPLOYDIR}/${IMAGE_LINK_NAME}.rwfs.${FLASH_EXT4_OVERLAY_BASETYPE} image-rwfs
