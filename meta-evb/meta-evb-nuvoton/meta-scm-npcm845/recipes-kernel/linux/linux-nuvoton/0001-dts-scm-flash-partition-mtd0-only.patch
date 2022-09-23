@@ -1,0 +1,44 @@
+From 44416940b395f8b69d227f1874f0b0a5871d7701 Mon Sep 17 00:00:00 2001
+From: Joseph Liu <kwliu@nuvoton.com>
+Date: Fri, 23 Sep 2022 19:04:10 +0800
+Subject: [PATCH] dts: scm: flash partition mtd0 only
+
+Signed-off-by: Joseph Liu <kwliu@nuvoton.com>
+---
+ .../boot/dts/nuvoton/nuvoton-npcm845-scm.dts  | 20 -------------------
+ 1 file changed, 20 deletions(-)
+
+diff --git a/arch/arm64/boot/dts/nuvoton/nuvoton-npcm845-scm.dts b/arch/arm64/boot/dts/nuvoton/nuvoton-npcm845-scm.dts
+index c924ae76e3fa..40c26e2d979d 100644
+--- a/arch/arm64/boot/dts/nuvoton/nuvoton-npcm845-scm.dts
++++ b/arch/arm64/boot/dts/nuvoton/nuvoton-npcm845-scm.dts
+@@ -197,26 +197,6 @@ bmc@0{
+ 						label = "bmc";
+ 						reg = <0x00000000 0x04000000>;
+ 					};
+-					u-boot@0 {
+-						label = "u-boot";
+-						reg = <0x00000000 0x001C0000>;
+-					};
+-					u-boot-env@1c0000{
+-						label = "u-boot-env";
+-						reg = <0x001C0000 0x00040000>;
+-					};
+-					kernel@200000 {
+-						label = "kernel";
+-						reg = <0x00200000 0x00800000>;
+-					};
+-					rofs@a00000 {
+-						label = "rofs";
+-						reg = <0x00a00000 0x02600000>;
+-					};
+-					rwfs@3000000 {
+-						label = "rwfs";
+-						reg = <0x3000000 0x400000>;
+-					};
+ 				};
+ 			};
+ 			spi-nor@1 {
+-- 
+2.34.1
+
