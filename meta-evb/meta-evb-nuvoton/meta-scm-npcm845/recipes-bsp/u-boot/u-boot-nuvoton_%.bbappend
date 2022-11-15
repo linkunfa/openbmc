@@ -11,3 +11,6 @@ SRC_URI:append:scm-npcm845 = " file://0005-net-phy-realtek-rtl8211f-introduce-ph
 SRC_URI:append:scm-npcm845 = " file://0006-set-clock-divisor-for-uart456.patch"
 SRC_URI:append:scm-npcm845 = " \
 	${@emmc_enabled(d, 'file://1111-boot-openbmc-form-emmc.patch')}"
+
+SRC_URI:append:scm-npcm845 = " file://ftpm.cfg"
+SRC_URI:append:scm-npcm845 = " file://0007-add-fTPM-changes-in-u-boot.patch"
