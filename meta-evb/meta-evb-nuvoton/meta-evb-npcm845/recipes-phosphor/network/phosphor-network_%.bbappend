@@ -1,1 +1,1 @@
-EXTRA_OECONF:append:evb-npcm845 = " --disable-link-local-autoconfiguration --with-uboot-env"
+PACKAGECONFIG:remove:evb-npcm845 = "default-link-local-autoconf"

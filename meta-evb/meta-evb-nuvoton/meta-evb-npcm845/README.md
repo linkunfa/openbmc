@@ -19,7 +19,9 @@ Please submit any patches against the meta-evb-npcm845 layer to the maintainer o
 * Joseph Liu, <KWLIU@nuvoton.com>
 * Stanley Chu, <YSCHU@nuvoton.com>
 * Tyrone Ting, <KFTING@nuvoton.com>
-* Medad Cchien, <CTCCHIEN@nuvoton.com>
+* Tim Lee, <CHLI30@nuvoton.com>
+* Jim Liu, <JJLIU0@nuvoton.com>
+* Marvin Lin, <KFLIN@nuvoton.com>
 
 # Table of Contents
 
@@ -61,9 +63,10 @@ Please submit any patches against the meta-evb-npcm845 layer to the maintainer o
   * [RNG](#rng)
   * [OTP](#otp)
   * [PSPI](#pspi)
-  * [ECC](#ecc)
+  * [EDAC](#edac)
   * [Host Serial Port](#host-serial-port)
   * [PECI](#peci)
+  * [FLM](#flm)
 - [Troubleshooting](#troubleshooting)
   * [Failed to probe SPI0 CS0 in u-boot](#failed-to-probe-SPI0-CS0-in-u-boot)
 
@@ -352,17 +355,11 @@ run mmcboot
 
 ## GPIO
 
-The NPCM8XX has eight GPIO modules with 256 pins(total). 
+The NPCM8XX has eight GPIO modules with total 256 pins (each GPIO module contains a port of 32 GPIO pins).
 Most of them are multiplexed with other system functions.
 You can program MFSEL registers to configure a pin as GPIO.
 
-- Physical connection
-
-Connect gpio0 to gpio1 on GPIOs header J4.
-```
-J4.3 (GPIO0)
-J4.4 (GPIO1)
-```
+- Connect pin GPIO0 (J4.3) to pin GPIO1 (J4.4) on GPIOs header J4 for the following tests.
 
 ### Linux Test
 
@@ -437,7 +434,7 @@ CONFIG_GPIO_CDEV_V1=y
 CONFIG_GPIO_GENERIC=y
 CONFIG_GPIO_GENERIC_PLATFORM=y
 ```
-- Boot to Openbmc, there is a sysfs interface that allow to operate GPIO
+- Boot to Openbmc, there is a sysfs interface that allows to operate GPIOs
 ```
 echo 0 > /sys/class/gpio/export
 echo out > /sys/class/gpio/gpio0/direction
@@ -446,7 +443,7 @@ echo 1 > /sys/class/gpio/export
 echo in > /sys/class/gpio/gpio1/direction
 cat /sys/class/gpio/gpio1/value
 ```
-- Example for verify GPIO status from GPIO Registers
+- Example for verifying GPIO status via GPIO Registers
 ```
 First, you need to check spec for GPIO Port Registers.
 
@@ -456,27 +453,24 @@ GPnOE:   offset   = 0x10
 GPnDOUT: offset   = 0x0c
 GPnDIN:  offset   = 0x04
 
-Get GPIO0 pin direction by GPnOE register
+Get GPIO0 pin direction by GPnOE register:
 devmem 0xf0010010 32
-0x30008000
-Bit 0 is 0 that means GPIO0 is Input
-Bit 0 is 1 that means GPIO0 is Output
+0x30009101
+(Bit 0 represents for pin GPIO0, and the value 1 means pin direction is Output)
 
-Get GPIO0 Output pin value by GPnDOUT register
+Get GPIO0 Output pin value by GPnDOUT register:
 devmem 0xf001000c 32
-0x00008000
-Bit 0 is 0 that means GPIO0 value is 0
-Bit 0 is 1 that means GPIO0 value is 1
+0x30008101
+(Bit 0 represents for pin GPIO0, and the value 1 means pin value is 1)
 
-Get GPIO0 Input pin value by GPnDIN register
+Get GPIO1 Input pin value by GPnDIN register:
 devmem 0xf0010004 32
-0x00000001
-Bit 0 is 0 that means GPIO0 value is 0
-Bit 0 is 1 that means GPIO0 value is 1
+0x00006002
+(Bit 1 represents for pin GPIO1, and the value 1 means pin value is 1)
 ```
 
 ### U-boot test
-- dts
+- DTS
 ```
     gpio0: gpio0@f0010000 {
         compatible = "nuvoton,npcm845-gpio";
@@ -567,7 +561,7 @@ CONFIG_CMD_GPIO=y
 CONFIG_NPCM_GPIO=y
 ```
 
-- use gpio command to operate GPIO.
+- Use gpio command to operate GPIOs.
 ```
 U-Boot>gpio set 0
 gpio: pin 0 (gpio 0) value is 1
@@ -581,33 +575,29 @@ gpio: pin 1 (gpio 1) value is 0
 
 ## UART
 
-The EVB has FTDI USB_TO_UART and UART Headers, the user can select the UART route through the dip switch.
+The EVB has FTDI J_USB_TO_UART and J_SI2_BU0 UART headers, the user can select the UART route through the DIP switch.
 
 1. Strap Settings
 
-- Strap 5 of the SW_STRAP1_8 dip switch
-  * Turn on strap 5 that BMC UART can rout via SI2 pins.
-  * Also, all logs can be rout to the same UART port.
+    - Strap 5 of the SW_STRAP1_8 DIP switch
+      * Turn on strap 5 to connect BMC debug port to SI2 interface.
 
-- Strap 7 of the SW1 dip switch
-  * Turn on strap 7 to isolate USB FTDI.
-  * UART headers can be used when FTDI is isolated.
+    - Strap 7 of the SW1 DIP switch
+      * Turn on strap 7 to isolate USB FTDI so that J_SI2_BU0 UART headers can be used.
 
-2. FTDI USB_TO_UART
+2. FTDI J_USB_TO_UART
 
-- Connects a Mini-USB cable to J_USB_TO_UART
-  * You will get 4 serial port options from your terminal settings.
-  * Please select second serial port and set baud rate to 115200.
+    - Connects a Mini-USB cable to J_USB_TO_UART
+      * You will get 4 serial port options from your terminal settings, select the second one and set baud rate to 115200.
 
-3. UART Headers
+3. J_SI2_BU0 UART Headers
 
-- Connects a USB FTDI cable to J_SI2_BU0
-  * Turn on strap 7 of the SW1 dip switch
-  * Set baud rate to 115200.
+    - Connect a USB FTDI cable to J_SI2_BU0
+      * Turn on strap 7 of the SW1 DIP switch and set baud rate to 115200.
 
 ## FIU
 
-The Arbel EVB has 4 Nor-flash mounted
+The Arbel EVB has mounted 4 NOR Flash:
 - FIU0 - SPI0CS0 and SPI0CS2
 - FIU1 - SPI1CS0
 - FIU3 - SPI3CS0
@@ -617,16 +607,16 @@ The Arbel EVB has 4 Nor-flash mounted
 **FIU3 test**
 
 1. Probe flash
-- In nuvoton-npcm845-evb.dts, we have enabled fiu3 and defined partition.
+- In nuvoton-npcm845-evb.dts, we have enabled FIU3 and defined the partition.
 ```ruby
-#kernel message
+# kernel message
 spi-nor spi3.0: w25q256 (32768 Kbytes)
 1 fixed-partitions partitions found on MTD device spi3.0
 Creating 1 MTD partitions on "spi3.0":
 0x000000000000-0x000002000000 : "spi3-system1
 ```
 ```ruby
-#MTD number for fiu3 is mtd7
+# MTD number for FIU3 is mtd7
 root@evb-npcm845:~# cat /proc/mtd
 dev:    size   erasesize  name
 mtd0: 02000000 00001000 "bmc"
@@ -672,8 +662,8 @@ SF: 4096 bytes @ 0x0 Written: OK
 
 4. Read flash
 
-- The SPI3 cs0 is mapped to A000_0000h to A7FF_FFFFh, you can use md command to direct read flash.
-- Still, you can use sf read command to read flash.
+- The SPI3 CS0 is mapped to A000_0000h ~ A7FF_FFFFh, you can use `md` command to direct read flash.
+- Or you can use `sf` command to read flash.
 
 ```ruby
 U-Boot>md 0xa0000000
@@ -713,7 +703,7 @@ The EVB has 3 RJ45 headers and 1 NCSI header
 # make sure the link is up
 stmmaceth f0802000.eth eth0: Link is Up - 1Gbps/Full - flow control off
 ```
-2.  Configure static ip or from DHCP server
+2.  Configure static IP or get from DHCP server
 ```ruby
 eth0: <BROADCAST,MULTICAST,UP,LOWER_UP> mtu 1500 qdisc mq qlen 1000
     link/ether 00:00:f7:a0:00:fc brd ff:ff:ff:ff:ff:ff
@@ -750,17 +740,15 @@ Reverse mode, remote host 192.168.0.128 is sending
 
 **RGMII test**
 
-- eth0: sgmii
-- eth1: rgmii
-- eth3: rmii
 ```
-Found phy_id=0x600d8595 addr=0x00 eth0: gmac1
-Found phy_id=0x600d84a2 addr=0x00 , eth1: gmac2
-Found phy_id=0x004061e4 addr=0x00 , eth3: gmac4
+# u-boot message
+Found phy_id=0x600d8595 addr=0x00 eth0: eth@f0802000
+Found phy_id=0x600d84a2 addr=0x00 , eth1: eth@f0804000
+Found phy_id=0x004061e4 addr=0x00 , eth3: eth@f0808000
 ```
 1. Connect a network cable with J_SGMII   
 
-2. Make sure the mac address has been assigned to eth0
+2. Make sure the MAC address has been assigned
 ```
 setenv ethact gmac2
 setenv eth1addr 00:00:F7:A0:00:FD
@@ -769,7 +757,7 @@ setenv eth3addr 00:00:F7:A0:00:FF
 setenv ethaddr 00:00:F7:A0:00:FC
 ```
 
-2. configure ip address
+2. configure IP address
 ```
 setenv gatewayip            192.168.0.254
 setenv serverip             192.168.0.128
@@ -842,7 +830,7 @@ The EVB has I3C0~I3C5 interfaces on the J_I3C header.
         status = "okay";
         i2c-scl-hz = <400000>;
         i3c-scl-hz = <4000000>;
-        static-address;
+        jedec,jesd403;
         hub@0x57 {
             reg = <0x57 0x4CC 0x51180000>;
         };
@@ -877,22 +865,20 @@ PMIC: /dev/i3c-2-4cc89000000
 - Use [i3ctransfer](https://github.com/vitor-soares-snps/i3c-tools) tool to test
 - Read HUB device type
 ```
-root@evb-npcm845:~# i3ctransfer -d /dev/i3c-2-4cc51180000 -w "0x00,0x00"
-root@evb-npcm845:~# i3ctransfer -d /dev/i3c-2-4cc51180000 -r 2
+root@evb-npcm845:~# i3ctransfer -d /dev/i3c-2-4cc51180000 -w "0x00,0x00" -r 2
 Success on message 0
   received data:
     0x51
     0x18
 ```
-- read 10 bytes from SPD5118 NVM addr 0x0
+- Read 10 bytes from SPD5118 NVM addr 0x0
 ```
 i3ctransfer -d /dev/i3c-2-4cc51180000 -w "0x80,0x00"
 i3ctransfer -d /dev/i3c-2-4cc51180000 -r 10
 ```
 - Read TS0 device type
 ```
-root@evb-npcm845:~# i3ctransfer -d /dev/i3c-2-4cc51110000 -w "0x00"
-root@evb-npcm845:~# i3ctransfer -d /dev/i3c-2-4cc51110000 -r 2
+root@evb-npcm845:~# i3ctransfer -d /dev/i3c-2-4cc51110000 -w "0x00" -r 2
 Success on message 0
   received data:
     0x51
@@ -900,8 +886,7 @@ Success on message 0
 ```
 - Read TS0 temperature data
 ```
-root@evb-npcm845:~# i3ctransfer -d /dev/i3c-2-4cc51110000 -w "0x31"
-root@evb-npcm845:~# i3ctransfer -d /dev/i3c-2-4cc51110000 -r 2
+root@evb-npcm845:~# i3ctransfer -d /dev/i3c-2-4cc51110000 -w "0x31" -r 2
 Success on message 0
   received data:
     0xb4
@@ -909,9 +894,7 @@ Success on message 0
 ```
 - Read PMIC register. The following example is to read register 0x32.
 ```
-# i3ctransfer -d /dev/i3c-2-4cc89000000 -w "0x32"
-Success on message 0
-# i3ctransfer -d /dev/i3c-2-4cc89000000 -r 1
+# i3ctransfer -d /dev/i3c-2-4cc89000000 -w "0x32" -r 1
 Success on message 0
   received data:
     0x40
@@ -945,7 +928,7 @@ loadsvf -d /dev/jtag0 -s arbelevb_cpld.svf
 
 ## SMBus
 
-The EVB has 27 SMB interfaces on J3 and J4 headers.
+The EVB has 27 SMB interface modules on J3 and J4 headers.
 
 There is a TMP100 sensor (0x48) connected to SMB module 6.
 
@@ -1064,7 +1047,7 @@ The EVB has the J_eSPI header to support ESPI transactions.
 
 2. ESPI channel support declaration in u-boot configuration
 - Enable u-boot configuration
-> _Edit nuvoton-npcm850-evb.dts in u-boot_  
+> _Edit nuvoton-npcm845-evb.dts in u-boot_  
 ```
   config {
     espi-channel-support = <0xf>;
@@ -1095,13 +1078,28 @@ sgpio2: sgpio@102000 {
 	bus-frequency = <16000000>;
 	nin_gpios = <64>;
 	nout_gpios = <64>;
-	gpio-line-names = "","","","","","","","",
+	gpio-line-names =
+		"POWER_OUT","RESET_OUT","","","","","","NMI_OUT",
 		"g_led","","","","","","","";
+		"","","","","","","","",
+		"","","","","","","","",
+		"","","","","","","","",
+		"","","","","","","","",
+		"","","","","","","","",
+		"","","","","","","","",
+		"","","PS_PWROK","POST_COMPLETE","POWER_BUTTON","RESET_BUTTON","NMI_BUTTON","",
+		"","","","","","","","",
+		"","","","","","","","",
+		"","","","","","","","",
+		"","","","","","","","",
+		"","","","","","","","",
+		"","","","","","","","",
+		"","","","","","","","";
 };	
 ```
 - Enable Kernel config
 ```
-CONFIG_GPIO_NUVOTON_SGPIO=y
+CONFIG_GPIO_NPCM_SGPIO=y
 ```
 - Boot EVB to Openbmc, you can check gpiochip8 information
 ```
@@ -1114,7 +1112,7 @@ gpiochip8 - 128 lines:
         line   4:      unnamed       unused  output  active-high
         line   5:      unnamed       unused  output  active-high
         line   6:      unnamed       unused  output  active-high
-        line   7:      unnamed       unused  output  active-high
+        line   7:      "NMI_OUT" "power-control" output active-high [used]
         line   8:      "g_led"       unused  output  active-high
         line   9:      unnamed       unused  output  active-high
         line  10:      unnamed       unused  output  active-high
@@ -1177,7 +1175,7 @@ gpiochip8 - 128 lines:
         line  67: "POST_COMPLETE" "power-control" input active-high [used]
         line  68: "POWER_BUTTON" "power-control" input active-high [used]
         line  69: "RESET_BUTTON" "power-control" input active-high [used]
-        line  70:      unnamed       unused   input  active-high
+        line  70: "NMI_BUTTON" "power-control" input active-high [used]
         line  71:      unnamed       unused   input  active-high
         line  72:      unnamed       unused   input  active-high
         line  73:      unnamed       unused   input  active-high
@@ -1261,7 +1259,7 @@ root@evb-npcm845:~# gpiomon 8 64 65 66 67 68 69 70 71 72 73 74 75 76 77 78 79 &
 root@evb-npcm845:~# gpioset 8 0=1 1=1 2=1 3=1 4=1 5=1 6=1 7=1 8=1 9=1 10=1 11=1 12=1 13=1 14=1 15=1
 root@evb-npcm845:~# gpioset 8 0=0 1=0 2=0 3=0 4=0 5=0 6=0 7=0 8=0 9=0 10=0 11=0 12=0 13=0 14=0 15=0
 ```
-- Monitor pin 96 ~ 103 from another consloe (login via SSH) 
+- Monitor pin 96 ~ 103 from another console (login via SSH) 
 ```
 root@evb-npcm845:~# gpiomon 8 96 97 98 99 100 101 102 103
 ```
@@ -1280,7 +1278,7 @@ J_CPLD.12 (pin 103)
 <img align="right" width="15%" src="https://raw.githubusercontent.com/NTC-CCBG/snapshots/master/openbmc/ARBEL_EVB_SIOX_INT_TEST.png">
 
 ```
-From the left consloe, you could see interrupt 64 ~ 79 repeatly.
+From the left consloe, you could see interrupt 64 ~ 79 repeatedly.
 From the right consloe, you could see gpiomon did get every interrupt from 96 to 103.
 ```
 
@@ -1346,46 +1344,58 @@ The EVB has a VGA output port.
 2. Power on Arbel EVB
 3. Waiting for arbel left bootblock
 4. Power on PC host
-5. Once PC run into OS, you should get OS screen from evb's vga port.
+5. Once PC run into OS, you should get OS screen from EVB's VGA port.
 6. If you didn't see the OS screen, please contact the developer.
 
 ### Linux test
-- iKVM test in OpenBMC
-1. Connects J_USB1_DEV and host PC with a USB cable
-2. Make sure your workstation and Arbel EVB are in the same network.
-3. Launch a browser in your workstation and you will see the entry page.
+- KVM
+1. Prepare a motherboard and connect Arbel EVB through PCI-E.
+2. Connect a USB cable from motherboard to J_USB1_DEV header of EVB.
+3. Make sure your workstation and EVB are in the same network.
+4. Launch a browser in your workstation and enter below URL, you will see the OpenBMC home page.
     ```
-    /* BMCWeb Server */
-    https://<arbel ip>
+    https://<Arbel_EVB_IP>
     ```
-4. Login to OpenBMC home page
+5. Use below username/password to login and navigate to the `KVM` page.
     ```
     Username: root
     Password: 0penBmc
     ```
-5. Navigate to OpenBMC WebUI viewer
+
+    > _NOTE: You can use [Real VNC Viewer](https://www.realvnc.com/en/connect/download/viewer/) with below preferences instead of OpenBMC Web._
+
     ```
-    https://<arbel ip>/#/control/kvm
+    /* Preference expert settings of Real VNC Viewer */
+    Quality: Custom
+    PreferredEncoding: Hextile
+    ColorLevel: rgb565
+    PointerEventInterval: 30
     ```
 
-**The preferred settings of RealVNC Viewer**
-```
-Picture quality: Custom
-ColorLevel: rgb565
-PreferredEncoding: Hextile
-```
+6. Power up the motherboard and the video output will show on the WebUI (or Real VNC Viewer).
+
+**Performance**
+
+* Host OS: Windows Server 2016
+
+|Playing video: [AQUAMAN](https://www.youtube.com/watch?v=2wcj6SrX4zw)|[Real VNC Viewer](https://www.realvnc.com/en/connect/download/viewer/) | WebUI (noVNC Viewer)
+:---------------|:------------|:-----------|
+Host Resolution | Average FPS | Average FPS|
+1024 x 768      |  41         |  26        |
+1280 x 1024     |  40         |  17        |
+1600 x 1200     |  21         |  11        |
 
 ## USB
 
-The evb has 2 x USB device ports and 1 x USB host port.
+The EVB has 2 x USB device ports and 1 x USB host port.
 - J_USB1_DEV: USB Port 1 - Device, Mini-USB Type B
 - J_USB2_HOST: USB Port 2 - Host, USB Type A
 - J_USB3_HOST_DEV: USB Port 3 - Host/Device, Micro-USB Type AB
 
 **UDC Connectivity**
-- The UDC0~7 are used for usb port 1,
-- The UDC8 is used for usb port 3 if usb device mode
-- The UDC9 is used for usb port 2 if usb device mode
+- The UDC0~7 are used for USB port 1,
+- The UDC8 is used for USB port 3 if USB device mode
+- The UDC9 is used for USB port 2 if USB device mode
 
 ### Linux test
 **Virtual Media test in OpenBMC**
@@ -1406,10 +1416,9 @@ The evb has 2 x USB device ports and 1 x USB host port.
 
 2. Enable Virtual Media
 
-    2.1 VM-WEB
-    1. Login and switch to webpage of VM on your browser
+    1. Login and navigate to webpage of VM on your browser
         ```
-        https://XXX.XXX.XXX.XXX/#/control/virtual-media
+        https://<Arbel_EVB_IP>/#/control/virtual-media
         ```
     2. Operations of Virtual Media
         * After `Choose File`, click `Start` to start VM network service
@@ -1440,17 +1449,17 @@ A prompt window will show on the host computer to format the USB drive.
 You can format it in FAT32 to proceed the EMMC test.
 
 ## ADC
-The evb contains an Analog-to-Digital Converter (ADC) input interface.
+The EVB contains an Analog-to-Digital Converter (ADC) input interface.
 
 VCC source is 1.2v and voltage is divided to:
 - ADCI0: 54 mV
-- ADCI1: 1146 mV
-- ADCI2: 1090 mV
+- ADCI1: 110 mV
+- ADCI2: 200 mV
 - ADCI3: 384 mV 
 - ADCI4: 816 mV
 - ADCI5: 1000 mV
-- ADCI6: 200mV
-- ADCI7: 110 mV
+- ADCI6: 1090 mV
+- ADCI7: 1146 mV
 
 ### Linux test
 - Read ADC value from hwmon path
@@ -1467,7 +1476,7 @@ cat /sys/class/hwmon/hwmon4/in8_input
 
 ## FAN
 
-The evb has 4 x FAN connectors
+The EVB has 4 x FAN connectors
 - FAN0: PWM0/FANIN0
 - FAN1: PWM1/FANIN1
 - FAN2: PWM2/FANIN2
@@ -1532,7 +1541,7 @@ Read FANIN0 value:
 md.w 0xf0180002
 f0180002: f88c
 ```
-### How convert the raw reading to RPM
+### Convert the raw reading to RPM
 1. Converting formula
 ```
 RPM = ((input_clk_freq * 60) / (fan_cnt * fan_pls_per_rev));
@@ -1569,7 +1578,7 @@ cat /sys/class/thermal/thermal_zone1/temp
 
 ## PCIE RC
 
-The PCIERC is used by the BMC CPU to control external PCIe devices connected to it.
+The PCIE RC is used by the BMC CPU to control external PCIe devices connected to it.
 
 The EVB has one J_PCIE_RC header.
 
@@ -1580,7 +1589,7 @@ Here a Poleg EVB is used.
 
 - Power up the Poleg EVB and then the Arbel EVB.
 
-- Locate the poleg evb device by inputting the **lspci** command on the openbmc debug console. Here is an example result.  
+- Locate the Poleg EVB device by inputting the **lspci** command on the openbmc debug console. Here is an example result.  
 ```
 00:00.0 PCI bridge: PLDA Device 1111 (rev 01)
 01:00.0 PCI bridge: PLDA PCI Express Bridge (rev 02)
@@ -1630,7 +1639,7 @@ The example result is:
 
 ## EMMC
 
-The evb has an 8G EMMC
+The EVB has an 8G EMMC
 
 ### Linux test
 1. Use as internal storage
@@ -1641,7 +1650,7 @@ mount /dev/mmcblk0 tmp
 ```
 	
 2. Export by Mass Storage
-- You need to setup configfs for mass storage first, then export emmc device node to below path.
+- You need to setup configfs for mass storage first, then export EMMC device node to below path.
 ```ruby
 echo "/dev/mmcblk0" > /sys/kernel/config/usb_gadget/mmc-storage/functions/mass_storage.usb0/lun.0/file
 ```
@@ -1662,7 +1671,7 @@ You can check if the content at 0x12000000 is the same as what's stored in test.
 
 ## BIOS POST Code
 
-- The evb support a FIFO for monitoring BIOS POST Code.
+- The EVB implements a FIFO for monitoring BIOS POST Code.
 - Typically, this feature is used by the BMC to watch host boot progress via port 0x80 writes made by the BIOS during the boot process.
 
 ### Linux test
@@ -1686,8 +1695,103 @@ md.b 0xf000704a 1
 
 ### Linux test
 ```
-openssl aes-256-cbc -pbkdf2 -e -kfile /tmp/aes.key -in /tmp/plaintext -out /tmp/encrypted -engine afalg
-openssl aes-256-cbc -pbkdf2 -d -kfile /tmp/aes.key -in /tmp/encrypted -out /tmp/plaintext2 -engine afalg
+Please add to the kernel configuration:
+CONFIG_CRYPTO_TEST=m
+And copy tcrypt.ko to npcm845 EVB
+
+root@evb-npcm845:~# insmod ./tcrypt.ko mode=500
+tcrypt:
+testing speed of async ecb(aes) (Nuvoton-ecb-aes) encryption
+tcrypt: test 0 (128 bit key, 16 byte blocks): 1 operation in 6948 cycles (16 bytes)
+tcrypt: test 1 (128 bit key, 64 byte blocks): 1 operation in 7169 cycles (64 bytes)
+tcrypt: test 2 (128 bit key, 128 byte blocks): 1 operation in 7187 cycles (128 bytes)
+tcrypt: test 3 (128 bit key, 256 byte blocks): 1 operation in 7845 cycles (256 bytes)
+tcrypt: test 4 (128 bit key, 1024 byte blocks): 1 operation in 11456 cycles (1024 bytes)
+tcrypt: test 5 (128 bit key, 1424 byte blocks): 1 operation in 13156 cycles (1424 bytes)
+tcrypt: test 6 (128 bit key, 4096 byte blocks): 1 operation in 31718 cycles (4096 bytes)
+tcrypt: test 7 (192 bit key, 16 byte blocks): 1 operation in 6887 cycles (16 bytes)
+tcrypt: test 8 (192 bit key, 64 byte blocks): 1 operation in 6967 cycles (64 bytes)
+tcrypt: test 9 (192 bit key, 128 byte blocks): 1 operation in 7360 cycles (128 bytes)
+tcrypt: test 10 (192 bit key, 256 byte blocks): 1 operation in 7999 cycles (256 bytes)
+tcrypt: test 11 (192 bit key, 1024 byte blocks): 1 operation in 12020 cycles (1024 bytes)
+tcrypt: test 12 (192 bit key, 1424 byte blocks): 1 operation in 14139 cycles (1424 bytes)
+tcrypt: test 13 (192 bit key, 4096 byte blocks): 1 operation in 41733 cycles (4096 bytes)
+tcrypt: test 14 (256 bit key, 16 byte blocks): 1 operation in 6768 cycles (16 bytes)
+tcrypt: test 15 (256 bit key, 64 byte blocks): 1 operation in 6971 cycles (64 bytes)
+tcrypt: test 16 (256 bit key, 128 byte blocks): 1 operation in 7317 cycles (128 bytes)
+tcrypt: test 17 (256 bit key, 256 byte blocks): 1 operation in 8060 cycles (256 bytes)
+tcrypt: test 18 (256 bit key, 1024 byte blocks): 1 operation in 12331 cycles (1024 bytes)
+tcrypt: test 19 (256 bit key, 1424 byte blocks): 1 operation in 14455 cycles (1424 bytes)
+tcrypt: test 20 (256 bit key, 4096 byte blocks): 1 operation in 35507 cycles (4096 bytes)
+tcrypt:
+testing speed of async ecb(aes) (Nuvoton-ecb-aes) decryption
+tcrypt: test 0 (128 bit key, 16 byte blocks): 1 operation in 6700 cycles (16 bytes)
+tcrypt: test 1 (128 bit key, 64 byte blocks): 1 operation in 6967 cycles (64 bytes)
+tcrypt: test 2 (128 bit key, 128 byte blocks): 1 operation in 7307 cycles (128 bytes)
+tcrypt: test 3 (128 bit key, 256 byte blocks): 1 operation in 8042 cycles (256 bytes)
+tcrypt: test 4 (128 bit key, 1024 byte blocks): 1 operation in 12257 cycles (1024 bytes)
+tcrypt: test 5 (128 bit key, 1424 byte blocks): 1 operation in 14411 cycles (1424 bytes)
+tcrypt: test 6 (128 bit key, 4096 byte blocks): 1 operation in 36638 cycles (4096 bytes)
+tcrypt: test 7 (192 bit key, 16 byte blocks): 1 operation in 6747 cycles (16 bytes)
+tcrypt: test 8 (192 bit key, 64 byte blocks): 1 operation in 7799 cycles (64 bytes)
+tcrypt: test 9 (192 bit key, 128 byte blocks): 1 operation in 7300 cycles (128 bytes)
+tcrypt: test 10 (192 bit key, 256 byte blocks): 1 operation in 8146 cycles (256 bytes)
+tcrypt: test 11 (192 bit key, 1024 byte blocks): 1 operation in 13644 cycles (1024 bytes)
+tcrypt: test 12 (192 bit key, 1424 byte blocks): 1 operation in 15090 cycles (1424 bytes)
+tcrypt: test 13 (192 bit key, 4096 byte blocks): 1 operation in 43614 cycles (4096 bytes)
+tcrypt: test 14 (256 bit key, 16 byte blocks): 1 operation in 6737 cycles (16 bytes)
+tcrypt: test 15 (256 bit key, 64 byte blocks): 1 operation in 7038 cycles (64 bytes)
+tcrypt: test 16 (256 bit key, 128 byte blocks): 1 operation in 7404 cycles (128 bytes)
+tcrypt: test 17 (256 bit key, 256 byte blocks): 1 operation in 8098 cycles (256 bytes)
+tcrypt: test 18 (256 bit key, 1024 byte blocks): 1 operation in 12318 cycles (1024 bytes)
+tcrypt: test 19 (256 bit key, 1424 byte blocks): 1 operation in 14505 cycles (1424 bytes)
+tcrypt: test 20 (256 bit key, 4096 byte blocks): 1 operation in 35526 cycles (4096 bytes)
+tcrypt:
+testing speed of async cbc(aes) (Nuvoton-cbc-aes) encryption
+tcrypt: test 0 (128 bit key, 16 byte blocks): 1 operation in 7930 cycles (16 bytes)
+tcrypt: test 1 (128 bit key, 64 byte blocks): 1 operation in 6935 cycles (64 bytes)
+tcrypt: test 2 (128 bit key, 128 byte blocks): 1 operation in 7241 cycles (128 bytes)
+tcrypt: test 3 (128 bit key, 256 byte blocks): 1 operation in 8009 cycles (256 bytes)
+tcrypt: test 4 (128 bit key, 1024 byte blocks): 1 operation in 12280 cycles (1024 bytes)
+tcrypt: test 5 (128 bit key, 1424 byte blocks): 1 operation in 15350 cycles (1424 bytes)
+tcrypt: test 6 (128 bit key, 4096 byte blocks): 1 operation in 35391 cycles (4096 bytes)
+tcrypt: test 7 (192 bit key, 16 byte blocks): 1 operation in 6746 cycles (16 bytes)
+tcrypt: test 8 (192 bit key, 64 byte blocks): 1 operation in 6953 cycles (64 bytes)
+tcrypt: test 9 (192 bit key, 128 byte blocks): 1 operation in 7330 cycles (128 bytes)
+tcrypt: test 10 (192 bit key, 256 byte blocks): 1 operation in 8084 cycles (256 bytes)
+tcrypt: test 11 (192 bit key, 1024 byte blocks): 1 operation in 12670 cycles (1024 bytes)
+tcrypt: test 12 (192 bit key, 1424 byte blocks): 1 operation in 15068 cycles (1424 bytes)
+tcrypt: test 13 (192 bit key, 4096 byte blocks): 1 operation in 44312 cycles (4096 bytes)
+tcrypt: test 14 (256 bit key, 16 byte blocks): 1 operation in 6702 cycles (16 bytes)
+tcrypt: test 15 (256 bit key, 64 byte blocks): 1 operation in 6954 cycles (64 bytes)
+tcrypt: test 16 (256 bit key, 128 byte blocks): 1 operation in 7315 cycles (128 bytes)
+tcrypt: test 17 (256 bit key, 256 byte blocks): 1 operation in 8040 cycles (256 bytes)
+tcrypt: test 18 (256 bit key, 1024 byte blocks): 1 operation in 12308 cycles (1024 bytes)
+tcrypt: test 19 (256 bit key, 1424 byte blocks): 1 operation in 14426 cycles (1424 bytes)
+tcrypt: test 20 (256 bit key, 4096 byte blocks): 1 operation in 35657 cycles (4096 bytes)
+tcrypt:
+testing speed of async cbc(aes) (Nuvoton-cbc-aes) decryption
+tcrypt: test 0 (128 bit key, 16 byte blocks): 1 operation in 6765 cycles (16 bytes)
+tcrypt: test 1 (128 bit key, 64 byte blocks): 1 operation in 6973 cycles (64 bytes)
+tcrypt: test 2 (128 bit key, 128 byte blocks): 1 operation in 7297 cycles (128 bytes)
+tcrypt: test 3 (128 bit key, 256 byte blocks): 1 operation in 8032 cycles (256 bytes)
+tcrypt: test 4 (128 bit key, 1024 byte blocks): 1 operation in 12273 cycles (1024 bytes)
+tcrypt: test 5 (128 bit key, 1424 byte blocks): 1 operation in 14414 cycles (1424 bytes)
+tcrypt: test 6 (128 bit key, 4096 byte blocks): 1 operation in 35394 cycles (4096 bytes)
+tcrypt: test 7 (192 bit key, 16 byte blocks): 1 operation in 6714 cycles (16 bytes)
+tcrypt: test 8 (192 bit key, 64 byte blocks): 1 operation in 6961 cycles (64 bytes)
+tcrypt: test 9 (192 bit key, 128 byte blocks): 1 operation in 7346 cycles (128 bytes)
+tcrypt: test 10 (192 bit key, 256 byte blocks): 1 operation in 8136 cycles (256 bytes)
+tcrypt: test 11 (192 bit key, 1024 byte blocks): 1 operation in 12661 cycles (1024 bytes)
+tcrypt: test 12 (192 bit key, 1424 byte blocks): 1 operation in 16046 cycles (1424 bytes)
+tcrypt: test 13 (192 bit key, 4096 byte blocks): 1 operation in 43601 cycles (4096 bytes)
+tcrypt: test 14 (256 bit key, 16 byte blocks): 1 operation in 6740 cycles (16 bytes)
+tcrypt: test 15 (256 bit key, 64 byte blocks): 1 operation in 6980 cycles (64 bytes)
+tcrypt: test 16 (256 bit key, 128 byte blocks): 1 operation in 7322 cycles (128 bytes)
+tcrypt: test 17 (256 bit key, 256 byte blocks): 1 operation in 8102 cycles (256 bytes)
+tcrypt: test 18 (256 bit key, 1024 byte blocks): 1 operation in 12311 cycles (1024 bytes)
+tcrypt: test 19 (256 bit key, 1424 byte blocks): 1 operation in 14503 cycles (1424 bytes)
+tcrypt: test 20 (256 bit key, 4096 byte blocks): 1 operation in 35615 cycles (4096 bytes)
 ```
 
 ### U-boot test
@@ -1704,6 +1808,42 @@ md.b 600050 10
 ```
 
 ## SHA
+
+
+### Linux test
+```
+Please add to the kernel configuration:
+CONFIG_CRYPTO_TEST=m
+And copy tcrypt.ko to npcm845 EVB
+test mode: 403(sha1), 404(sha256), 405(sha384), 406(sha512)
+
+root@evb-npcm845:~# insmod ./tcrypt.ko mode=403
+
+testing speed of async sha1 (nuvoton_sha)
+tcrypt: test  0 (   16 byte blocks,   16 bytes per update,   1 updates):    782 cycles/operation,   48 cycles/byte
+tcrypt: test  1 (   64 byte blocks,   16 bytes per update,   4 updates):   1855 cycles/operation,   28 cycles/byte
+tcrypt: test  2 (   64 byte blocks,   64 bytes per update,   1 updates):   1422 cycles/operation,   22 cycles/byte
+tcrypt: test  3 (  256 byte blocks,   16 bytes per update,  16 updates):   5309 cycles/operation,   20 cycles/byte
+tcrypt: test  4 (  256 byte blocks,   64 bytes per update,   4 updates):   3796 cycles/operation,   14 cycles/byte
+tcrypt: test  5 (  256 byte blocks,  256 bytes per update,   1 updates):   2567 cycles/operation,   10 cycles/byte
+tcrypt: test  6 ( 1024 byte blocks,   16 bytes per update,  64 updates):  19218 cycles/operation,   18 cycles/byte
+tcrypt: test  7 ( 1024 byte blocks,  256 bytes per update,   4 updates):   8368 cycles/operation,    8 cycles/byte
+tcrypt: test  8 ( 1024 byte blocks, 1024 bytes per update,   1 updates):   7151 cycles/operation,    6 cycles/byte
+tcrypt: test  9 ( 2048 byte blocks,   16 bytes per update, 128 updates):  37773 cycles/operation,   18 cycles/byte
+tcrypt: test 10 ( 2048 byte blocks,  256 bytes per update,   8 updates):  16093 cycles/operation,    7 cycles/byte
+tcrypt: test 11 ( 2048 byte blocks, 1024 bytes per update,   2 updates):  13659 cycles/operation,    6 cycles/byte
+tcrypt: test 12 ( 2048 byte blocks, 2048 bytes per update,   1 updates):  13226 cycles/operation,    6 cycles/byte
+tcrypt: test 13 ( 4096 byte blocks,   16 bytes per update, 256 updates):  76011 cycles/operation,   18 cycles/byte
+tcrypt: test 14 ( 4096 byte blocks,  256 bytes per update,  16 updates):  31500 cycles/operation,    7 cycles/byte
+tcrypt: test 15 ( 4096 byte blocks, 1024 bytes per update,   4 updates):  26636 cycles/operation,    6 cycles/byte
+tcrypt: test 16 ( 4096 byte blocks, 4096 bytes per update,   1 updates):  25436 cycles/operation,    6 cycles/byte
+tcrypt: test 17 ( 8192 byte blocks,   16 bytes per update, 512 updates): 275240 cycles/operation,   33 cycles/byte
+tcrypt: test 18 ( 8192 byte blocks,  256 bytes per update,  32 updates):  62349 cycles/operation,    7 cycles/byte
+tcrypt: test 19 ( 8192 byte blocks, 1024 bytes per update,   8 updates):  52646 cycles/operation,    6 cycles/byte
+tcrypt: test 20 ( 8192 byte blocks, 4096 bytes per update,   2 updates):  50230 cycles/operation,    6 cycles/byte
+tcrypt: test 21 ( 8192 byte blocks, 8192 bytes per update,   1 updates):  50190 cycles/operation,    6 cycles/byte
+
+```
 
 ### U-boot test
 ```
@@ -1825,16 +1965,16 @@ U-Boot>sspi 5:0@10000000 32 9f
 FFEF4018
 ```
 
-## ECC
+## EDAC
 
-The NPCM8XX has an cadence memory controller.
+Arbel EVB has a memory controller that supports single bit error correction and double bit error detection.
 
 ### Linux Test
 
 - Edit nuvoton-npcm845-evb.dts.
 ```
     mc: memory-controller@f0824000 {
-        compatible = "nuvoton,npcm8xx-sdram-edac";
+        compatible = "nuvoton,npcm845-memory-controller";
         reg = <0x0 0xf0824000 0x0 0x1000>;
         interrupts = <GIC_SPI 25 IRQ_TYPE_LEVEL_HIGH>;
         status = "okay";
@@ -1844,37 +1984,30 @@ The NPCM8XX has an cadence memory controller.
 ```
 CONFIG_EDAC=y
 CONFIG_EDAC_SUPPORT=y
-CONFIG_EDAC_NPCM8XX=y
-```
-- Add this config in npcm8xx_edac.c to create a sysfs path for forcing ECC event
-```
-CONFIG_EDAC_DEBUG
-```
-- Boot to Openbmc, there is a sysfs interface that allow to force ecc event
-- Read this path to get more usage information
-- You can force uncorrectable or correctable event and error on any bit
-- For data err, the bit range must be between 0 and 63
-- For checkcode error, the bit range must be between 0 and 7 
-```
-echo CE data 0 > /sys/devices/system/edac/mc/mc0/forced_ecc_error
-echo CE checkcode 0 > /sys/devices/system/edac/mc/mc0/forced_ecc_error
-echo UE > /sys/devices/system/edac/mc/mc0/forced_ecc_error
+CONFIG_EDAC_NPCM=y
+CONFIG_EDAC_DEBUG=y  // Support error injection
 ```
 
-The result of reading the path is:
+- Inject correctable error (CE) and uncorrectable error (UE)
 ```
-root@evb-npcm845:~# cat /sys/devices/system/edac/mc/mc0/forced_ecc_error
-CDNS-DDR4 Force Injection Help:
-CE: Corrected
-checkcode/data:source
-bit [0-63] for data [0-7] for checkcode:bit number
---------------------------------------------------
-UE: Uncorrected
-```
+/*
+ * debugfs nodes under /sys/kernel/debug/edac/npcm-edac/
+ *
+ * error_type - 0: CE, 1: UE
+ * location - 0: data, 1: checkcode
+ * bit - 0 ~ 63 for data and 0 ~ 7 for checkcode
+ * force_ecc_error - trigger
+ */
 
-The result of forcing an ecc event is:
-```
-EDAC MC0: 1 CE DDR ECC nuvoton,npcm8xx-sdram-edac: addr=0xac8f080 data=0x5565ec5106 source_id=0x042800 on unknown memory (memory:0 page:0xac8f offset:0x80 grain:1 syndrome:0xf4)
+ // Example 1: injecting CE at checkcode bit 7
+ echo 0 > /sys/kernel/debug/edac/npcm-edac/error_type
+ echo 1 > /sys/kernel/debug/edac/npcm-edac/location
+ echo 7 > /sys/kernel/debug/edac/npcm-edac/bit
+ echo 1 > /sys/kernel/debug/edac/npcm-edac/force_ecc_error
+
+ // Example 2: injecting UE
+ echo 1 > /sys/kernel/debug/edac/npcm-edac/error_type
+ echo 1 > /sys/kernel/debug/edac/npcm-edac/force_ecc_error
 ```
 
 ## Host Serial Port
@@ -1884,27 +2017,27 @@ EDAC MC0: 1 CE DDR ECC nuvoton,npcm8xx-sdram-edac: addr=0xac8f080 data=0x5565ec5
 
 ### U-Boot test
 
-**Test SP1 to SI2 on Arbel EVB**
- 1. make sure only strap5 of the SW_STRAP1_8 dip switch is turned off, then issue power on reset.
- 2. Now the BMC logs will output from BSP TX/RX
+**Connect Host SP1 to SI2 on Arbel EVB**
+ 1. Make sure only strap5 of the SW_STRAP1_8 dip switch is turned off, then issue power on reset.
+ 2. Now the BMC logs will output from BSPTXD / BSPRXD
  3. Update the BMC regs to achieve the behavior
   ```r
-  mw.l 0xf0800038 0x00000020  // bit 0-2 = 0, set uart mode to 1
-  mw.l 0xf0800260 0x00216a08  //bit11 = 1, mfse1.9:  BSP TX/RX selected
-  mw.l 0xf080026C 0x19a00100  //bit1 = 0, mfsel4.1: SI2_TXD/RXD selected.
+  mw.l 0xf0800038 0x00000020  // set GCR bit 0-2 to 0 for UART mode 1
+  mw.l 0xf0800260 0x00216a08  // set MFSEL1 bit 9 to 1 for selecting BSPTXD / BSPRXD
+  mw.l 0xf080026C 0x19a00100  // set MFSEL4 bit 1 to 0 for selecting SI2_TXD / SI2_RXD
   ```
-4. Power on the host, you will get host message from SI2_TXD/RXD
+4. Power on the host, you will get host message from SI2_TXD / SI2_RXD
 
-**Test SP1 to SI1 on Arbel EVB**
- 1. make sure only strap5 of the SW_STRAP1_8 dip switch is turned on, then issue power on reset.
- 2. Now the BMC logs will output from SI2_TXD/RXD
+**Connect Host SP1 to SI1 on Arbel EVB**
+ 1. Make sure only strap5 of the SW_STRAP1_8 dip switch is turned on, then issue power on reset.
+ 2. Now the BMC logs will output from SI2_TXD / SI2_RXD
  3. Update the BMC regs to achieve the behavior
   ```r
-  mw.l 0xf0800038 0x00000026  //bit 0-2 = 6, set uart mode to 7
-  mw.l 0xf0800268 0x00000e00 //bit24 = 0, mfse3.24: GPIO63/SI1_TXD and GPIO43/SI1_RXD are selected
-  mw.l 0xf0800260 0x00216408 //bit10 = 1, mfse1.10: SI1_TXD/RXD selected.
+  mw.l 0xf0800038 0x00000026  // set GCR bit 0-2 to 6 for UART mode 7
+  mw.l 0xf0800268 0x00000e00 // set MFSEL3 bit 24 to 0 for selecting GPIO63/SI1_TXD/STRAP4, GPIO43/SI1_RXD
+  mw.l 0xf0800260 0x00216408 // set MFSEL1 bit 10 to 1 for selecting SI1_TXD / SI1_RXD
   ```
-4. Power on the host, you will get host message from SI1_TXD/RXD
+4. Power on the host, you will get host message from SI1_TXD / SI2_RXD
 
 ## PECI
 
@@ -1946,6 +2079,56 @@ The client address under test is 0x30.
   ```
   root@evb-npcm845:~# peci_cmds raw 0x30 0x5 0x9 0xb1
    0x40 0x65 0x7a 0xc4 0x3f 0x65 0x7a 0xc4 0x3f
+  ```
+
+## FLM
+
+Arbel SOC provides four SPI flash monitoring(FLM).
+
+- The FLM is connected in parallel to a flash interface, with only the chip-select in series connection. The flash controller is connected to the flash device via six signals and supports up to quad data bus.
+
+- Arbel evb can enable FLM mode and test.
+  ```
+  SPI3.CS0 master via FM1 to XU_SPI3 & SPI3.CS1 master to XU_SPI1 (SPI1 Hi-Z or FM).
+  ```
+
+
+### uboot test
+
+Select SW1.6 to on to enable FLM feature.
+
+- Compare command only: using FLM_CMB
+  ```
+  mw f0800274 20000      //Set PinMux for FLM1: set MFSEL6.17
+  mw f0211014 4000a901   //enable FLM1
+  md a0000000            //incorrect data
+  mw f0211014 a901       //disable FLM1
+  mw F0211280 B          //Configure FLM_CMB0 , accept FastRead command
+  mw f0211064 1          //enable CMB0
+  mw f0211014 4000a901   //enable FLM1
+  md a0000000            //correct data
+  mw f0211064 0          //disable CMB0
+  mw f0211014 4000a903   //apply the dynamic parameter change
+  md a0000000            //incorrect data
+  ```
+- Compare command  and address: using FLM_CMD
+  ```
+  mw f0800274 20000      //Set PinMux for FLM1: set MFSEL6.17
+  mw f0211014 4000a901   //enable FLM1
+  md a0000000            //incorrect data
+  mw f0211014 a901       //disable FLM1
+  mw F0211080 0114000B   //Configure FLM_CMD0
+  mw f0211060 1          //enable CMD0
+  mw f0211014 4000a901   //enable FLM1
+  md a0000000            //correct data
+  md a0001000            //incorrect data
+  mw f0211014 a901       //disable FLM1
+  mw F0211084 0214000B   //configure FLM_CMD1
+  mw f0211024 10001      //range: 1000~1fffh
+  mw f0211060 3          //Set corresponding bit in FLM_CMDEN, enable CMD0 and CMD1
+  mw f0211014 4000a901   //enable FLM1
+  md a0000000            //correct data
+  md a0001000            //correct data
   ```
 
 # Troubleshooting
